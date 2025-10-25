@@ -1,0 +1,224 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    SOCRATIC AI BENCHMARKS PLATFORM                           ║
+║                         DynamoDB Data Model                                  ║
+║                                                                              ║
+║                         Complete Documentation                               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          EXPERIMENTAL DESIGN                                 │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   4 LOCATIONS          ×    3 INTERVALS      ×    2 INTERVENTIONS  = 24     │
+│   ────────────              ────────────           ────────────────          │
+│   1. On-site                1. 2.5 min             1. Static                 │
+│   2. Learning-space         2. 5.0 min             2. Dynamic AI             │
+│   3. Classroom              3. 10.0 min                                      │
+│   4. Home                                                                    │
+│                                                                              │
+│   Research Question: Does Socratic AI improve learning comprehension?       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        DYNAMODB TABLE STRUCTURE                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   Table: SocraticBenchmarks                                                 │
+│   ├── Primary Keys: PK (Hash), SK (Range)                                   │
+│   └── Global Secondary Indexes (5):                                         │
+│       ├── GSI1: Query by Condition (24 experimental conditions)             │
+│       ├── GSI2: Query by Student (longitudinal tracking)                    │
+│       ├── GSI3: Query by Location (location comparison)                     │
+│       ├── GSI4: Query by Intervention Type (static vs dynamic)              │
+│       └── GSI5: Query by Date (time-series analytics)                       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          ENTITY HIERARCHY                                    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   STUDENT                                                                    │
+│   └── PROFILE (demographics, consent, learning profile)                     │
+│       │                                                                      │
+│       └── SESSION (1:N relationship)                                        │
+│           ├── METADATA (condition, timeline, status)                        │
+│           ├── LOCATION_VERIFICATION (GPS, QR, manual)                       │
+│           ├── CONTENT_DELIVERY (engagement metrics)                         │
+│           ├── INTERVENTIONS (×1-4, dynamic or static)                       │
+│           │   ├── Dynamic: 3 adaptive Socratic questions                    │
+│           │   └── Static: 3 pre-written reflection questions                │
+│           ├── ASSESSMENTS (×2-3)                                            │
+│           │   ├── Baseline (before content)                                 │
+│           │   ├── Midpoint (optional, at 5 min)                             │
+│           │   └── Final (after content)                                     │
+│           └── POST_SURVEY (feedback)                                        │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        TYPICAL SESSION FLOW                                  │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   1. Student Registration → Create STUDENT#<id>                             │
+│      ↓                                                                       │
+│   2. Condition Assignment → Random to 1 of 24 conditions                    │
+│      ↓                                                                       │
+│   3. Session Creation → Create SESSION#<id> with GSI keys                   │
+│      ↓                                                                       │
+│   4. Location Verification → GPS/QR/Manual check                            │
+│      ↓                                                                       │
+│   5. Baseline Assessment → Test prior knowledge (10 questions)              │
+│      ↓                                                                       │
+│   6. Content Delivery → 10-minute audio/text (4 segments × 2.5 min)        │
+│      │                                                                       │
+│      ├─ Intervention after Segment 1 (if 2.5min interval)                  │
+│      ├─ Intervention after Segment 2 (if 2.5min or 5.0min interval)        │
+│      ├─ Intervention after Segment 3 (if 2.5min interval)                  │
+│      └─ Intervention after Segment 4 (always, all intervals)               │
+│      ↓                                                                       │
+│   7. Final Assessment → Same questions as baseline                          │
+│      ↓                                                                       │
+│   8. Post-Survey → Experience feedback                                      │
+│      ↓                                                                       │
+│   9. Calculate Learning Gain → Final - Baseline                             │
+│      ↓                                                                       │
+│  10. Update Statistics → Via DynamoDB Streams                               │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                     KEY RESEARCH METRICS                                     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   Learning Outcomes:                                                         │
+│   ├── Absolute Gain = Final Score - Baseline Score                          │
+│   ├── Normalized Gain = (Final - Baseline) / (100 - Baseline)              │
+│   └── Effect Size (Cohen's d) = (Mean₁ - Mean₂) / Pooled SD                │
+│                                                                              │
+│   Intervention Quality:                                                      │
+│   ├── Dynamic: Question clarity, relevance, progression quality             │
+│   └── Static: Answer depth, accuracy                                        │
+│                                                                              │
+│   Engagement:                                                                │
+│   ├── Content completion rate (%)                                           │
+│   ├── Pause/rewind counts                                                   │
+│   └── Segment engagement scores (0-1)                                       │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                     DOCUMENTATION OVERVIEW                                   │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   Total Files: 12                                                           │
+│   Total Lines: 14,778+                                                      │
+│   Total Size:  ~450 KB                                                      │
+│                                                                              │
+│   Core Data Model (152 KB):                                                 │
+│   ├── DYNAMODB_SCHEMA.md          (61 KB) - Complete schema reference       │
+│   ├── types.ts                    (24 KB) - TypeScript definitions          │
+│   ├── dynamodb_helpers.py         (29 KB) - Python helper library           │
+│   ├── SCHEMA_QUICK_REFERENCE.md   (15 KB) - Quick query patterns            │
+│   ├── ENTITY_RELATIONSHIPS.md     (23 KB) - Visual diagrams                 │
+│   └── DATA_MODEL_SUMMARY.md       (16 KB) - High-level overview             │
+│                                                                              │
+│   System Architecture (128 KB):                                             │
+│   ├── COMPONENT_DIAGRAM.md        (59 KB) - Full system architecture        │
+│   └── DASHBOARD_ARCHITECTURE.md   (69 KB) - Analytics dashboard             │
+│                                                                              │
+│   Operations (107 KB):                                                      │
+│   ├── DEPLOYMENT_GUIDE.md         (27 KB) - AWS deployment                  │
+│   └── TEST_AUTOMATION_STRATEGY.md (80 KB) - Testing strategy                │
+│                                                                              │
+│   Navigation:                                                                │
+│   ├── INDEX.md                    - Documentation index                     │
+│   └── README.md                   - Project overview                        │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        COST ESTIMATES                                        │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   Monthly Operational Costs (3,000 sessions):                               │
+│   ├── DynamoDB:    $27.55  (88%)                                            │
+│   ├── Lambda:      $1.50   (5%)                                             │
+│   ├── S3:          $0.27   (1%)                                             │
+│   └── CloudWatch:  $2.00   (6%)                                             │
+│       ──────────   ──────                                                    │
+│       Total:       $31.32/month                                              │
+│                                                                              │
+│   Per Session: $0.01                                                         │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                     IMPLEMENTATION TIMELINE                                  │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   Phase 1: Infrastructure Setup (Week 1)                                    │
+│   └── Deploy DynamoDB, Lambda, S3, CloudWatch                               │
+│                                                                              │
+│   Phase 2: Core Features (Weeks 2-4)                                        │
+│   └── Build student registration, sessions, interventions, assessments      │
+│                                                                              │
+│   Phase 3: Testing (Week 5)                                                 │
+│   └── Unit, integration, E2E, load tests                                    │
+│                                                                              │
+│   Phase 4: Pilot Study (Week 6)                                             │
+│   └── 10 students, 2-3 conditions, validate data                            │
+│                                                                              │
+│   Phase 5: Full Launch (Week 7+)                                            │
+│   └── All 24 conditions, real-time monitoring, analytics                    │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                         QUICK START                                          │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   For Developers:                                                            │
+│   1. Read INDEX.md (navigation)                                             │
+│   2. Study DYNAMODB_SCHEMA.md (data model)                                  │
+│   3. Use dynamodb_helpers.py or types.ts (implementations)                  │
+│   4. Follow DEPLOYMENT_GUIDE.md (AWS setup)                                 │
+│                                                                              │
+│   For Researchers:                                                           │
+│   1. Read README.md (research design)                                       │
+│   2. Study DATA_MODEL_SUMMARY.md (conditions & metrics)                     │
+│   3. Use SCHEMA_QUICK_REFERENCE.md (query patterns)                         │
+│   4. Review ENTITY_RELATIONSHIPS.md (research questions)                    │
+│                                                                              │
+│   For DevOps:                                                                │
+│   1. Read DEPLOYMENT_GUIDE.md (infrastructure)                              │
+│   2. Study COMPONENT_DIAGRAM.md (architecture)                              │
+│   3. Use DYNAMODB_SCHEMA.md (table setup)                                   │
+│   4. Follow TEST_AUTOMATION_STRATEGY.md (validation)                        │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                          STATUS                                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   ✓ Complete DynamoDB schema with 8 entity types                            │
+│   ✓ 5 GSIs supporting all research questions                                │
+│   ✓ TypeScript type definitions for type safety                             │
+│   ✓ Python helper library with CRUD + analytics                             │
+│   ✓ Visual diagrams and data flow charts                                    │
+│   ✓ Query patterns for all 24 conditions                                    │
+│   ✓ Cost estimates and optimization strategies                              │
+│   ✓ Implementation checklist with 5 phases                                  │
+│   ✓ Complete deployment guide                                               │
+│   ✓ Comprehensive testing strategy                                          │
+│                                                                              │
+│   Ready for immediate implementation and deployment.                        │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+                         Generated: October 23, 2025
+                    Total Documentation: ~450 KB, 12 files
+                         Platform: AWS (DynamoDB + Lambda)
+                      Estimated Cost: $31.32/month (3,000 sessions)

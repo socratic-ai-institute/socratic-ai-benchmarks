@@ -1,0 +1,117 @@
+{
+  "metadata": {
+    "timestamp": "2025-10-25T07:44:35.815429",
+    "aws_profile": "mvp",
+    "aws_region": "us-east-1",
+    "total_scenarios": 10,
+    "models_tested": 2
+  },
+  "results": [
+    {
+      "model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+      "model_name": "Claude 3.5 Sonnet v2",
+      "total_scenarios": 10,
+      "successful": 0,
+      "errors": 10,
+      "success_rate": 0.0,
+      "avg_quality": 0,
+      "avg_latency_ms": 0,
+      "criteria_scores": {},
+      "detailed_results": [
+        {
+          "scenario_id": "scenario_001",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_002",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_003",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_004",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_005",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_006",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_007",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_008",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_009",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_010",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        }
+      ]
+    },
+    {
+      "model_id": "anthropic.claude-3-opus-20240229-v1:0",
+      "model_name": "Claude 3 Opus",
+      "total_scenarios": 10,
+      "successful": 0,
+      "errors": 10,
+      "success_rate": 0.0,
+      "avg_quality": 0,
+      "avg_latency_ms": 0,
+      "criteria_scores": {},
+      "detailed_results": [
+        {
+          "scenario_id": "scenario_001",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_002",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_003",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_004",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_005",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_006",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_007",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_008",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_009",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        },
+        {
+          "scenario_id": "scenario_010",
+          "error": "An error occurred (UnrecognizedClientException) when calling the InvokeModel operation: The security token included in the request is invalid."
+        }
+      ]
+    }
+  ]
+}
