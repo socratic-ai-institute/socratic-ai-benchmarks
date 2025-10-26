@@ -118,6 +118,7 @@ Each question scored 0-1 on:
 | `README.md` | This file |
 | `QUICK_START.md` | 5-minute setup guide |
 | `BEDROCK_MODEL_COMPARISON.md` | Complete architecture |
+| `SOCRATIC_EVAL_FRAMEWORK.md` | Three‑vector Socratic benchmark (plain‑English guide) |
 | `generate_scenarios.py` | Create 120 test scenarios |
 | `benchmark.py` | Run model comparison |
 | `generate_dashboard.py` | Create HTML report |
