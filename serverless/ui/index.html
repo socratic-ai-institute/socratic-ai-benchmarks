@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socratic AI Benchmarks</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Socratic AI Benchmarks</h1>
+            <p class="subtitle">Weekly Model Performance Dashboard</p>
+        </header>
+
+        <nav>
+            <button id="nav-weekly" class="nav-btn active">Weekly Dashboard</button>
+            <button id="nav-runs" class="nav-btn">Run Details</button>
+        </nav>
+
+        <!-- Weekly Dashboard View -->
+        <div id="view-weekly" class="view active">
+            <div class="controls">
+                <label>
+                    Week:
+                    <input type="week" id="week-selector" />
+                </label>
+                <button id="refresh-weekly">Refresh</button>
+            </div>
+
+            <div id="weekly-loading" class="loading">Loading...</div>
+            <div id="weekly-error" class="error hidden"></div>
+
+            <div id="weekly-data" class="hidden">
+                <h2>Model Performance - <span id="current-week"></span></h2>
+
+                <table id="weekly-table">
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Runs</th>
+                            <th>Mean Score</th>
+                            <th>Compliance Rate</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weekly-tbody">
+                    </tbody>
+                </table>
+
+                <div id="weekly-chart" class="chart-container">
+                    <!-- Placeholder for sparklines or charts -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Run Details View -->
+        <div id="view-runs" class="view hidden">
+            <div class="controls">
+                <label>
+                    Run ID:
+                    <input type="text" id="run-id-input" placeholder="Enter run ID" />
+                </label>
+                <button id="load-run">Load Run</button>
+            </div>
+
+            <div id="run-loading" class="loading hidden">Loading...</div>
+            <div id="run-error" class="error hidden"></div>
+
+            <div id="run-data" class="hidden">
+                <h2>Run Summary</h2>
+                <div id="run-summary" class="summary-card">
+                    <!-- Run metadata -->
+                </div>
+
+                <h3>Turn Details</h3>
+                <div id="turns-container">
+                    <table id="turns-table">
+                        <thead>
+                            <tr>
+                                <th>Turn</th>
+                                <th>Latency (ms)</th>
+                                <th>Tokens (in/out)</th>
+                                <th>Has Question</th>
+                                <th>Overall Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="turns-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for viewing full turn data -->
+    <div id="turn-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Turn Details</h3>
+            <div id="turn-detail"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
