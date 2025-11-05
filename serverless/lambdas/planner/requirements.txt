@@ -1,0 +1,2 @@
+boto3>=1.28.0
+python-ulid==2.2.0
