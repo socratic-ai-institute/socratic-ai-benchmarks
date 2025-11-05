@@ -1,0 +1,604 @@
+{
+  "_comment": "IAM Policies for AWS Socratic Benchmark System",
+  "_note": "Follow principle of least privilege: each role has minimal permissions",
+
+  "roles": {
+    "BatchRunnerRole": {
+      "description": "Role for Batch/Fargate tasks that run dialogue simulations",
+      "assume_role_policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": ["batch.amazonaws.com", "ecs-tasks.amazonaws.com"]
+            },
+            "Action": "sts:AssumeRole"
+          }
+        ]
+      },
+      "inline_policies": {
+        "S3WriteRaw": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "WriteRawTurns",
+              "Effect": "Allow",
+              "Action": ["s3:PutObject"],
+              "Resource": [
+                "arn:aws:s3:::socratic-bench/raw/*",
+                "arn:aws:s3:::socratic-bench/scores/*"
+              ],
+              "Condition": {
+                "StringLike": {
+                  "s3:x-amz-server-side-encryption": "AES256"
+                }
+              }
+            }
+          ]
+        },
+        "S3ReadConfig": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ReadConfigsAndSeeds",
+              "Effect": "Allow",
+              "Action": ["s3:GetObject"],
+              "Resource": [
+                "arn:aws:s3:::socratic-bench/config/*",
+                "arn:aws:s3:::socratic-bench/manifests/*"
+              ]
+            }
+          ]
+        },
+        "BedrockInvoke": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "InvokeModelsUnderTest",
+              "Effect": "Allow",
+              "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+              "Resource": [
+                "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-*",
+                "arn:aws:bedrock:us-east-1::foundation-model/meta.llama*",
+                "arn:aws:bedrock:us-east-1::foundation-model/mistral.*"
+              ]
+            }
+          ]
+        },
+        "CloudWatchLogs": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "WriteLogs",
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "arn:aws:logs:us-east-1:*:log-group:/aws/batch/socratic-runner:*"
+            }
+          ]
+        },
+        "CloudWatchMetrics": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "PublishEMFMetrics",
+              "Effect": "Allow",
+              "Action": ["cloudwatch:PutMetricData"],
+              "Resource": "*",
+              "Condition": {
+                "StringEquals": {
+                  "cloudwatch:namespace": "SocraticBenchmark"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+
+    "JudgeRole": {
+      "description": "Role for judge tasks (separate queue, separate permissions)",
+      "assume_role_policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": ["batch.amazonaws.com", "ecs-tasks.amazonaws.com"]
+            },
+            "Action": "sts:AssumeRole"
+          }
+        ]
+      },
+      "inline_policies": {
+        "S3ReadRaw": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ReadRawTurnsForJudging",
+              "Effect": "Allow",
+              "Action": ["s3:GetObject"],
+              "Resource": "arn:aws:s3:::socratic-bench/raw/*"
+            }
+          ]
+        },
+        "S3WriteScores": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "WriteJudgeResults",
+              "Effect": "Allow",
+              "Action": ["s3:PutObject"],
+              "Resource": "arn:aws:s3:::socratic-bench/scores/*"
+            }
+          ]
+        },
+        "S3ReadConfigsAndCalibration": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ReadRubricsAndGoldenSet",
+              "Effect": "Allow",
+              "Action": ["s3:GetObject"],
+              "Resource": [
+                "arn:aws:s3:::socratic-bench/config/rubrics/*",
+                "arn:aws:s3:::socratic-bench/config/prompts/judge/*",
+                "arn:aws:s3:::socratic-bench/calibration/golden_sets/*"
+              ]
+            }
+          ]
+        },
+        "BedrockInvokeJudge": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "InvokeJudgeModelOnly",
+              "Effect": "Allow",
+              "Action": ["bedrock:InvokeModel"],
+              "Resource": [
+                "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-opus-*",
+                "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-*"
+              ]
+            }
+          ]
+        },
+        "CloudWatchLogs": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "WriteLogs",
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "arn:aws:logs:us-east-1:*:log-group:/aws/batch/socratic-judge:*"
+            }
+          ]
+        },
+        "CloudWatchMetrics": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "PublishJudgeMetrics",
+              "Effect": "Allow",
+              "Action": ["cloudwatch:PutMetricData"],
+              "Resource": "*",
+              "Condition": {
+                "StringEquals": {
+                  "cloudwatch:namespace": "SocraticBenchmark/Judge"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+
+    "AggregationLambdaRole": {
+      "description": "Lambda that aggregates turn data into RunSummary and WeeklySummary",
+      "assume_role_policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "lambda.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+          }
+        ]
+      },
+      "inline_policies": {
+        "S3ReadRawAndScores": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ReadAllData",
+              "Effect": "Allow",
+              "Action": ["s3:GetObject", "s3:ListBucket"],
+              "Resource": [
+                "arn:aws:s3:::socratic-bench",
+                "arn:aws:s3:::socratic-bench/raw/*",
+                "arn:aws:s3:::socratic-bench/scores/*"
+              ]
+            }
+          ]
+        },
+        "S3WriteCurated": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "WriteAggregates",
+              "Effect": "Allow",
+              "Action": ["s3:PutObject"],
+              "Resource": "arn:aws:s3:::socratic-bench/curated/*"
+            }
+          ]
+        },
+        "DynamoDBWrite": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "WriteSummariesToDDB",
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:BatchWriteItem"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:us-east-1:*:table/SocraticBench-Runs",
+                "arn:aws:dynamodb:us-east-1:*:table/SocraticBench-WeeklySummary"
+              ]
+            }
+          ]
+        },
+        "CloudWatchLogs": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "WriteLogs",
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "arn:aws:logs:us-east-1:*:log-group:/aws/lambda/SocraticAggregator:*"
+            }
+          ]
+        }
+      },
+      "managed_policies": [
+        "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      ]
+    },
+
+    "StepFunctionsOrchestratorRole": {
+      "description": "Step Functions state machine that orchestrates weekly benchmark",
+      "assume_role_policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "states.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+          }
+        ]
+      },
+      "inline_policies": {
+        "InvokeLambdas": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "InvokeConfigAndAggregationLambdas",
+              "Effect": "Allow",
+              "Action": ["lambda:InvokeFunction"],
+              "Resource": [
+                "arn:aws:lambda:us-east-1:*:function:SocraticFetchConfig",
+                "arn:aws:lambda:us-east-1:*:function:SocraticGenerateRuns",
+                "arn:aws:lambda:us-east-1:*:function:SocraticAggregator",
+                "arn:aws:lambda:us-east-1:*:function:SocraticAlerts"
+              ]
+            }
+          ]
+        },
+        "SubmitBatchJobs": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "SubmitRunnerAndJudgeJobs",
+              "Effect": "Allow",
+              "Action": [
+                "batch:SubmitJob",
+                "batch:DescribeJobs",
+                "batch:TerminateJob"
+              ],
+              "Resource": [
+                "arn:aws:batch:us-east-1:*:job-definition/socratic-runner:*",
+                "arn:aws:batch:us-east-1:*:job-definition/socratic-judge:*",
+                "arn:aws:batch:us-east-1:*:job-queue/socratic-runner-queue",
+                "arn:aws:batch:us-east-1:*:job-queue/socratic-judge-queue"
+              ]
+            }
+          ]
+        },
+        "CloudWatchEvents": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "PublishExecutionEvents",
+              "Effect": "Allow",
+              "Action": [
+                "events:PutTargets",
+                "events:PutRule",
+                "events:DescribeRule"
+              ],
+              "Resource": "arn:aws:events:us-east-1:*:rule/StepFunctionsGetEventsForBatchJobsRule"
+            }
+          ]
+        },
+        "SNSPublish": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "PublishAlerts",
+              "Effect": "Allow",
+              "Action": ["sns:Publish"],
+              "Resource": "arn:aws:sns:us-east-1:*:SocraticBenchmarkAlerts"
+            }
+          ]
+        }
+      }
+    },
+
+    "QuickSightRole": {
+      "description": "QuickSight service role for reading S3 and DynamoDB",
+      "assume_role_policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "quicksight.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+          }
+        ]
+      },
+      "inline_policies": {
+        "S3ReadCurated": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ReadParquetData",
+              "Effect": "Allow",
+              "Action": ["s3:GetObject", "s3:ListBucket"],
+              "Resource": [
+                "arn:aws:s3:::socratic-bench",
+                "arn:aws:s3:::socratic-bench/curated/*"
+              ]
+            }
+          ]
+        },
+        "AthenaQuery": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ExecuteAthenaQueries",
+              "Effect": "Allow",
+              "Action": [
+                "athena:GetQueryExecution",
+                "athena:GetQueryResults",
+                "athena:StartQueryExecution",
+                "athena:StopQueryExecution"
+              ],
+              "Resource": "arn:aws:athena:us-east-1:*:workgroup/socratic-bench"
+            }
+          ]
+        },
+        "GlueCatalog": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ReadGlueTables",
+              "Effect": "Allow",
+              "Action": [
+                "glue:GetDatabase",
+                "glue:GetTable",
+                "glue:GetPartitions"
+              ],
+              "Resource": [
+                "arn:aws:glue:us-east-1:*:catalog",
+                "arn:aws:glue:us-east-1:*:database/socratic_bench",
+                "arn:aws:glue:us-east-1:*:table/socratic_bench/*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+
+    "DeveloperRole": {
+      "description": "IAM role for developers to manage the system (read-only + deploy)",
+      "assume_role_policy": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": "arn:aws:iam::123456789012:root"
+            },
+            "Action": "sts:AssumeRole",
+            "Condition": {
+              "StringEquals": {
+                "sts:ExternalId": "socratic-dev-access"
+              }
+            }
+          }
+        ]
+      },
+      "inline_policies": {
+        "S3FullAccess": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ManageS3Bucket",
+              "Effect": "Allow",
+              "Action": ["s3:*"],
+              "Resource": [
+                "arn:aws:s3:::socratic-bench",
+                "arn:aws:s3:::socratic-bench/*"
+              ]
+            }
+          ]
+        },
+        "DynamoDBReadOnly": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "QueryTables",
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:GetItem",
+                "dynamodb:BatchGetItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Resource": "arn:aws:dynamodb:us-east-1:*:table/SocraticBench-*"
+            }
+          ]
+        },
+        "StepFunctionsManage": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ManageStateMachines",
+              "Effect": "Allow",
+              "Action": [
+                "states:StartExecution",
+                "states:StopExecution",
+                "states:DescribeExecution",
+                "states:GetExecutionHistory"
+              ],
+              "Resource": "arn:aws:states:us-east-1:*:execution:SocraticBenchmarkOrchestrator:*"
+            }
+          ]
+        },
+        "CloudWatchReadOnly": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ViewMetricsAndLogs",
+              "Effect": "Allow",
+              "Action": [
+                "cloudwatch:GetMetricData",
+                "cloudwatch:GetMetricStatistics",
+                "logs:FilterLogEvents",
+                "logs:GetLogEvents"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      },
+      "managed_policies": [
+        "arn:aws:iam::aws:policy/ReadOnlyAccess"
+      ]
+    }
+  },
+
+  "bucket_policy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "DenyUnencryptedObjectUploads",
+        "Effect": "Deny",
+        "Principal": "*",
+        "Action": "s3:PutObject",
+        "Resource": "arn:aws:s3:::socratic-bench/*",
+        "Condition": {
+          "StringNotEquals": {
+            "s3:x-amz-server-side-encryption": "AES256"
+          }
+        }
+      },
+      {
+        "Sid": "DenyInsecureTransport",
+        "Effect": "Deny",
+        "Principal": "*",
+        "Action": "s3:*",
+        "Resource": [
+          "arn:aws:s3:::socratic-bench",
+          "arn:aws:s3:::socratic-bench/*"
+        ],
+        "Condition": {
+          "Bool": {
+            "aws:SecureTransport": "false"
+          }
+        }
+      }
+    ]
+  },
+
+  "service_control_policy": {
+    "_comment": "Optional SCP to restrict Bedrock usage to approved models only",
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "AllowOnlyApprovedModels",
+        "Effect": "Deny",
+        "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+        "Resource": "arn:aws:bedrock:*:*:foundation-model/*",
+        "Condition": {
+          "StringNotLike": {
+            "bedrock:ModelId": [
+              "anthropic.claude-*",
+              "meta.llama*",
+              "mistral.*"
+            ]
+          }
+        }
+      }
+    ]
+  },
+
+  "kms_key_policy": {
+    "_comment": "Optional: use KMS instead of SSE-S3 for sensitive data",
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Sid": "Enable IAM User Permissions",
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": "arn:aws:iam::123456789012:root"
+        },
+        "Action": "kms:*",
+        "Resource": "*"
+      },
+      {
+        "Sid": "Allow services to use the key",
+        "Effect": "Allow",
+        "Principal": {
+          "Service": [
+            "s3.amazonaws.com",
+            "dynamodb.amazonaws.com",
+            "logs.amazonaws.com"
+          ]
+        },
+        "Action": [
+          "kms:Decrypt",
+          "kms:GenerateDataKey"
+        ],
+        "Resource": "*"
+      }
+    ]
+  }
+}

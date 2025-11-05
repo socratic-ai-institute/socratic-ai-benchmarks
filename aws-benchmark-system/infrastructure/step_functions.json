@@ -1,0 +1,362 @@
+{
+  "Comment": "Weekly Socratic Benchmark Orchestrator",
+  "StartAt": "FetchConfig",
+  "States": {
+    "FetchConfig": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SocraticFetchConfig",
+        "Payload": {
+          "execution_id.$": "$$.Execution.Name",
+          "start_time.$": "$$.Execution.StartTime"
+        }
+      },
+      "ResultPath": "$.config",
+      "ResultSelector": {
+        "manifest.$": "$.Payload.manifest",
+        "models.$": "$.Payload.models",
+        "seeds.$": "$.Payload.seeds",
+        "phases.$": "$.Payload.phases",
+        "temperatures.$": "$.Payload.temperatures"
+      },
+      "Retry": [
+        {
+          "ErrorEquals": ["States.TaskFailed"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "NotifyFailure",
+          "ResultPath": "$.error"
+        }
+      ],
+      "Next": "GenerateRunMatrix"
+    },
+
+    "GenerateRunMatrix": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SocraticGenerateRuns",
+        "Payload": {
+          "manifest_id.$": "$.config.manifest.manifest_id",
+          "models.$": "$.config.models",
+          "temperatures.$": "$.config.temperatures",
+          "seeds.$": "$.config.seeds",
+          "phases.$": "$.config.phases",
+          "max_turns": 40
+        }
+      },
+      "ResultPath": "$.runs",
+      "ResultSelector": {
+        "run_specs.$": "$.Payload.run_specs",
+        "total_runs.$": "$.Payload.total_runs"
+      },
+      "Next": "ParallelDialogueRuns"
+    },
+
+    "ParallelDialogueRuns": {
+      "Type": "Map",
+      "ItemsPath": "$.runs.run_specs",
+      "MaxConcurrency": 20,
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "INLINE"
+        },
+        "StartAt": "SubmitDialogueJob",
+        "States": {
+          "SubmitDialogueJob": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::batch:submitJob.sync",
+            "Parameters": {
+              "JobName.$": "$.run_id",
+              "JobQueue": "arn:aws:batch:us-east-1:${AWS::AccountId}:job-queue/socratic-runner-queue",
+              "JobDefinition": "arn:aws:batch:us-east-1:${AWS::AccountId}:job-definition/socratic-runner:1",
+              "ContainerOverrides": {
+                "Environment": [
+                  {"Name": "RUN_ID", "Value.$": "$.run_id"},
+                  {"Name": "MANIFEST_ID", "Value.$": "$.manifest_id"},
+                  {"Name": "MODEL_ID", "Value.$": "$.model"},
+                  {"Name": "SEED_ID", "Value.$": "$.seed"},
+                  {"Name": "PHASE", "Value.$": "$.phase"},
+                  {"Name": "TEMPERATURE", "Value.$": "States.Format('{}', $.temperature)"},
+                  {"Name": "MAX_TURNS", "Value": "40"},
+                  {"Name": "S3_BUCKET", "Value": "socratic-bench"},
+                  {"Name": "DT", "Value.$": "$$.Execution.StartTime"}
+                ]
+              }
+            },
+            "ResultPath": "$.dialogue_result",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 30,
+                "MaxAttempts": 2,
+                "BackoffRate": 2
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "LogDialogueFailure",
+                "ResultPath": "$.dialogue_error"
+              }
+            ],
+            "End": true
+          },
+
+          "LogDialogueFailure": {
+            "Type": "Pass",
+            "Parameters": {
+              "run_id.$": "$.run_id",
+              "error.$": "$.dialogue_error",
+              "status": "failed"
+            },
+            "End": true
+          }
+        }
+      },
+      "ResultPath": "$.dialogue_results",
+      "Next": "CheckDialogueFailures"
+    },
+
+    "CheckDialogueFailures": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.dialogue_results[?(@.status == 'failed')]",
+          "IsPresent": true,
+          "Next": "PartialDialogueSuccess"
+        }
+      ],
+      "Default": "HeuristicFilter"
+    },
+
+    "PartialDialogueSuccess": {
+      "Type": "Pass",
+      "Comment": "Some dialogue runs failed; continue with successful ones",
+      "ResultPath": "$.partial_failure_flag",
+      "Result": true,
+      "Next": "HeuristicFilter"
+    },
+
+    "HeuristicFilter": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SocraticHeuristicFilter",
+        "Payload": {
+          "run_results.$": "$.dialogue_results",
+          "s3_bucket": "socratic-bench",
+          "dt.$": "$$.Execution.StartTime"
+        }
+      },
+      "ResultPath": "$.filter_result",
+      "ResultSelector": {
+        "runs_needing_judge.$": "$.Payload.runs_needing_judge",
+        "runs_passed_heuristic.$": "$.Payload.runs_passed_heuristic",
+        "judge_workload_reduction_pct.$": "$.Payload.reduction_pct"
+      },
+      "Comment": "Filter out runs where heuristic scores are confident (>30% reduction)",
+      "Next": "ParallelJudgeRuns"
+    },
+
+    "ParallelJudgeRuns": {
+      "Type": "Map",
+      "ItemsPath": "$.filter_result.runs_needing_judge",
+      "MaxConcurrency": 10,
+      "ItemProcessor": {
+        "ProcessorConfig": {
+          "Mode": "INLINE"
+        },
+        "StartAt": "SubmitJudgeJob",
+        "States": {
+          "SubmitJudgeJob": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::batch:submitJob.sync",
+            "Parameters": {
+              "JobName.$": "States.Format('judge-{}', $.run_id)",
+              "JobQueue": "arn:aws:batch:us-east-1:${AWS::AccountId}:job-queue/socratic-judge-queue",
+              "JobDefinition": "arn:aws:batch:us-east-1:${AWS::AccountId}:job-definition/socratic-judge:1",
+              "ContainerOverrides": {
+                "Environment": [
+                  {"Name": "RUN_ID", "Value.$": "$.run_id"},
+                  {"Name": "S3_BUCKET", "Value": "socratic-bench"},
+                  {"Name": "JUDGE_MODEL", "Value": "claude-3-opus"},
+                  {"Name": "RUBRIC_VERSION", "Value.$": "$.rubric_version"}
+                ]
+              }
+            },
+            "ResultPath": "$.judge_result",
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 30,
+                "MaxAttempts": 2,
+                "BackoffRate": 2
+              }
+            ],
+            "Catch": [
+              {
+                "ErrorEquals": ["States.ALL"],
+                "Next": "LogJudgeFailure",
+                "ResultPath": "$.judge_error"
+              }
+            ],
+            "End": true
+          },
+
+          "LogJudgeFailure": {
+            "Type": "Pass",
+            "Parameters": {
+              "run_id.$": "$.run_id",
+              "error.$": "$.judge_error",
+              "status": "judge_failed"
+            },
+            "End": true
+          }
+        }
+      },
+      "ResultPath": "$.judge_results",
+      "Next": "AggregateRunSummaries"
+    },
+
+    "AggregateRunSummaries": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SocraticAggregator",
+        "Payload": {
+          "dialogue_results.$": "$.dialogue_results",
+          "judge_results.$": "$.judge_results",
+          "heuristic_passed.$": "$.filter_result.runs_passed_heuristic",
+          "manifest_id.$": "$.config.manifest.manifest_id",
+          "dt.$": "$$.Execution.StartTime"
+        }
+      },
+      "ResultPath": "$.aggregation",
+      "ResultSelector": {
+        "summaries_written.$": "$.Payload.summaries_written",
+        "weekly_summary.$": "$.Payload.weekly_summary",
+        "curated_parquet_s3.$": "$.Payload.curated_s3"
+      },
+      "Comment": "Compute RunSummary per run + WeeklySummary aggregates",
+      "Next": "ParallelPostProcessing"
+    },
+
+    "ParallelPostProcessing": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "RunCanaryCalibration",
+          "States": {
+            "RunCanaryCalibration": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::batch:submitJob.sync",
+              "Parameters": {
+                "JobName": "canary-calibration",
+                "JobQueue": "arn:aws:batch:us-east-1:${AWS::AccountId}:job-queue/socratic-judge-queue",
+                "JobDefinition": "arn:aws:batch:us-east-1:${AWS::AccountId}:job-definition/socratic-canary:1",
+                "ContainerOverrides": {
+                  "Environment": [
+                    {"Name": "GOLDEN_SET_VERSION", "Value": "golden_set_v1"},
+                    {"Name": "JUDGE_MODEL", "Value": "claude-3-opus"},
+                    {"Name": "ALERT_THRESHOLD", "Value": "0.05"}
+                  ]
+                }
+              },
+              "ResultPath": "$.canary_result",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "UpdateDynamoDB",
+          "States": {
+            "UpdateDynamoDB": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SocraticDynamoDBIndexer",
+                "Payload": {
+                  "summaries.$": "$.aggregation.summaries_written",
+                  "weekly_summary.$": "$.aggregation.weekly_summary"
+                }
+              },
+              "End": true
+            }
+          }
+        }
+      ],
+      "ResultPath": "$.post_processing",
+      "Next": "CheckForAlerts"
+    },
+
+    "CheckForAlerts": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SocraticAlerts",
+        "Payload": {
+          "weekly_summary.$": "$.aggregation.weekly_summary",
+          "canary_result.$": "$.post_processing[0].canary_result",
+          "execution_id.$": "$$.Execution.Name"
+        }
+      },
+      "ResultPath": "$.alerts",
+      "ResultSelector": {
+        "alerts_triggered.$": "$.Payload.alerts",
+        "notifications_sent.$": "$.Payload.notifications_sent"
+      },
+      "Next": "PublishMetrics"
+    },
+
+    "PublishMetrics": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "arn:aws:lambda:us-east-1:${AWS::AccountId}:function:SocraticMetricsPublisher",
+        "Payload": {
+          "weekly_summary.$": "$.aggregation.weekly_summary",
+          "total_runs.$": "$.runs.total_runs",
+          "judge_workload_reduction.$": "$.filter_result.judge_workload_reduction_pct",
+          "alerts.$": "$.alerts.alerts_triggered"
+        }
+      },
+      "ResultPath": "$.metrics",
+      "Comment": "Publish CloudWatch EMF metrics",
+      "Next": "Success"
+    },
+
+    "Success": {
+      "Type": "Succeed",
+      "Comment": "Weekly benchmark completed successfully"
+    },
+
+    "NotifyFailure": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "TopicArn": "arn:aws:sns:us-east-1:${AWS::AccountId}:SocraticBenchmarkAlerts",
+        "Subject": "Socratic Benchmark FAILED",
+        "Message": {
+          "execution_id.$": "$$.Execution.Name",
+          "error.$": "$.error",
+          "timestamp.$": "$$.State.EnteredTime"
+        }
+      },
+      "Next": "Fail"
+    },
+
+    "Fail": {
+      "Type": "Fail",
+      "Error": "BenchmarkExecutionFailed",
+      "Cause": "See CloudWatch logs for details"
+    }
+  }
+}
