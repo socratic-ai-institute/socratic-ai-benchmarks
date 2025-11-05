@@ -171,7 +171,7 @@ class ContextGrowthEvaluator:
         print(f"  Resistance to Drift:  {overall_score['resistance_to_drift']:.2f}/10")
         print(f"  Memory Preservation:  {overall_score['memory_preservation']:.2f}/10")
 
-        return {
+        result = {
             "scenario_id": scenario["id"],
             "scenario_name": scenario["name"],
             "test_type": scenario["test_type"],
@@ -189,6 +189,12 @@ class ContextGrowthEvaluator:
             "overall_score": dict(overall_score),
             "timestamp": datetime.now().isoformat()
         }
+
+        # Include context_type if present (for fidelity tests)
+        if "context_type" in scenario:
+            result["context_type"] = scenario["context_type"]
+
+        return result
 
     def _call_model(self, model_id: str, prompt: str) -> str:
         """Call Bedrock model with error handling."""
