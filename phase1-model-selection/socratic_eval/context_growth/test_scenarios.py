@@ -23,11 +23,12 @@ class ConversationTurn(TypedDict):
     distractor_text: Optional[str]  # For context inflation
 
 
-class TestScenario(TypedDict):
+class TestScenario(TypedDict, total=False):
     """A complete test scenario."""
     id: str
     name: str
     test_type: str
+    context_type: Optional[str]  # NEW: For fidelity testing (e.g., 'knowledge_heavy', 'emotional')
     description: str
     system_prompt: str
     conversation_turns: List[ConversationTurn]
@@ -546,8 +547,16 @@ class ChainOfThoughtTest:
 # Helper Functions
 # =============================================================================
 
-def get_all_test_scenarios() -> List[TestScenario]:
-    """Get all test scenarios across all types."""
+def get_all_test_scenarios(include_fidelity: bool = False) -> List[TestScenario]:
+    """
+    Get all test scenarios across all types.
+
+    Args:
+        include_fidelity: If True, includes fidelity context tests (15 additional scenarios)
+
+    Returns:
+        List of test scenarios
+    """
 
     scenarios = []
 
@@ -571,36 +580,66 @@ def get_all_test_scenarios() -> List[TestScenario]:
     scenarios.append(ChainOfThoughtTest.startup_dialogue())
     scenarios.append(ChainOfThoughtTest.climate_dialogue())
 
+    # Fidelity tests (optional - adds 15 scenarios)
+    if include_fidelity:
+        try:
+            from .fidelity_tests import get_all_fidelity_scenarios
+            scenarios.extend(get_all_fidelity_scenarios())
+        except ImportError:
+            print("Warning: fidelity_tests.py not found. Skipping fidelity scenarios.")
+
     return scenarios
 
 
-def get_scenarios_by_type(test_type: str) -> List[TestScenario]:
+def get_scenarios_by_type(test_type: str, include_fidelity: bool = False) -> List[TestScenario]:
     """Get scenarios filtered by type."""
 
-    all_scenarios = get_all_test_scenarios()
+    all_scenarios = get_all_test_scenarios(include_fidelity=include_fidelity)
     return [s for s in all_scenarios if s["test_type"] == test_type]
 
 
-def print_scenario_summary():
-    """Print summary of all available scenarios."""
+def get_scenarios_by_context_type(context_type: str) -> List[TestScenario]:
+    """Get scenarios filtered by context type (fidelity tests only)."""
 
-    scenarios = get_all_test_scenarios()
+    all_scenarios = get_all_test_scenarios(include_fidelity=True)
+    return [s for s in all_scenarios if s.get("context_type") == context_type]
+
+
+def print_scenario_summary(include_fidelity: bool = False, group_by: str = "test_type"):
+    """
+    Print summary of all available scenarios.
+
+    Args:
+        include_fidelity: Whether to include fidelity context tests
+        group_by: 'test_type' or 'context_type'
+    """
+
+    scenarios = get_all_test_scenarios(include_fidelity=include_fidelity)
 
     print(f"Total scenarios: {len(scenarios)}\n")
 
-    by_type = {}
+    # Group scenarios
+    groups = {}
     for scenario in scenarios:
-        test_type = scenario["test_type"]
-        if test_type not in by_type:
-            by_type[test_type] = []
-        by_type[test_type].append(scenario)
+        if group_by == "context_type":
+            key = scenario.get("context_type", "core_tests")
+        else:
+            key = scenario["test_type"]
 
-    for test_type, scenarios_list in by_type.items():
-        print(f"\n{test_type.upper()} ({len(scenarios_list)} scenarios)")
-        print("=" * 60)
+        if key not in groups:
+            groups[key] = []
+        groups[key].append(scenario)
+
+    # Print grouped scenarios
+    for group_name, scenarios_list in sorted(groups.items()):
+        print(f"\n{group_name.upper().replace('_', ' ')} ({len(scenarios_list)} scenarios)")
+        print("=" * 70)
         for scenario in scenarios_list:
-            print(f"  {scenario['id']}: {scenario['name']}")
-            print(f"    {scenario['description']}")
+            context_tag = f" [{scenario['context_type']}]" if scenario.get('context_type') else ""
+            print(f"  {scenario['id']}{context_tag}")
+            print(f"  └─ {scenario['name']}")
+            print(f"     {scenario['description']}")
+            print()
 
 
 if __name__ == "__main__":
