@@ -1,0 +1,2191 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Growth Evaluation Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            color: #2d3748;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .metadata {
+            background: #edf2f7;
+            padding: 20px 40px;
+            border-bottom: 2px solid #cbd5e0;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metadata-item label {
+            font-size: 0.85em;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .metadata-item value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .model-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .model-card {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .model-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-size: 0.95em;
+            color: #4a5568;
+        }
+
+        .metric-value {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .metric-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .metric-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 40px;
+        }
+
+        .scenario-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .scenario-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .scenario-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .scenario-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .score-excellent { background: #48bb78; color: white; }
+        .score-good { background: #38b2ac; color: white; }
+        .score-fair { background: #ed8936; color: white; }
+        .score-poor { background: #f56565; color: white; }
+
+        .test-type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-consistency { background: #bee3f8; color: #2c5282; }
+        .badge-complexity { background: #fbd38d; color: #7c2d12; }
+        .badge-ambiguity { background: #c6f6d5; color: #22543d; }
+        .badge-interrupt_redirect { background: #fed7d7; color: #742a2a; }
+        .badge-chain_of_thought { background: #e9d8fd; color: #44337a; }
+
+        .winner-banner {
+            background: linear-gradient(135deg, #48bb78 0%, #38b2ac 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .winner-banner h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .winner-banner p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Context Growth Evaluation</h1>
+            <p>Reasoning vs. Non-Reasoning Models in Socratic Use Cases</p>
+        </div>
+
+        <div class="metadata">
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <label>Timestamp</label>
+                    <value>2025-11-05T11:40:47.078737</value>
+                </div>
+                <div class="metadata-item">
+                    <label>Models Tested</label>
+                    <value>25</value>
+                </div>
+                <div class="metadata-item">
+                    <label>Scenarios</label>
+                    <value>8</value>
+                </div>
+                <div class="metadata-item">
+                    <label>AWS Region</label>
+                    <value>us-east-1</value>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            
+    <div class="winner-banner">
+        <h2>🏆 Winner: anthropic.claude-sonnet-4-5-20250929-v1:0</h2>
+        <p>Overall Score: 6.84/10</p>
+    </div>
+    
+
+            
+    <div class="section">
+        <h2 class="section-title">Model Comparison</h2>
+        <div class="model-comparison">
+            
+        <div class="model-card">
+            <h3>anthropic.claude-sonnet-4-5-20250929-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">6.84</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 68.39999999999999%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">9.34</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 93.39999999999999%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 0.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">6.55</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 65.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">9.59</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 95.89999999999999%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">8.75</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 87.5%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>anthropic.claude-opus-4-1-20250805-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.70</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 57.00000000000001%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">6.83</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 68.30000000000001%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.79</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 7.9%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">5.55</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 55.49999999999999%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">5.95</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 59.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">9.38</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 93.80000000000001%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>anthropic.claude-3-opus-20240229-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">2.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 20.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">0.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 0.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 0.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">2.98</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 29.799999999999997%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">1.50</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 15.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">5.50</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 55.00000000000001%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>deepseek.r1-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">3.44</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 34.4%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">1.25</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 12.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.79</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 7.9%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">4.06</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 40.599999999999994%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">2.83</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 28.300000000000004%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">8.25</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 82.5%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>meta.llama3-3-70b-instruct-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">4.02</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 40.199999999999996%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">1.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 10.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">2.42</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 24.2%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">4.35</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 43.49999999999999%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">2.33</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 23.3%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">10.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 100.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>meta.llama3-1-70b-instruct-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.98</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 59.80000000000001%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">5.67</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 56.699999999999996%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">2.17</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 21.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">6.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 60.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">6.57</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 65.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">9.50</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 95.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>mistral.mistral-large-2402-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">4.57</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 45.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">3.67</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 36.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.34</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 3.4000000000000004%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">4.66</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 46.6%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">4.20</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 42.00000000000001%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">10.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 100.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>amazon.nova-premier-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.52</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 55.199999999999996%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">5.33</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 53.300000000000004%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.79</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 7.9%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">5.60</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 55.99999999999999%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">6.50</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 65.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">9.38</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 93.80000000000001%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>anthropic.claude-haiku-4-5-20251001-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">3.71</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 37.1%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">1.67</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 16.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.79</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 7.9%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">3.95</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 39.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">2.78</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 27.799999999999997%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">9.38</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 93.80000000000001%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>anthropic.claude-3-5-haiku-20241022-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.23</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 52.300000000000004%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">5.33</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 53.300000000000004%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 0.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">5.15</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 51.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">6.29</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 62.9%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">9.38</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 93.80000000000001%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>amazon.nova-pro-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.26</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 52.6%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">4.33</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 43.3%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.83</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 8.299999999999999%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">5.56</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 55.599999999999994%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">5.58</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 55.800000000000004%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">10.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 100.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>meta.llama3-2-90b-instruct-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.98</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 59.80000000000001%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">6.50</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 65.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">1.50</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 15.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">6.04</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 60.4%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">7.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 70.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">8.88</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 88.80000000000001%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>mistral.mixtral-8x7b-instruct-v0:1</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">3.77</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 37.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">1.67</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 16.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.67</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 6.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">4.20</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 42.00000000000001%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">2.28</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 22.799999999999997%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">10.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 100.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>cohere.command-r-plus-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.17</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 51.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">5.33</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 53.300000000000004%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 0.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">5.02</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 50.2%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">5.46</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 54.6%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">10.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 100.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>anthropic.claude-3-7-sonnet-20250219-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.38</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 53.800000000000004%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">4.83</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 48.3%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.75</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 7.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">5.35</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 53.49999999999999%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">5.95</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 59.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">10.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 100.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>meta.llama4-maverick-17b-instruct-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">6.63</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 66.3%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">7.25</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 72.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">1.92</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 19.2%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">6.66</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 66.60000000000001%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">7.33</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 73.3%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">10.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 100.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>meta.llama4-scout-17b-instruct-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">6.37</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 63.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">6.42</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 64.2%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">2.96</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 29.599999999999998%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">6.33</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 63.3%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">6.78</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 67.80000000000001%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">9.38</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 93.80000000000001%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>ai21.jamba-1-5-large-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.83</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 58.3%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">6.25</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 62.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 0.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">5.85</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 58.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">7.54</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 75.4%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">9.50</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 95.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>qwen.qwen3-32b-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.17</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 51.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">5.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 50.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.58</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 5.8%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">5.36</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 53.6%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">5.50</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 55.00000000000001%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">9.38</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 93.80000000000001%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>openai.gpt-oss-120b-1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">3.02</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 30.2%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">0.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 0.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.58</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 5.8%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">3.85</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 38.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">0.67</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 6.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">10.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 100.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>anthropic.claude-3-sonnet-20240229-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">3.35</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 33.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">2.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 20.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.58</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 5.8%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">3.70</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 37.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">3.25</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 32.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">7.25</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 72.5%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>anthropic.claude-3-5-sonnet-20240620-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">4.69</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 46.900000000000006%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">5.33</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 53.300000000000004%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 0.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">4.90</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 49.00000000000001%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">3.21</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 32.1%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">10.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 100.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>cohere.command-r-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.49</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 54.900000000000006%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">5.17</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 51.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.58</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 5.8%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">5.12</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 51.2%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">7.21</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 72.1%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">9.38</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 93.80000000000001%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>amazon.nova-lite-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">6.15</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 61.5%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">6.67</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 66.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">1.38</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 13.799999999999999%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">5.72</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 57.199999999999996%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">7.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 70.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">10.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 100.0%"></div>
+            </div>
+            
+        </div>
+        
+        <div class="model-card">
+            <h3>meta.llama3-2-11b-instruct-v1:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">3.01</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 30.099999999999998%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">0.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 0.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.41</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 4.1%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">3.63</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 36.3%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">1.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 10.0%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">10.00</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 100.0%"></div>
+            </div>
+            
+        </div>
+        
+        </div>
+    </div>
+    
+
+            
+    <div class="section">
+        <h2 class="section-title">Metric Comparison</h2>
+        <div class="chart-container">
+            <canvas id="radarChart"></canvas>
+        </div>
+    </div>
+    
+
+            
+
+            
+    <div class="section">
+        <h2 class="section-title">Detailed Results</h2>
+        <table class="scenario-table">
+            <thead>
+                <tr>
+                    <th>Test Type</th>
+                    <th>Scenario</th>
+                    <th>Model</th>
+                    <th>Overall</th>
+                    <th>Persistence</th>
+                    <th>Cognitive Depth</th>
+                    <th>Context Adapt.</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>anthropic.claude-sonnet-4-5-20250929-v1:0</td>
+                <td><span class="score-badge score-good">6.89/10</span></td>
+                <td>8.67</td>
+                <td>0.00</td>
+                <td>6.60</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>anthropic.claude-opus-4-1-20250805-v1:0</td>
+                <td><span class="score-badge score-fair">5.85/10</span></td>
+                <td>5.33</td>
+                <td>0.00</td>
+                <td>5.60</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>anthropic.claude-3-opus-20240229-v1:0</td>
+                <td><span class="score-badge score-poor">1.99/10</span></td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>2.95</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>deepseek.r1-v1:0</td>
+                <td><span class="score-badge score-poor">2.73/10</span></td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>3.63</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>meta.llama3-3-70b-instruct-v1:0</td>
+                <td><span class="score-badge score-fair">4.84/10</span></td>
+                <td>2.00</td>
+                <td>2.33</td>
+                <td>5.20</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>meta.llama3-1-70b-instruct-v1:0</td>
+                <td><span class="score-badge score-fair">5.62/10</span></td>
+                <td>5.00</td>
+                <td>1.17</td>
+                <td>6.00</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>mistral.mistral-large-2402-v1:0</td>
+                <td><span class="score-badge score-fair">5.30/10</span></td>
+                <td>4.00</td>
+                <td>0.67</td>
+                <td>5.32</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>amazon.nova-premier-v1:0</td>
+                <td><span class="score-badge score-fair">4.77/10</span></td>
+                <td>4.00</td>
+                <td>0.00</td>
+                <td>5.20</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>anthropic.claude-sonnet-4-5-20250929-v1:0</td>
+                <td><span class="score-badge score-good">6.80/10</span></td>
+                <td>10.00</td>
+                <td>0.00</td>
+                <td>6.50</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>anthropic.claude-opus-4-1-20250805-v1:0</td>
+                <td><span class="score-badge score-fair">5.54/10</span></td>
+                <td>8.33</td>
+                <td>1.58</td>
+                <td>5.50</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>anthropic.claude-3-opus-20240229-v1:0</td>
+                <td><span class="score-badge score-poor">2.00/10</span></td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>3.00</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>deepseek.r1-v1:0</td>
+                <td><span class="score-badge score-fair">4.15/10</span></td>
+                <td>2.50</td>
+                <td>1.58</td>
+                <td>4.50</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>meta.llama3-3-70b-instruct-v1:0</td>
+                <td><span class="score-badge score-poor">3.20/10</span></td>
+                <td>0.00</td>
+                <td>2.50</td>
+                <td>3.50</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>meta.llama3-1-70b-instruct-v1:0</td>
+                <td><span class="score-badge score-good">6.34/10</span></td>
+                <td>6.33</td>
+                <td>3.17</td>
+                <td>6.00</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>mistral.mistral-large-2402-v1:0</td>
+                <td><span class="score-badge score-poor">3.84/10</span></td>
+                <td>3.33</td>
+                <td>0.00</td>
+                <td>4.00</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>amazon.nova-premier-v1:0</td>
+                <td><span class="score-badge score-good">6.27/10</span></td>
+                <td>6.67</td>
+                <td>1.58</td>
+                <td>6.00</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>anthropic.claude-haiku-4-5-20251001-v1:0</td>
+                <td><span class="score-badge score-poor">2.98/10</span></td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>3.90</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>anthropic.claude-3-5-haiku-20241022-v1:0</td>
+                <td><span class="score-badge score-fair">4.61/10</span></td>
+                <td>4.00</td>
+                <td>0.00</td>
+                <td>4.80</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>amazon.nova-pro-v1:0</td>
+                <td><span class="score-badge score-poor">3.89/10</span></td>
+                <td>2.00</td>
+                <td>0.00</td>
+                <td>4.63</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>meta.llama3-2-90b-instruct-v1:0</td>
+                <td><span class="score-badge score-good">6.26/10</span></td>
+                <td>6.33</td>
+                <td>1.33</td>
+                <td>6.32</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>mistral.mixtral-8x7b-instruct-v0:1</td>
+                <td><span class="score-badge score-poor">3.25/10</span></td>
+                <td>0.00</td>
+                <td>1.33</td>
+                <td>3.90</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>cohere.command-r-plus-v1:0</td>
+                <td><span class="score-badge score-fair">4.76/10</span></td>
+                <td>4.00</td>
+                <td>0.00</td>
+                <td>4.53</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>anthropic.claude-haiku-4-5-20251001-v1:0</td>
+                <td><span class="score-badge score-fair">4.44/10</span></td>
+                <td>3.33</td>
+                <td>1.58</td>
+                <td>4.00</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>anthropic.claude-3-5-haiku-20241022-v1:0</td>
+                <td><span class="score-badge score-fair">5.85/10</span></td>
+                <td>6.67</td>
+                <td>0.00</td>
+                <td>5.50</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>amazon.nova-pro-v1:0</td>
+                <td><span class="score-badge score-good">6.63/10</span></td>
+                <td>6.67</td>
+                <td>1.67</td>
+                <td>6.50</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>meta.llama3-2-90b-instruct-v1:0</td>
+                <td><span class="score-badge score-fair">5.70/10</span></td>
+                <td>6.67</td>
+                <td>1.67</td>
+                <td>5.75</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>mistral.mixtral-8x7b-instruct-v0:1</td>
+                <td><span class="score-badge score-fair">4.28/10</span></td>
+                <td>3.33</td>
+                <td>0.00</td>
+                <td>4.50</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>cohere.command-r-plus-v1:0</td>
+                <td><span class="score-badge score-fair">5.57/10</span></td>
+                <td>6.67</td>
+                <td>0.00</td>
+                <td>5.50</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>anthropic.claude-3-7-sonnet-20250219-v1:0</td>
+                <td><span class="score-badge score-good">6.32/10</span></td>
+                <td>6.67</td>
+                <td>0.67</td>
+                <td>5.95</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>meta.llama4-maverick-17b-instruct-v1:0</td>
+                <td><span class="score-badge score-good">7.73/10</span></td>
+                <td>10.00</td>
+                <td>1.33</td>
+                <td>7.32</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>meta.llama4-scout-17b-instruct-v1:0</td>
+                <td><span class="score-badge score-good">6.50/10</span></td>
+                <td>5.33</td>
+                <td>3.42</td>
+                <td>6.40</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>ai21.jamba-1-5-large-v1:0</td>
+                <td><span class="score-badge score-good">6.19/10</span></td>
+                <td>8.00</td>
+                <td>0.00</td>
+                <td>6.20</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>qwen.qwen3-32b-v1:0</td>
+                <td><span class="score-badge score-poor">3.28/10</span></td>
+                <td>0.00</td>
+                <td>1.17</td>
+                <td>4.22</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>openai.gpt-oss-120b-1:0</td>
+                <td><span class="score-badge score-poor">3.27/10</span></td>
+                <td>0.00</td>
+                <td>1.17</td>
+                <td>4.20</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>anthropic.claude-3-7-sonnet-20250219-v1:0</td>
+                <td><span class="score-badge score-fair">4.43/10</span></td>
+                <td>3.00</td>
+                <td>0.83</td>
+                <td>4.75</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>meta.llama4-maverick-17b-instruct-v1:0</td>
+                <td><span class="score-badge score-fair">5.53/10</span></td>
+                <td>4.50</td>
+                <td>2.50</td>
+                <td>6.00</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>meta.llama4-scout-17b-instruct-v1:0</td>
+                <td><span class="score-badge score-good">6.24/10</span></td>
+                <td>7.50</td>
+                <td>2.50</td>
+                <td>6.25</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>ai21.jamba-1-5-large-v1:0</td>
+                <td><span class="score-badge score-fair">5.47/10</span></td>
+                <td>4.50</td>
+                <td>0.00</td>
+                <td>5.50</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>qwen.qwen3-32b-v1:0</td>
+                <td><span class="score-badge score-good">7.05/10</span></td>
+                <td>10.00</td>
+                <td>0.00</td>
+                <td>6.50</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>openai.gpt-oss-120b-1:0</td>
+                <td><span class="score-badge score-poor">2.77/10</span></td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>3.50</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>anthropic.claude-3-sonnet-20240229-v1:0</td>
+                <td><span class="score-badge score-fair">5.41/10</span></td>
+                <td>4.00</td>
+                <td>1.17</td>
+                <td>5.40</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>anthropic.claude-3-5-sonnet-20240620-v1:0</td>
+                <td><span class="score-badge score-fair">4.44/10</span></td>
+                <td>4.00</td>
+                <td>0.00</td>
+                <td>4.80</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>cohere.command-r-v1:0</td>
+                <td><span class="score-badge score-fair">5.52/10</span></td>
+                <td>5.33</td>
+                <td>1.17</td>
+                <td>5.00</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>amazon.nova-lite-v1:0</td>
+                <td><span class="score-badge score-good">6.47/10</span></td>
+                <td>6.67</td>
+                <td>1.17</td>
+                <td>6.20</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>meta.llama3-2-11b-instruct-v1:0</td>
+                <td><span class="score-badge score-poor">2.65/10</span></td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>3.27</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>anthropic.claude-3-sonnet-20240229-v1:0</td>
+                <td><span class="score-badge score-poor">1.30/10</span></td>
+                <td>0.00</td>
+                <td>0.00</td>
+                <td>2.00</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>anthropic.claude-3-5-sonnet-20240620-v1:0</td>
+                <td><span class="score-badge score-fair">4.93/10</span></td>
+                <td>6.67</td>
+                <td>0.00</td>
+                <td>5.00</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>cohere.command-r-v1:0</td>
+                <td><span class="score-badge score-fair">5.47/10</span></td>
+                <td>5.00</td>
+                <td>0.00</td>
+                <td>5.25</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>amazon.nova-lite-v1:0</td>
+                <td><span class="score-badge score-fair">5.83/10</span></td>
+                <td>6.67</td>
+                <td>1.58</td>
+                <td>5.25</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>meta.llama3-2-11b-instruct-v1:0</td>
+                <td><span class="score-badge score-poor">3.37/10</span></td>
+                <td>0.00</td>
+                <td>0.83</td>
+                <td>4.00</td>
+            </tr>
+            
+            </tbody>
+        </table>
+    </div>
+    
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts
+        
+        // Radar Chart
+        const radarCtx = document.getElementById('radarChart').getContext('2d');
+        new Chart(radarCtx, {
+            type: 'radar',
+            data: {"labels": ["Persistence", "Cognitive Depth", "Context Adaptability", "Resistance to Drift", "Memory Preservation"], "datasets": [{"label": "anthropic.claude-sonnet-4-5-20250929-v1:0", "data": [9.34, 0.0, 6.55, 9.59, 8.75], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "anthropic.claude-opus-4-1-20250805-v1:0", "data": [6.83, 0.79, 5.55, 5.95, 9.38], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-opus-20240229-v1:0", "data": [0.0, 0.0, 2.98, 1.5, 5.5], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "deepseek.r1-v1:0", "data": [1.25, 0.79, 4.06, 2.83, 8.25], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "meta.llama3-3-70b-instruct-v1:0", "data": [1.0, 2.42, 4.35, 2.33, 10.0], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "meta.llama3-1-70b-instruct-v1:0", "data": [5.67, 2.17, 6.0, 6.57, 9.5], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "mistral.mistral-large-2402-v1:0", "data": [3.67, 0.34, 4.66, 4.2, 10.0], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "amazon.nova-premier-v1:0", "data": [5.33, 0.79, 5.6, 6.5, 9.38], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "anthropic.claude-haiku-4-5-20251001-v1:0", "data": [1.67, 0.79, 3.95, 2.78, 9.38], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-5-haiku-20241022-v1:0", "data": [5.33, 0.0, 5.15, 6.29, 9.38], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "amazon.nova-pro-v1:0", "data": [4.33, 0.83, 5.56, 5.58, 10.0], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "meta.llama3-2-90b-instruct-v1:0", "data": [6.5, 1.5, 6.04, 7.0, 8.88], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "mistral.mixtral-8x7b-instruct-v0:1", "data": [1.67, 0.67, 4.2, 2.28, 10.0], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "cohere.command-r-plus-v1:0", "data": [5.33, 0.0, 5.02, 5.46, 10.0], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-7-sonnet-20250219-v1:0", "data": [4.83, 0.75, 5.35, 5.95, 10.0], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "meta.llama4-maverick-17b-instruct-v1:0", "data": [7.25, 1.92, 6.66, 7.33, 10.0], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "meta.llama4-scout-17b-instruct-v1:0", "data": [6.42, 2.96, 6.33, 6.78, 9.38], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "ai21.jamba-1-5-large-v1:0", "data": [6.25, 0.0, 5.85, 7.54, 9.5], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "qwen.qwen3-32b-v1:0", "data": [5.0, 0.58, 5.36, 5.5, 9.38], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "openai.gpt-oss-120b-1:0", "data": [0.0, 0.58, 3.85, 0.67, 10.0], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-sonnet-20240229-v1:0", "data": [2.0, 0.58, 3.7, 3.25, 7.25], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-5-sonnet-20240620-v1:0", "data": [5.33, 0.0, 4.9, 3.21, 10.0], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "cohere.command-r-v1:0", "data": [5.17, 0.58, 5.12, 7.21, 9.38], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "amazon.nova-lite-v1:0", "data": [6.67, 1.38, 5.72, 7.0, 10.0], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "meta.llama3-2-11b-instruct-v1:0", "data": [0.0, 0.41, 3.63, 1.0, 10.0], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}]},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 2
+                        }
+                    }
+                }
+            }
+        });
+
+        // Test Type Chart
+        const testTypeCtx = document.getElementById('testTypeChart').getContext('2d');
+        new Chart(testTypeCtx, {
+            type: 'bar',
+            data: {"labels": [], "datasets": [{"label": "Average Score", "data": [], "backgroundColor": []}]},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 2
+                        }
+                    }
+                }
+            }
+        });
+    
+    </script>
+</body>
+</html>
+    

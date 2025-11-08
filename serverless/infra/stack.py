@@ -14,6 +14,7 @@ from aws_cdk import (
     Duration,
     RemovalPolicy,
     aws_lambda as lambda_,
+    aws_lambda_event_sources as lambda_events,
     aws_dynamodb as dynamodb,
     aws_s3 as s3,
     aws_sqs as sqs,
@@ -153,7 +154,7 @@ class SocraticBenchStack(Stack):
             "SocraticLibLayer",
             code=lambda_.Code.from_asset("../lib"),
             compatible_runtimes=[lambda_.Runtime.PYTHON_3_12],
-            description="Socratic Bench shared library",
+            description="Socratic Bench shared library with dependencies",
         )
 
         # ========================================
@@ -254,8 +255,7 @@ class SocraticBenchStack(Stack):
 
         # Judge: read raw S3, write judge JSON, update DynamoDB, send events
         self.table.grant_read_write_data(self.judge_fn)
-        self.data_bucket.grant_read(self.judge_fn, "raw/*")
-        self.data_bucket.grant_write(self.judge_fn, "raw/*/judge.json")
+        self.data_bucket.grant_read_write(self.judge_fn, "raw/*")
         self.event_bus.grant_put_events_to(self.judge_fn)
 
         # Curator: read DynamoDB, write curated S3
@@ -263,9 +263,10 @@ class SocraticBenchStack(Stack):
         self.data_bucket.grant_read(self.curator_fn, "raw/*")
         self.data_bucket.grant_write(self.curator_fn, "curated/*")
 
-        # API: read DynamoDB, read curated S3
+        # API: read DynamoDB, read curated AND raw S3 (needs raw for judge dimension scores)
         self.table.grant_read_data(self.api_fn)
         self.data_bucket.grant_read(self.api_fn, "curated/*")
+        self.data_bucket.grant_read(self.api_fn, "raw/*")
 
         # Grant Bedrock access to all functions that need it
         bedrock_policy = iam.PolicyStatement(
@@ -290,14 +291,14 @@ class SocraticBenchStack(Stack):
 
         # SQS trigger for Runner
         self.runner_fn.add_event_source(
-            lambda_.event_sources.SqsEventSource(
+            lambda_events.SqsEventSource(
                 self.dialogue_queue, batch_size=1, max_concurrency=25
             )
         )
 
         # SQS trigger for Judge
         self.judge_fn.add_event_source(
-            lambda_.event_sources.SqsEventSource(
+            lambda_events.SqsEventSource(
                 self.judge_queue, batch_size=1, max_concurrency=25
             )
         )
@@ -349,6 +350,23 @@ class SocraticBenchStack(Stack):
         turns = run_id.add_resource("turns")
         turns.add_method("GET", integration, api_key_required=True)
 
+        # New API routes (no API key required for public dashboard)
+        api_resource = api.root.add_resource("api")
+        timeseries = api_resource.add_resource("timeseries")
+        timeseries.add_method("GET", integration, api_key_required=False)
+
+        rankings = api_resource.add_resource("latest-rankings")
+        rankings.add_method("GET", integration, api_key_required=False)
+
+        cost_analysis = api_resource.add_resource("cost-analysis")
+        cost_analysis.add_method("GET", integration, api_key_required=False)
+
+        detailed_results = api_resource.add_resource("detailed-results")
+        detailed_results.add_method("GET", integration, api_key_required=False)
+
+        model_comparison = api_resource.add_resource("model-comparison")
+        model_comparison.add_method("GET", integration, api_key_required=False)
+
         usage_plan.add_api_stage(stage=api.deployment_stage)
 
         # ========================================
@@ -359,23 +377,41 @@ class SocraticBenchStack(Stack):
             self,
             "UIBucket",
             bucket_name=f"socratic-bench-ui-{self.account}",
-            website_index_document="index.html",
-            website_error_document="error.html",
             public_read_access=False,
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
             removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=True,
         )
 
+        # Origin Access Identity for CloudFront
+        oai = cloudfront.OriginAccessIdentity(
+            self,
+            "UIOriginAccessIdentity",
+            comment="OAI for Socratic Bench UI bucket"
+        )
+
+        # Grant CloudFront read access to bucket
+        ui_bucket.grant_read(oai)
+
         # CloudFront distribution
         distribution = cloudfront.Distribution(
             self,
             "UIDistribution",
             default_behavior=cloudfront.BehaviorOptions(
-                origin=origins.S3Origin(ui_bucket),
+                origin=origins.S3Origin(
+                    ui_bucket,
+                    origin_access_identity=oai
+                ),
                 viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
             ),
             default_root_object="index.html",
+            error_responses=[
+                cloudfront.ErrorResponse(
+                    http_status=404,
+                    response_http_status=200,
+                    response_page_path="/index.html",
+                )
+            ],
         )
 
         # Deploy UI assets

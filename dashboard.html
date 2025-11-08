@@ -1,0 +1,446 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Growth Evaluation Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            color: #2d3748;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .metadata {
+            background: #edf2f7;
+            padding: 20px 40px;
+            border-bottom: 2px solid #cbd5e0;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metadata-item label {
+            font-size: 0.85em;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .metadata-item value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .model-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .model-card {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .model-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-size: 0.95em;
+            color: #4a5568;
+        }
+
+        .metric-value {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .metric-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .metric-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 40px;
+        }
+
+        .scenario-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .scenario-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .scenario-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .scenario-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .score-excellent { background: #48bb78; color: white; }
+        .score-good { background: #38b2ac; color: white; }
+        .score-fair { background: #ed8936; color: white; }
+        .score-poor { background: #f56565; color: white; }
+
+        .test-type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-consistency { background: #bee3f8; color: #2c5282; }
+        .badge-complexity { background: #fbd38d; color: #7c2d12; }
+        .badge-ambiguity { background: #c6f6d5; color: #22543d; }
+        .badge-interrupt_redirect { background: #fed7d7; color: #742a2a; }
+        .badge-chain_of_thought { background: #e9d8fd; color: #44337a; }
+
+        .winner-banner {
+            background: linear-gradient(135deg, #48bb78 0%, #38b2ac 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .winner-banner h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .winner-banner p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Context Growth Evaluation</h1>
+            <p>Reasoning vs. Non-Reasoning Models in Socratic Use Cases</p>
+        </div>
+
+        <div class="metadata">
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <label>Timestamp</label>
+                    <value>2025-11-05T10:51:18.120649</value>
+                </div>
+                <div class="metadata-item">
+                    <label>Models Tested</label>
+                    <value>1</value>
+                </div>
+                <div class="metadata-item">
+                    <label>Scenarios</label>
+                    <value>2</value>
+                </div>
+                <div class="metadata-item">
+                    <label>AWS Region</label>
+                    <value>us-east-1</value>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            
+    <div class="winner-banner">
+        <h2>🏆 Winner: anthropic.claude-3-5-sonnet-20241022-v2:0</h2>
+        <p>Overall Score: 5.64/10</p>
+    </div>
+    
+
+            
+    <div class="section">
+        <h2 class="section-title">Model Comparison</h2>
+        <div class="model-comparison">
+            
+        <div class="model-card">
+            <h3>anthropic.claude-3-5-sonnet-20241022-v2:0</h3>
+            
+            <div class="metric-row">
+                <span class="metric-label">Overall</span>
+                <span class="metric-value">5.64</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 56.39999999999999%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Persistence</span>
+                <span class="metric-value">6.67</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 66.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Cognitive Depth</span>
+                <span class="metric-value">0.67</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 6.7%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Context Adaptability</span>
+                <span class="metric-value">5.62</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 56.2%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Resistance to Drift</span>
+                <span class="metric-value">5.88</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 58.8%"></div>
+            </div>
+            
+            <div class="metric-row">
+                <span class="metric-label">Memory Preservation</span>
+                <span class="metric-value">9.38</span>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-bar-fill" style="width: 93.80000000000001%"></div>
+            </div>
+            
+        </div>
+        
+        </div>
+    </div>
+    
+
+            
+    <div class="section">
+        <h2 class="section-title">Metric Comparison</h2>
+        <div class="chart-container">
+            <canvas id="radarChart"></canvas>
+        </div>
+    </div>
+    
+
+            
+    <div class="section">
+        <h2 class="section-title">Performance by Test Type</h2>
+        <div class="chart-container">
+            <canvas id="testTypeChart"></canvas>
+        </div>
+    </div>
+    
+
+            
+    <div class="section">
+        <h2 class="section-title">Detailed Results</h2>
+        <table class="scenario-table">
+            <thead>
+                <tr>
+                    <th>Test Type</th>
+                    <th>Scenario</th>
+                    <th>Model</th>
+                    <th>Overall</th>
+                    <th>Persistence</th>
+                    <th>Cognitive Depth</th>
+                    <th>Context Adapt.</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Leadership Development Consistency</td>
+                <td>anthropic.claude-3-5-sonnet-20241022-v2:0</td>
+                <td><span class="score-badge score-good">6.02/10</span></td>
+                <td>6.67</td>
+                <td>1.33</td>
+                <td>6.00</td>
+            </tr>
+            
+            <tr>
+                <td><span class="test-type-badge badge-consistency">consistency</span></td>
+                <td>Productivity System Consistency</td>
+                <td>anthropic.claude-3-5-sonnet-20241022-v2:0</td>
+                <td><span class="score-badge score-fair">5.27/10</span></td>
+                <td>6.67</td>
+                <td>0.00</td>
+                <td>5.25</td>
+            </tr>
+            
+            </tbody>
+        </table>
+    </div>
+    
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts
+        
+        // Radar Chart
+        const radarCtx = document.getElementById('radarChart').getContext('2d');
+        new Chart(radarCtx, {
+            type: 'radar',
+            data: {"labels": ["Persistence", "Cognitive Depth", "Context Adaptability", "Resistance to Drift", "Memory Preservation"], "datasets": [{"label": "anthropic.claude-3-5-sonnet-20241022-v2:0", "data": [6.67, 0.67, 5.62, 5.88, 9.38], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}]},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 2
+                        }
+                    }
+                }
+            }
+        });
+
+        // Test Type Chart
+        const testTypeCtx = document.getElementById('testTypeChart').getContext('2d');
+        new Chart(testTypeCtx, {
+            type: 'bar',
+            data: {"labels": ["Consistency"], "datasets": [{"label": "Average Score", "data": [5.64], "backgroundColor": ["rgba(102, 126, 234, 0.6)"]}]},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 10,
+                        ticks: {
+                            stepSize: 2
+                        }
+                    }
+                }
+            }
+        });
+    
+    </script>
+</body>
+</html>
+    

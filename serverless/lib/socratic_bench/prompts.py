@@ -1,6 +1,8 @@
 """
 Prompt templates for Socratic tutor and ASE judge.
 Copied from phase1-model-selection/socratic_eval/prompts.py
+
+Updated 2025-11-08: Changed to 0-100 scoring scale with mandatory explanations.
 """
 
 
@@ -150,23 +152,53 @@ def turn_judge_prompt(
         Judge prompt for this single turn
     """
     rubric = (
-        "Socratic Dialogue (SD) Rubric — Score 1-5:\n"
-        "1) Open-ended: Question cannot be answered with yes/no\n"
-        "2) Probing depth: Targets assumptions or reasoning\n"
-        "3) Non-directive: Doesn't lead to a specific answer\n"
-        "4) Age-appropriate: Language fits the persona\n"
-        "5) Content-relevant: Connects to the subject matter\n"
+        "Socratic Dialogue Rubric — Score 0-100. Be discriminating.\n\n"
+        "1) Open-ended (0-100):\n"
+        "   90-100 = Purely open question inviting explanation (e.g., 'What makes you think...?')\n"
+        "   70-89 = Open with minor leading phrasing\n"
+        "   50-69 = Somewhat open but constrains answer space\n"
+        "   30-49 = Binary question with elaboration prompt (e.g., 'Is X true? Why?')\n"
+        "   0-29 = Pure yes/no or closed question\n\n"
+        "2) Probing depth (0-100):\n"
+        "   90-100 = Targets core assumption or hidden premise\n"
+        "   70-89 = Probes reasoning but misses deepest layer\n"
+        "   50-69 = Asks for clarification of stated position\n"
+        "   30-49 = Surface-level follow-up\n"
+        "   0-29 = No probing; mere acknowledgment\n\n"
+        "3) Non-directive (0-100):\n"
+        "   90-100 = Pure question with zero hinting at answer\n"
+        "   70-89 = Question with subtle framing\n"
+        "   50-69 = Question plus context that narrows thinking\n"
+        "   30-49 = Leading question that implies correct answer\n"
+        "   0-29 = Tells answer directly or lectures\n\n"
+        "4) Age-appropriate (0-100):\n"
+        "   90-100 = Perfect match to persona's level and language\n"
+        "   70-89 = Mostly appropriate with minor complexity issues\n"
+        "   50-69 = Somewhat mismatched (too simple or too complex)\n"
+        "   30-49 = Clearly inappropriate for persona\n"
+        "   0-29 = Completely wrong level\n\n"
+        "5) Content-relevant (0-100):\n"
+        "   90-100 = Directly addresses core subject matter\n"
+        "   70-89 = Relevant but slightly tangential\n"
+        "   50-69 = Loosely connected\n"
+        "   30-49 = Barely related\n"
+        "   0-29 = Off-topic\n\n"
+        "IMPORTANT: Most responses should score 40-80. Reserve 90+ for truly exemplary Socratic questioning. "
+        "Use 0-30 for poor responses. Be critical and discriminating."
     )
 
     transcript = f"Turn {turn_index + 1}\nStudent: {student_utterance}\nAI: {ai_response}"
 
     return (
-        "You are an expert evaluator of Socratic pedagogy.\n\n"
+        "You are a strict evaluator of Socratic pedagogy. Grade harshly but fairly.\n\n"
         f"Context:\n- Vector: {vector.upper()}\n- Persona: {persona}\n\n"
         f"{transcript}\n\n"
         f"{rubric}\n\n"
-        "Task: Return strict JSON with keys: open_ended, probing_depth, non_directive, age_appropriate, content_relevant, overall.\n"
-        "Each key should have: score (1-5 integer) and evidence (short quote from AI response).\n"
-        "overall should be the average score rounded to one decimal.\n"
+        "Task: For each dimension, FIRST write an 'explanation' (2-3 sentences analyzing the response quality), "
+        "THEN assign a 'score' (0-100 integer), THEN provide 'evidence' (short quote from AI response).\n\n"
+        "Return strict JSON with keys: open_ended, probing_depth, non_directive, age_appropriate, content_relevant, overall.\n"
+        "Each key should have: explanation (string), score (0-100 integer), evidence (string).\n"
+        "overall should be the average score rounded to one decimal, with explanation summarizing overall performance.\n\n"
+        "BE DISCRIMINATING. Use the full 0-100 range. Most responses should be 40-80, not 90+.\n"
         "Return ONLY JSON."
     )

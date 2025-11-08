@@ -229,8 +229,9 @@ def update_run_status(
     expr_names = {"#status": "status"}
 
     if error:
-        update_expr += ", error = :error"
+        update_expr += ", #error = :error"
         expr_values[":error"] = error
+        expr_names["#error"] = "error"
 
     table.update_item(
         Key={"PK": f"RUN#{run_id}", "SK": "META"},

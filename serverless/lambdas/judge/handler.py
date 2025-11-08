@@ -150,7 +150,12 @@ def save_judge_result(
 
     # Extract key scores for DynamoDB
     scores = judge_result.scores or {}
-    overall_score = float(scores.get("overall", 0.0))
+    # Handle both old format (score as number) and new format (score as {"score": X, "evidence": "..."})
+    overall = scores.get("overall", 0.0)
+    if isinstance(overall, dict):
+        overall_score = float(overall.get("score", 0.0))
+    else:
+        overall_score = float(overall)
 
     # Save to DynamoDB
     table.put_item(

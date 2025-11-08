@@ -26,7 +26,7 @@ from .scorer import ContextGrowthScorer, TurnResult, OverallScore, compare_model
 
 # Import Bedrock utilities from parent module
 try:
-    from ..grader import call_bedrock_model, AWS_PROFILE, AWS_REGION
+    from ..bedrock_utils import call_bedrock_model, AWS_PROFILE, AWS_REGION
 except ImportError:
     print("Warning: Could not import Bedrock utilities. Using mock mode.")
 

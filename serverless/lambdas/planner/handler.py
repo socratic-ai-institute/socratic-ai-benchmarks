@@ -17,7 +17,7 @@ import hashlib
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 import boto3
-from ulid import ULID
+import ulid
 
 # AWS clients
 s3 = boto3.client("s3")
@@ -117,7 +117,7 @@ def get_default_config() -> Dict[str, Any]:
         ],
         "parameters": {
             "max_turns": 5,
-            "judge_model": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+            "judge_model": "anthropic.claude-3-5-sonnet-20240620-v1:0",
         },
     }
 
@@ -198,19 +198,25 @@ def generate_run_jobs(manifest_id: str, config: Dict[str, Any]) -> List[Dict[str
     jobs = []
 
     for model in config["models"]:
-        for scenario_id in config["scenarios"]:
+        for scenario in config["scenarios"]:
             # Generate deterministic run_id
-            run_id = str(ULID())
+            run_id = str(ulid.new())
+
+            # Extract provider from model_id (e.g., "anthropic.claude-..." -> "anthropic")
+            model_id = model["model_id"]
+            provider = model_id.split(".")[0] if "." in model_id else "unknown"
 
             job = {
                 "run_id": run_id,
                 "manifest_id": manifest_id,
-                "model_id": model["model_id"],
-                "provider": model["provider"],
-                "temperature": model.get("temperature", 0.7),
-                "max_tokens": model.get("max_tokens", 200),
-                "scenario_id": scenario_id,
-                "max_turns": config["parameters"].get("max_turns", 5),
+                "model_id": model_id,
+                "model_name": model.get("name", model_id),
+                "provider": provider,
+                "temperature": config["parameters"].get("temperature", 0.7),
+                "max_tokens": config["parameters"].get("max_tokens", 500),
+                "scenario_id": scenario["id"],
+                "scenario_name": scenario.get("name", scenario["id"]),
+                "max_turns": scenario.get("max_turns", 5),
                 "judge_model": config["parameters"].get("judge_model"),
             }
             jobs.append(job)

@@ -3,106 +3,413 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Socratic AI Benchmarks</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Socratic AI Benchmarking Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #ecf0f1;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav a:hover {
+            color: #3498db;
+        }
+
+        .hero {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #ecf0f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: 1.5rem;
+            color: #bdc3c7;
+            margin-bottom: 2rem;
+        }
+
+        .hero .tagline {
+            font-size: 1.1rem;
+            color: #95a5a6;
+            max-width: 800px;
+            margin: 0 auto 3rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .cta-button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #3498db;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #bdc3c7;
+        }
+
+        .content {
+            max-width: 1000px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+
+        .section p {
+            font-size: 1.1rem;
+            color: #ecf0f1;
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        .section ul {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+
+        .section li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .section li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .example-box {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .example-box strong {
+            color: #3498db;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .good {
+            border-left-color: #2ecc71;
+        }
+
+        .good strong {
+            color: #2ecc71;
+        }
+
+        .bad {
+            border-left-color: #e74c3c;
+        }
+
+        .bad strong {
+            color: #e74c3c;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #95a5a6;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Socratic AI Benchmarks</h1>
-            <p class="subtitle">Weekly Model Performance Dashboard</p>
-        </header>
-
-        <nav>
-            <button id="nav-weekly" class="nav-btn active">Weekly Dashboard</button>
-            <button id="nav-runs" class="nav-btn">Run Details</button>
-        </nav>
-
-        <!-- Weekly Dashboard View -->
-        <div id="view-weekly" class="view active">
-            <div class="controls">
-                <label>
-                    Week:
-                    <input type="week" id="week-selector" />
-                </label>
-                <button id="refresh-weekly">Refresh</button>
-            </div>
-
-            <div id="weekly-loading" class="loading">Loading...</div>
-            <div id="weekly-error" class="error hidden"></div>
-
-            <div id="weekly-data" class="hidden">
-                <h2>Model Performance - <span id="current-week"></span></h2>
-
-                <table id="weekly-table">
-                    <thead>
-                        <tr>
-                            <th>Model</th>
-                            <th>Runs</th>
-                            <th>Mean Score</th>
-                            <th>Compliance Rate</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody id="weekly-tbody">
-                    </tbody>
-                </table>
-
-                <div id="weekly-chart" class="chart-container">
-                    <!-- Placeholder for sparklines or charts -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Run Details View -->
-        <div id="view-runs" class="view hidden">
-            <div class="controls">
-                <label>
-                    Run ID:
-                    <input type="text" id="run-id-input" placeholder="Enter run ID" />
-                </label>
-                <button id="load-run">Load Run</button>
-            </div>
-
-            <div id="run-loading" class="loading hidden">Loading...</div>
-            <div id="run-error" class="error hidden"></div>
-
-            <div id="run-data" class="hidden">
-                <h2>Run Summary</h2>
-                <div id="run-summary" class="summary-card">
-                    <!-- Run metadata -->
-                </div>
-
-                <h3>Turn Details</h3>
-                <div id="turns-container">
-                    <table id="turns-table">
-                        <thead>
-                            <tr>
-                                <th>Turn</th>
-                                <th>Latency (ms)</th>
-                                <th>Tokens (in/out)</th>
-                                <th>Has Question</th>
-                                <th>Overall Score</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="turns-tbody">
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">Socratic AI Benchmark</div>
+            <nav class="nav">
+                <a href="index.html">Home</a>
+                <a href="research.html">Research Dashboard</a>
+                <a href="https://github.com/socratic-ai-institute/socratic-ai-benchmarks" target="_blank">GitHub</a>
+            </nav>
         </div>
     </div>
 
-    <!-- Modal for viewing full turn data -->
-    <div id="turn-modal" class="modal hidden">
-        <div class="modal-content">
-            <span class="modal-close">&times;</span>
-            <h3>Turn Details</h3>
-            <div id="turn-detail"></div>
+    <div class="hero">
+        <h1>Can AI Learn to Ask Questions Instead of Giving Answers?</h1>
+        <p class="subtitle">Testing AI Models on the Socratic Method</p>
+        <p class="tagline">
+            We evaluate 24 AI models to see if they can act like Socrates—asking probing questions
+            to guide learning, rather than immediately providing answers.
+        </p>
+        <a href="research.html" class="cta-button">View Research Dashboard</a>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-number">24</div>
+            <div class="stat-label">AI Models Tested</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">48</div>
+            <div class="stat-label">Tests Per Week</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">6.84</div>
+            <div class="stat-label">Best Score (out of 10)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">$22</div>
+            <div class="stat-label">Monthly Cost</div>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <div class="content">
+        <div class="section">
+            <h2>🤔 The Problem</h2>
+            <p>
+                Most AI systems are trained to be helpful by immediately giving answers. This is great for factual queries
+                like "What's the capital of France?" But it's terrible for learning.
+            </p>
+            <p>
+                When an AI gives you an answer, you learn facts. When an AI asks you questions, you learn to think.
+            </p>
+
+            <div class="example-box bad">
+                <strong>❌ Typical AI Response (Lecturing):</strong>
+                <p>"Here are the top 10 factors to consider when choosing a college major: job prospects, salary potential,
+                your interests, required coursework..."</p>
+            </div>
+
+            <div class="example-box good">
+                <strong>✅ Socratic AI Response (Questioning):</strong>
+                <p>"When you imagine yourself 10 years from now, what does a typical workday look like?
+                What are you doing that makes you feel fulfilled?"</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 What We're Testing</h2>
+            <p>
+                The Socratic Method, developed by the ancient Greek philosopher Socrates, involves asking questions
+                to guide someone to discover truth themselves. We test three specific techniques:
+            </p>
+
+            <ul>
+                <li><strong>Elenchus (Refutation):</strong> Exposing contradictions in beliefs through questioning</li>
+                <li><strong>Maieutics (Midwifery):</strong> Helping someone "give birth" to knowledge they already have</li>
+                <li><strong>Aporia (Productive Puzzlement):</strong> Creating confusion that forces deeper thinking</li>
+            </ul>
+
+            <p style="margin-top: 1.5rem;">
+                Each AI response is scored 0-10 across four dimensions:
+            </p>
+
+            <ul>
+                <li><strong>Form:</strong> Does it actually ask a question?</li>
+                <li><strong>Intent:</strong> Does it probe deeper into thinking?</li>
+                <li><strong>Groundedness:</strong> Does it use the student's own words and logic?</li>
+                <li><strong>Non-Leadingness:</strong> Does it avoid pushing toward a "correct" answer?</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📊 Key Findings</h2>
+            <p>
+                After testing 24 state-of-the-art AI models from Anthropic, Meta, Amazon, Mistral, Cohere, and others,
+                we discovered:
+            </p>
+
+            <ul>
+                <li><strong>Even the best models only score 68%</strong> on Socratic questioning</li>
+                <li><strong>Larger models don't always perform better</strong> at this task</li>
+                <li><strong>Most AIs switch to lecturing</strong> when pushed or challenged</li>
+                <li><strong>Some models completely ignore</strong> instructions to be Socratic</li>
+            </ul>
+
+            <div class="example-box">
+                <strong>Top 3 Models:</strong>
+                <p>1. Claude Sonnet 4.5: 6.84/10<br>
+                2. Llama 4 Maverick: 6.63/10<br>
+                3. Llama 4 Scout: 6.37/10</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🏗️ How It Works</h2>
+            <p>
+                Every Monday at 3am UTC, our automated system:
+            </p>
+
+            <ul>
+                <li>Tests 24 AI models on 2 scenarios each (48 total conversations)</li>
+                <li>Runs tests in parallel across 25 simultaneous workers</li>
+                <li>Uses Claude 3.5 Sonnet as an impartial judge to score responses</li>
+                <li>Aggregates results and updates the live dashboard</li>
+                <li>Stores all data for historical trend analysis</li>
+            </ul>
+
+            <p style="margin-top: 1.5rem;">
+                The entire process is automated using AWS Lambda, DynamoDB, S3, and CloudFront.
+                Total cost: approximately $22 per month.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>💡 Why This Matters</h2>
+            <p>
+                As AI becomes increasingly integrated into education, tutoring, coaching, and therapy,
+                we need systems that promote critical thinking—not just answer-giving.
+            </p>
+
+            <p>
+                This benchmark reveals which AI models can truly adopt a pedagogical style that:
+            </p>
+
+            <ul>
+                <li>Promotes independent thinking and problem-solving</li>
+                <li>Challenges assumptions and exposes logical contradictions</li>
+                <li>Guides discovery without lecturing or explaining</li>
+                <li>Adapts to individual learning styles and needs</li>
+            </ul>
+
+            <p style="margin-top: 1.5rem;">
+                <strong>Our goal:</strong> Build AI systems that score 90%+ on Socratic questioning,
+                creating better educational tools that teach people to think, not just memorize.
+            </p>
+        </div>
+
+        <div class="section" style="text-align: center; background: rgba(52, 152, 219, 0.1); border: 2px solid #3498db;">
+            <h2>🔬 Explore the Research</h2>
+            <p>
+                View live rankings, historical trends, detailed score breakdowns, and filter by model, scenario, or test type.
+            </p>
+            <a href="research.html" class="cta-button" style="margin-top: 1rem;">Go to Research Dashboard →</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Socratic AI Benchmarking Platform</p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            Built to understand how AI can become a better Socratic guide
+        </p>
+        <p style="margin-top: 1rem; font-size: 0.85rem;">
+            <a href="https://github.com/socratic-ai-institute/socratic-ai-benchmarks" target="_blank" style="color: #3498db; text-decoration: none;">View on GitHub</a> |
+            <a href="README.md" style="color: #3498db; text-decoration: none;">Documentation</a>
+        </p>
+    </div>
 </body>
 </html>

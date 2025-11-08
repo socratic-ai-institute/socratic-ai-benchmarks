@@ -22,6 +22,15 @@ from typing import Dict, Any, List
 from decimal import Decimal
 import boto3
 
+
+class DecimalEncoder(json.JSONEncoder):
+    """JSON encoder that handles DynamoDB Decimal types."""
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super().default(obj)
+
+
 # AWS clients
 s3 = boto3.client("s3")
 dynamodb = boto3.resource("dynamodb")
@@ -244,7 +253,7 @@ def materialize_run_json(
     s3.put_object(
         Bucket=BUCKET_NAME,
         Key=s3_key,
-        Body=json.dumps(curated, indent=2),
+        Body=json.dumps(curated, indent=2, cls=DecimalEncoder),
         ContentType="application/json",
     )
 

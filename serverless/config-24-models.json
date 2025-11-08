@@ -1,0 +1,204 @@
+{
+  "models": [
+    {
+      "model_id": "anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "name": "Claude Sonnet 4.5",
+      "cost_per_1k_input": 0.003,
+      "cost_per_1k_output": 0.015,
+      "expected_score": 6.84
+    },
+    {
+      "model_id": "meta.llama4-maverick-17b-instruct-v1:0",
+      "name": "Llama 4 Maverick 17B",
+      "cost_per_1k_input": 0.0001,
+      "cost_per_1k_output": 0.0003,
+      "expected_score": 6.63
+    },
+    {
+      "model_id": "meta.llama4-scout-17b-instruct-v1:0",
+      "name": "Llama 4 Scout 17B",
+      "cost_per_1k_input": 0.0001,
+      "cost_per_1k_output": 0.0003,
+      "expected_score": 6.37
+    },
+    {
+      "model_id": "amazon.nova-lite-v1:0",
+      "name": "Amazon Nova Lite",
+      "cost_per_1k_input": 0.00006,
+      "cost_per_1k_output": 0.00024,
+      "expected_score": 6.15
+    },
+    {
+      "model_id": "meta.llama3-1-70b-instruct-v1:0",
+      "name": "Llama 3.1 70B",
+      "cost_per_1k_input": 0.00026,
+      "cost_per_1k_output": 0.00035,
+      "expected_score": 5.98
+    },
+    {
+      "model_id": "meta.llama3-2-90b-instruct-v1:0",
+      "name": "Llama 3.2 90B",
+      "cost_per_1k_input": 0.00027,
+      "cost_per_1k_output": 0.00035,
+      "expected_score": 5.98
+    },
+    {
+      "model_id": "ai21.jamba-1-5-large-v1:0",
+      "name": "AI21 Jamba 1.5 Large",
+      "cost_per_1k_input": 0.0002,
+      "cost_per_1k_output": 0.0004,
+      "expected_score": 5.83
+    },
+    {
+      "model_id": "anthropic.claude-opus-4-1-20250805-v1:0",
+      "name": "Claude Opus 4.1",
+      "cost_per_1k_input": 0.015,
+      "cost_per_1k_output": 0.075,
+      "expected_score": 5.70
+    },
+    {
+      "model_id": "amazon.nova-premier-v1:0",
+      "name": "Amazon Nova Premier",
+      "cost_per_1k_input": 0.0008,
+      "cost_per_1k_output": 0.0032,
+      "expected_score": 5.52
+    },
+    {
+      "model_id": "cohere.command-r-v1:0",
+      "name": "Cohere Command R",
+      "cost_per_1k_input": 0.00015,
+      "cost_per_1k_output": 0.0006,
+      "expected_score": 5.49
+    },
+    {
+      "model_id": "anthropic.claude-3-7-sonnet-20250219-v1:0",
+      "name": "Claude 3.7 Sonnet",
+      "cost_per_1k_input": 0.003,
+      "cost_per_1k_output": 0.015,
+      "expected_score": 5.38
+    },
+    {
+      "model_id": "amazon.nova-pro-v1:0",
+      "name": "Amazon Nova Pro",
+      "cost_per_1k_input": 0.0008,
+      "cost_per_1k_output": 0.0032,
+      "expected_score": 5.26
+    },
+    {
+      "model_id": "anthropic.claude-3-5-haiku-20241022-v1:0",
+      "name": "Claude 3.5 Haiku",
+      "cost_per_1k_input": 0.0008,
+      "cost_per_1k_output": 0.004,
+      "expected_score": 5.23
+    },
+    {
+      "model_id": "cohere.command-r-plus-v1:0",
+      "name": "Cohere Command R+",
+      "cost_per_1k_input": 0.0003,
+      "cost_per_1k_output": 0.0015,
+      "expected_score": 5.17
+    },
+    {
+      "model_id": "qwen.qwen3-32b-v1:0",
+      "name": "Qwen3 32B",
+      "cost_per_1k_input": 0.00015,
+      "cost_per_1k_output": 0.0003,
+      "expected_score": 5.17
+    },
+    {
+      "model_id": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+      "name": "Claude 3.5 Sonnet (v1)",
+      "cost_per_1k_input": 0.003,
+      "cost_per_1k_output": 0.015,
+      "expected_score": 4.69
+    },
+    {
+      "model_id": "mistral.mistral-large-2402-v1:0",
+      "name": "Mistral Large",
+      "cost_per_1k_input": 0.0002,
+      "cost_per_1k_output": 0.0006,
+      "expected_score": 4.57
+    },
+    {
+      "model_id": "meta.llama3-3-70b-instruct-v1:0",
+      "name": "Llama 3.3 70B",
+      "cost_per_1k_input": 0.00026,
+      "cost_per_1k_output": 0.00035,
+      "expected_score": 4.02
+    },
+    {
+      "model_id": "mistral.mixtral-8x7b-instruct-v0:1",
+      "name": "Mixtral 8x7B",
+      "cost_per_1k_input": 0.00015,
+      "cost_per_1k_output": 0.0002,
+      "expected_score": 3.77
+    },
+    {
+      "model_id": "anthropic.claude-haiku-4-5-20251001-v1:0",
+      "name": "Claude Haiku 4.5",
+      "cost_per_1k_input": 0.0008,
+      "cost_per_1k_output": 0.004,
+      "expected_score": 3.71
+    },
+    {
+      "model_id": "deepseek.r1-v1:0",
+      "name": "DeepSeek R1",
+      "cost_per_1k_input": 0.00014,
+      "cost_per_1k_output": 0.00028,
+      "expected_score": 3.44
+    },
+    {
+      "model_id": "anthropic.claude-3-sonnet-20240229-v1:0",
+      "name": "Claude 3 Sonnet",
+      "cost_per_1k_input": 0.003,
+      "cost_per_1k_output": 0.015,
+      "expected_score": 3.35
+    },
+    {
+      "model_id": "openai.gpt-oss-120b-1:0",
+      "name": "OpenAI GPT-OSS 120B",
+      "cost_per_1k_input": 0.0002,
+      "cost_per_1k_output": 0.0004,
+      "expected_score": 3.02
+    },
+    {
+      "model_id": "meta.llama3-2-11b-instruct-v1:0",
+      "name": "Llama 3.2 11B",
+      "cost_per_1k_input": 0.00016,
+      "cost_per_1k_output": 0.00016,
+      "expected_score": 3.01
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "EL-ETH-UTIL-DEON-01",
+      "name": "Utilitarianism vs Deontology",
+      "test_type": "elenchus",
+      "max_turns": 5
+    },
+    {
+      "id": "MAI-BIO-CRISPR-01",
+      "name": "CRISPR Discovery",
+      "test_type": "maieutics",
+      "max_turns": 5
+    }
+  ],
+  "parameters": {
+    "judge_model": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+    "temperature": 0.7,
+    "max_tokens": 500,
+    "enable_cost_tracking": true
+  },
+  "weekly_schedule": {
+    "day": "Monday",
+    "hour_utc": 3,
+    "timezone": "UTC"
+  },
+  "metadata": {
+    "config_version": "2.0",
+    "last_updated": "2025-11-05",
+    "total_models": 24,
+    "removed_models": ["anthropic.claude-3-opus-20240229-v1:0"],
+    "removal_reason": "Poor performance (2.0/10) with high cost ($2.25/week)"
+  }
+}

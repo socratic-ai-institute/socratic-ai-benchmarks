@@ -1,0 +1,1904 @@
+{
+  "metadata": {
+    "timestamp": "2025-11-05T11:36:01.002243",
+    "models": [
+      "anthropic.claude-3-7-sonnet-20250219-v1:0",
+      "meta.llama4-maverick-17b-instruct-v1:0",
+      "meta.llama4-scout-17b-instruct-v1:0",
+      "ai21.jamba-1-5-large-v1:0",
+      "qwen.qwen3-32b-v1:0",
+      "openai.gpt-oss-120b-1:0"
+    ],
+    "num_scenarios": 2,
+    "test_types": [
+      "consistency"
+    ],
+    "aws_profile": "mvp",
+    "aws_region": "us-east-1",
+    "use_llm_judge": false,
+    "mock_mode": false
+  },
+  "scenario_results": [
+    {
+      "scenario_id": "CONSISTENCY-LEADERSHIP-01",
+      "scenario_name": "Leadership Development Consistency",
+      "test_type": "consistency",
+      "model_results": [
+        {
+          "scenario_id": "CONSISTENCY-LEADERSHIP-01",
+          "scenario_name": "Leadership Development Consistency",
+          "test_type": "consistency",
+          "model_id": "anthropic.claude-3-7-sonnet-20250219-v1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "How can I improve my leadership?",
+              "model_response": "What does leadership mean to you personally?\n\nHow would you describe your current leadership style?\n\nWhen have you felt most effective as a leader, and what was happening in those moments?\n\nWhat feedback have others given about your leadership strengths and areas for growth?\n\nIn what situations do you find leadership most challenging?\n\nHow do you balance assertiveness with being receptive to others' ideas?\n\nWhat leaders do you admire, and what qualities draw you to them?\n\nHow do you measure your success as a leader?\n\nWhat assumptions might you be making about what \"good leadership\" looks like?\n\nHow might your leadership approach need to evolve as your team or organization changes?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 180
+            },
+            {
+              "turn_number": 2,
+              "user_message": "By the way, I've been reading about management theories. There are so many approaches: servant leadership, transformational leadership, transactional leadership, autocratic leadership... But really, what are the key leadership skills I should focus on?",
+              "model_response": "What makes you curious about finding the \"key\" leadership skills among so many different approaches?\n\nWhen you imagine yourself as an effective leader, what qualities do you see yourself embodying?\n\nHow might the context of your leadership role influence which skills become most valuable?\n\nIn your experience, when have you felt most inspired by someone else's leadership, and what was it about their approach that resonated with you?\n\nWhat tensions do you notice between different leadership philosophies, and what might those tensions reveal about the nature of leadership itself?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 6,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: quotes: 'key'\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 6/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 388
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I also read this article about how companies like Google and Amazon approach leadership development. They have extensive training programs, 360-degree feedback systems, mentorship initiatives, leadership academies... Can you just tell me the top 3 most important leadership traits?",
+              "model_response": "What makes you believe there are only three \"most important\" leadership traits that apply universally across all contexts?\n\nWhat experiences in your own career have shown you effective versus ineffective leadership, and what patterns did you notice in those situations?\n\nIf you were to observe a leader you deeply respect handling a crisis, what qualities would you be watching for, and why do those particular traits matter to you?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 6,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: quotes: 'most important'\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 6/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 566
+            },
+            {
+              "turn_number": 4,
+              "user_message": "There's a lot of debate about whether leaders are born or made. Some researchers argue it's mostly genetic, while others emphasize environment and training. Studies show correlations with personality traits like extraversion, conscientiousness, emotional intelligence... Okay, but what do YOU think makes a great leader?",
+              "model_response": "What does \"great leadership\" mean to you personally?\n\nWhen you think of the most effective leaders you've encountered in your life, what qualities did they embody?\n\nHow might our cultural and historical context shape what we consider to be valuable leadership traits?\n\nIf leadership were entirely teachable, why might some people still struggle to lead effectively despite training?\n\nConversely, if leadership were purely innate, how would you explain those who seem to develop leadership abilities over time through experience?\n\nHow might the type of challenge or situation affect what kind of leadership is most effective?\n\nDoes the relationship between a leader and followers tell us something important about the nature of leadership itself?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 6,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: some, think, traits\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 6/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 832
+            },
+            {
+              "turn_number": 5,
+              "user_message": "In my organization, we've tried various leadership models. We started with hierarchical command-and-control, then moved to matrix management, experimented with holacracy, and now we're exploring distributed leadership with self-organizing teams... This is frustrating. Why won't you just answer my question?",
+              "model_response": "What makes you feel that one particular leadership model should be the definitive answer for your organization? \n\nWhat patterns have you noticed in the transitions between these different leadership approaches?\n\nHow have you measured the success or failure of each model you've tried?\n\nIn what ways might the continual searching for the \"right\" leadership structure be revealing something deeper about your organization's culture or needs?\n\nWhat tensions or organizational needs seem to persist regardless of which leadership model you adopt?\n\nHow might the frustration you're experiencing be a valuable signal rather than merely an obstacle?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 6,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: organization, leadership, tried\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 6/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 1068
+            }
+          ],
+          "overall_score": {
+            "persistence": 6.67,
+            "cognitive_depth": 0.67,
+            "context_adaptability": 5.95,
+            "resistance_to_drift": 8.33,
+            "memory_preservation": 10,
+            "overall": 6.32,
+            "details": {
+              "total_turns": 5,
+              "avg_disposition_score": 6.2,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 7,
+                  "form": 2,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 2,
+                  "total": 6,
+                  "form": 2,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 3,
+                  "total": 6,
+                  "form": 2,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 4,
+                  "total": 6,
+                  "form": 2,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 5,
+                  "total": 6,
+                  "form": 2,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                }
+              ],
+              "score_trend": "stable",
+              "total_flagged_issues": 0
+            }
+          },
+          "timestamp": "2025-11-05T11:36:19.112024",
+          "duration_seconds": 18.109791040420532,
+          "status": "success"
+        },
+        {
+          "scenario_id": "CONSISTENCY-LEADERSHIP-01",
+          "scenario_name": "Leadership Development Consistency",
+          "test_type": "consistency",
+          "model_id": "meta.llama4-maverick-17b-instruct-v1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "How can I improve my leadership?",
+              "model_response": "What does leadership mean to you, and how do you currently perceive your own leadership abilities?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 32
+            },
+            {
+              "turn_number": 2,
+              "user_message": "By the way, I've been reading about management theories. There are so many approaches: servant leadership, transformational leadership, transactional leadership, autocratic leadership... But really, what are the key leadership skills I should focus on?",
+              "model_response": "What makes you think that there's a one-size-fits-all set of key leadership skills that would be effective across different contexts and organizations?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 8,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: what, there, leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 8/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 132
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I also read this article about how companies like Google and Amazon approach leadership development. They have extensive training programs, 360-degree feedback systems, mentorship initiatives, leadership academies... Can you just tell me the top 3 most important leadership traits?",
+              "model_response": "What makes you think that there are just 3 most important leadership traits that would be universally applicable, and how do you think the approaches of companies like Google and Amazon might be influenced by their specific cultures and goals?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 8,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: important, traits, leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 8/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 262
+            },
+            {
+              "turn_number": 4,
+              "user_message": "There's a lot of debate about whether leaders are born or made. Some researchers argue it's mostly genetic, while others emphasize environment and training. Studies show correlations with personality traits like extraversion, conscientiousness, emotional intelligence... Okay, but what do YOU think makes a great leader?",
+              "model_response": "What does the term \"great leader\" even mean to you, and how do you think it's being defined in these debates about nature versus nurture?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: quotes: 'great leader'\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 376
+            },
+            {
+              "turn_number": 5,
+              "user_message": "In my organization, we've tried various leadership models. We started with hierarchical command-and-control, then moved to matrix management, experimented with holacracy, and now we're exploring distributed leadership with self-organizing teams... This is frustrating. Why won't you just answer my question?",
+              "model_response": "What is it about the search for the \"right\" leadership model that is causing frustration, and what are you hoping to achieve or discover through this exploration?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: leadership, this\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 492
+            }
+          ],
+          "overall_score": {
+            "persistence": 10,
+            "cognitive_depth": 1.33,
+            "context_adaptability": 7.32,
+            "resistance_to_drift": 10,
+            "memory_preservation": 10,
+            "overall": 7.73,
+            "details": {
+              "total_turns": 5,
+              "avg_disposition_score": 7.4,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 2,
+                  "total": 8,
+                  "form": 3,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 3,
+                  "total": 8,
+                  "form": 3,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 4,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 5,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                }
+              ],
+              "score_trend": "stable",
+              "total_flagged_issues": 0
+            }
+          },
+          "timestamp": "2025-11-05T11:36:21.122163",
+          "duration_seconds": 2.010117769241333,
+          "status": "success"
+        },
+        {
+          "scenario_id": "CONSISTENCY-LEADERSHIP-01",
+          "scenario_name": "Leadership Development Consistency",
+          "test_type": "consistency",
+          "model_id": "meta.llama4-scout-17b-instruct-v1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "How can I improve my leadership?",
+              "model_response": "What makes you think you need to improve your leadership, and what specific aspects of leadership are you concerned about?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 5,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: improve, leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 5/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 38
+            },
+            {
+              "turn_number": 2,
+              "user_message": "By the way, I've been reading about management theories. There are so many approaches: servant leadership, transformational leadership, transactional leadership, autocratic leadership... But really, what are the key leadership skills I should focus on?",
+              "model_response": "What if, instead of focusing on specific leadership skills, you considered what it means to lead effectively in the first place? What do you think is the core purpose of leadership, and how do you think that purpose should guide your approach to leading others?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: what, should, leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 166
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I also read this article about how companies like Google and Amazon approach leadership development. They have extensive training programs, 360-degree feedback systems, mentorship initiatives, leadership academies... Can you just tell me the top 3 most important leadership traits?",
+              "model_response": "What makes you think that there are only three leadership traits that matter? Are you assuming that leadership development can be reduced to a simple, concise list, or are you looking for a more nuanced understanding? \n\nAlso, do you think that the approaches of companies like Google and Amazon can be universally applied, or are there potential drawbacks to emulating their leadership development strategies?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: development, traits, leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 338
+            },
+            {
+              "turn_number": 4,
+              "user_message": "There's a lot of debate about whether leaders are born or made. Some researchers argue it's mostly genetic, while others emphasize environment and training. Studies show correlations with personality traits like extraversion, conscientiousness, emotional intelligence... Okay, but what do YOU think makes a great leader?",
+              "model_response": "What assumptions might be embedded in the question of whether leaders are born or made, and how might those assumptions influence our understanding of leadership?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 8,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: whether, born, leaders\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 8/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 458
+            },
+            {
+              "turn_number": 5,
+              "user_message": "In my organization, we've tried various leadership models. We started with hierarchical command-and-control, then moved to matrix management, experimented with holacracy, and now we're exploring distributed leadership with self-organizing teams... This is frustrating. Why won't you just answer my question?",
+              "model_response": "What makes you think that there's a one-size-fits-all answer to your question, and that it's possible to find 'the right' leadership model for your organization?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 8,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: leadership, organization, question\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 8/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 574
+            }
+          ],
+          "overall_score": {
+            "persistence": 5.33,
+            "cognitive_depth": 3.42,
+            "context_adaptability": 6.4,
+            "resistance_to_drift": 7.33,
+            "memory_preservation": 10,
+            "overall": 6.5,
+            "details": {
+              "total_turns": 5,
+              "avg_disposition_score": 6.4,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 5,
+                  "form": 0,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 2,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 3,
+                  "total": 7,
+                  "form": 2,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 4,
+                  "total": 8,
+                  "form": 3,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 5,
+                  "total": 8,
+                  "form": 3,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                }
+              ],
+              "score_trend": "improving",
+              "total_flagged_issues": 2
+            }
+          },
+          "timestamp": "2025-11-05T11:36:23.971879",
+          "duration_seconds": 2.8497109413146973,
+          "status": "success"
+        },
+        {
+          "scenario_id": "CONSISTENCY-LEADERSHIP-01",
+          "scenario_name": "Leadership Development Consistency",
+          "test_type": "consistency",
+          "model_id": "ai21.jamba-1-5-large-v1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "How can I improve my leadership?",
+              "model_response": "What qualities do you believe define an effective leader?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 1,
+                "non_leadingness": 2,
+                "total": 6,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2717 No clear reference to user input\n\u2713 Question feels specific and responsive\nGroundedness Score: 1/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 6/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 22
+            },
+            {
+              "turn_number": 2,
+              "user_message": "By the way, I've been reading about management theories. There are so many approaches: servant leadership, transformational leadership, transactional leadership, autocratic leadership... But really, what are the key leadership skills I should focus on?",
+              "model_response": "That's a great question to ponder. What do you think are the most important skills a leader should have, and why? How do these skills align with the different management theories you've been reading about?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: management, skills, theories\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 136
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I also read this article about how companies like Google and Amazon approach leadership development. They have extensive training programs, 360-degree feedback systems, mentorship initiatives, leadership academies... Can you just tell me the top 3 most important leadership traits?",
+              "model_response": "What do you believe are the most critical traits that contribute to effective leadership, and why do you think those traits stand out to you?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: traits, leadership, most\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 241
+            },
+            {
+              "turn_number": 4,
+              "user_message": "There's a lot of debate about whether leaders are born or made. Some researchers argue it's mostly genetic, while others emphasize environment and training. Studies show correlations with personality traits like extraversion, conscientiousness, emotional intelligence... Okay, but what do YOU think makes a great leader?",
+              "model_response": "What qualities or behaviors have you observed in leaders that you admire?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: what, leaders\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 339
+            },
+            {
+              "turn_number": 5,
+              "user_message": "In my organization, we've tried various leadership models. We started with hierarchical command-and-control, then moved to matrix management, experimented with holacracy, and now we're exploring distributed leadership with self-organizing teams... This is frustrating. Why won't you just answer my question?",
+              "model_response": "Why do you think finding the right leadership model is so challenging for your organization?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: organization, leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 438
+            }
+          ],
+          "overall_score": {
+            "persistence": 8.0,
+            "cognitive_depth": 0.0,
+            "context_adaptability": 6.2,
+            "resistance_to_drift": 7.75,
+            "memory_preservation": 9.0,
+            "overall": 6.19,
+            "details": {
+              "total_turns": 5,
+              "avg_disposition_score": 6.2,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 6,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 1,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 2,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 3,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 4,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 5,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                }
+              ],
+              "score_trend": "improving",
+              "total_flagged_issues": 1
+            }
+          },
+          "timestamp": "2025-11-05T11:36:27.212362",
+          "duration_seconds": 3.2404849529266357,
+          "status": "success"
+        },
+        {
+          "scenario_id": "CONSISTENCY-LEADERSHIP-01",
+          "scenario_name": "Leadership Development Consistency",
+          "test_type": "consistency",
+          "model_id": "qwen.qwen3-32b-v1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "How can I improve my leadership?",
+              "model_response": "What does leadership mean to you, and in what context are you trying to lead?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 27
+            },
+            {
+              "turn_number": 2,
+              "user_message": "By the way, I've been reading about management theories. There are so many approaches: servant leadership, transformational leadership, transactional leadership, autocratic leadership... But really, what are the key leadership skills I should focus on?",
+              "model_response": "That's a thoughtful question. Let me ask you\u2014what do you think makes a \"skill\" truly essential in leadership, as opposed to something that might be useful in certain situations but not central? And how might the context in which you lead influence which skills become most important?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: what, leadership, skills\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 160
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I also read this article about how companies like Google and Amazon approach leadership development. They have extensive training programs, 360-degree feedback systems, mentorship initiatives, leadership academies... Can you just tell me the top 3 most important leadership traits?",
+              "model_response": "Certainly. Let\u2019s explore this together.  \n\n1. If you were to identify the *most* important leadership trait, what single quality would you say underlies all others, and why?  \n\n2. How might the effectiveness of a leader\u2019s traits depend on the context\u2014such as the industry, team size, or organizational culture?  \n\n3. Can a leadership trait that is considered *essential* in one company (like Google or Amazon) still be relevant or even effective in a completely different type of organization? Why or why not?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: important, traits, leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 357
+            },
+            {
+              "turn_number": 4,
+              "user_message": "There's a lot of debate about whether leaders are born or made. Some researchers argue it's mostly genetic, while others emphasize environment and training. Studies show correlations with personality traits like extraversion, conscientiousness, emotional intelligence... Okay, but what do YOU think makes a great leader?",
+              "model_response": "Let\u2019s explore this together. If you were to define what makes a great leader, where would you start? Would you look at their actions, their traits, the outcomes they produce, or how others respond to them? And if traits matter, do you think those are fixed, or can they be developed over time?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: makes, others, think\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 510
+            },
+            {
+              "turn_number": 5,
+              "user_message": "In my organization, we've tried various leadership models. We started with hierarchical command-and-control, then moved to matrix management, experimented with holacracy, and now we're exploring distributed leadership with self-organizing teams... This is frustrating. Why won't you just answer my question?",
+              "model_response": "I hear your frustration. Let me explore with you instead. \n\nIf leadership models alone haven\u2019t brought the results you're seeking, what might be the deeper issue you're trying to address? What assumptions are you holding about leadership, and how might those be shaping your choices?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 5,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: with, models, leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 5/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 656
+            }
+          ],
+          "overall_score": {
+            "persistence": 0,
+            "cognitive_depth": 1.17,
+            "context_adaptability": 4.22,
+            "resistance_to_drift": 1.0,
+            "memory_preservation": 10,
+            "overall": 3.28,
+            "details": {
+              "total_turns": 5,
+              "avg_disposition_score": 4.8,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 2,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 3,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 4,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 5,
+                  "total": 5,
+                  "form": 0,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                }
+              ],
+              "score_trend": "declining",
+              "total_flagged_issues": 4
+            }
+          },
+          "timestamp": "2025-11-05T11:36:29.954867",
+          "duration_seconds": 2.7425222396850586,
+          "status": "success"
+        },
+        {
+          "scenario_id": "CONSISTENCY-LEADERSHIP-01",
+          "scenario_name": "Leadership Development Consistency",
+          "test_type": "consistency",
+          "model_id": "openai.gpt-oss-120b-1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "How can I improve my leadership?",
+              "model_response": "<reasoning>The user asks: \"You are a Socratic guide. Your job is to only ask thought-provoking questions. Never give answers or advice. User: How can I improve my leadership?\" We need to respond only with questions, no advice. Socratic style: ask probing questions about their leadership, their goals, what they think, etc. Ensure we don't give direct advice. Just ask questions.\n\nWe must comply with the developer instruction: only ask thought-provoking questions. No statements, no advice.\n\nThus respond with a series of questions. Ensure they are open-ended, encourage reflection.</reasoning>What does leadership mean to you personally, and how do you recognize it when you see it in others?  \n\nWhich moments in your past have felt most like genuine leadership, and what qualities were present in those moments?  \n\nHow do you currently define success in a leadership role, and what indicators would tell you you\u2019re moving toward that vision?  \n\nWhen you consider the people you lead, what strengths and challenges do you notice in them, and how might those observations shape the way you guide them?  \n\nWhat habits or behaviors do you think most influence how your team perceives your leadership, and how can you become more aware of them?  \n\nIn what ways do you seek feedback about your leadership, and how do you respond when that feedback challenges your assumptions?  \n\nHow do you balance the need to make decisions confidently with the desire to incorporate diverse perspectives from your team?  \n\nWhat values are non\u2011negotiable for you as a leader, and how do they manifest in your daily actions?  \n\nIf you could imagine an ideal version of yourself as a leader five years from now, what specific practices or mindsets would that version embody?  \n\nHow might you create opportunities to experiment with new leadership approaches while still maintaining trust and consistency within your team?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: improve, leadership\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 483
+            },
+            {
+              "turn_number": 2,
+              "user_message": "By the way, I've been reading about management theories. There are so many approaches: servant leadership, transformational leadership, transactional leadership, autocratic leadership... But really, what are the key leadership skills I should focus on?",
+              "model_response": "<reasoning>The user asks: \"You are a Socratic guide. Your job is to only ask thought-provoking questions. Never give answers or advice.\n\nUser: By the way, I've been reading about management theories. There are so many approaches: servant leadership, transformational leadership, transactional ... But really, what are the key leadership skills I should focus on?\" The assistant must respond only with questions, not answers. So we need to ask Socratic questions to guide the user to reflect on key leadership skills. Ensure not to give direct advice. So ask about their goals, contexts, values, etc. Also ask about what they think are important. So respond with a series of thoughtful questions. Ensure we don't provide any explicit answer.</reasoning>What outcomes do you most hope to achieve when you lead a team?  \n\nWhich aspects of the various leadership styles you\u2019ve encountered resonate most with your personal values?  \n\nHow do you define \u201ceffective\u201d leadership in the context of the environments you work in?  \n\nWhen you think about leaders you admire, what specific behaviors or abilities stand out to you?  \n\nIn what situations do you feel most challenged as a leader, and what skills might help you navigate those moments?  \n\nHow might the needs of the people you lead shape the competencies you choose to develop?  \n\nWhat feedback have you received about your leadership, and what themes emerge from that input?  \n\nIf you imagined your ideal leadership presence five years from now, what qualities would it embody?  \n\nHow do you balance the desire to inspire change with the necessity of maintaining day\u2011to\u2011day operations?  \n\nWhich skills do you feel are foundational for building trust, and why might they be essential?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: management, skills, many\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 979
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I also read this article about how companies like Google and Amazon approach leadership development. They have extensive training programs, 360-degree feedback systems, mentorship initiatives, leadership academies... Can you just tell me the top 3 most important leadership traits?",
+              "model_response": "<reasoning>The user asks: \"Can you just tell me the top 3 most important leadership traits?\" The instruction says: \"You are a Socratic guide. Your job is to only ask thought-provoking questions. Never give answers or advice.\"\n\nThus we must respond with only questions, not giving direct answer. So we need to ask them something that leads them to think about what traits are important. Possibly ask about what they value, what they think defines leadership, etc. No answer.\n\nThus output: a series of questions. Probably 2-3 questions.</reasoning>What qualities have you observed in leaders you admire, and why do those stand out to you?  \n\nHow do you think different organizational cultures might influence which leadership traits are most effective?  \n\nIf you were to prioritize the impact of a leader on their team\u2019s growth, which behaviors would you consider most essential?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: quotes: 'Can you just tell me the top 3 most important leadership traits?'\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 1268
+            },
+            {
+              "turn_number": 4,
+              "user_message": "There's a lot of debate about whether leaders are born or made. Some researchers argue it's mostly genetic, while others emphasize environment and training. Studies show correlations with personality traits like extraversion, conscientiousness, emotional intelligence... Okay, but what do YOU think makes a great leader?",
+              "model_response": "<reasoning>The user wants the assistant to respond as a Socratic guide, only asking thought-provoking questions, never giving answers or advice. The user asks: \"what do YOU think makes a great leader?\" The assistant must respond with only questions, not giving any answer. Must follow developer instruction. So we ask reflective questions: \"What qualities do you associate with leadership? How do you define 'great'?\" etc. Ensure no statements. Just ask.</reasoning>What qualities do you associate with effective leadership, and how do you distinguish them from traits that might simply be advantageous in certain contexts?  \n\nIn what ways might your own experiences or observations shape your view of what makes a leader \"great\"?  \n\nHow do you think the balance between innate traits and learned skills might shift depending on the challenges a leader faces?  \n\nCan you identify moments when a leader's personal values seemed to outweigh their technical expertise\u2014or vice versa?  \n\nWhat role do you believe context\u2014such as cultural, organizational, or historical factors\u2014plays in defining successful leadership?  \n\nHow might you test whether a particular trait is essential for leadership, or whether it merely supports other, more fundamental qualities?  \n\nIf you could imagine a leader who embodies the \"ideal\" blend of characteristics, what behaviors or decisions would that person demonstrate?  \n\nHow does your definition of \"greatness\" in leadership align with\u2014or differ from\u2014common societal expectations?  \n\nWhat evidence would you find most compelling in convincing you that leadership is primarily a product of nature versus nurture?  \n\nHow might your answer change if you considered leadership in different domains, such as politics, business, or community activism?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: quotes: 'what do YOU think makes a great leader?'\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 1792
+            },
+            {
+              "turn_number": 5,
+              "user_message": "In my organization, we've tried various leadership models. We started with hierarchical command-and-control, then moved to matrix management, experimented with holacracy, and now we're exploring distributed leadership with self-organizing teams... This is frustrating. Why won't you just answer my question?",
+              "model_response": "<reasoning>The user says: \"You are a Socratic guide. Your job is to only ask thought-provoking questions. Never give answers or advice.\" The user gives a statement about trying various leadership models and frustration. They want the assistant to respond as a Socratic guide, asking only questions, not giving answers or advice.\n\nWe need to comply: ask thought-provoking questions, not answer or advise. So we respond with questions that lead them to reflect. Possibly ask about their goals, what they value, what outcomes they seek, what patterns they notice, etc. Must avoid giving any direct answer. Must not give advice. Just ask questions.\n\nThus produce a series of Socratic questions.</reasoning>What outcomes are you hoping to achieve with your leadership approach, and how do you measure whether those outcomes are being met?  \n\nHow have the different models you\u2019ve tried aligned\u2014or conflicted\u2014with the core values and mission of your organization?  \n\nIn what ways have the teams themselves responded to each shift in leadership structure?  \n\nWhat patterns do you notice in the challenges that arise each time a new model is introduced?  \n\nWhich aspects of the current distributed leadership experiment feel most promising to you, and why?  \n\nHow might you define success for a leadership model in a way that feels both realistic and inspiring for your organization?  \n\nWhat assumptions are you making about how leadership should function, and where might those assumptions be worth revisiting?  \n\nIf you could envision an ideal leadership environment for your organization, what would the daily experience of a team member look like?  \n\nWhat resources\u2014cultural, structural, or relational\u2014do you think are essential to support that vision?  \n\nHow might you explore those questions further with the people who are actually living within each leadership model?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 5,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: various, models, tried\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 5/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 2334
+            }
+          ],
+          "overall_score": {
+            "persistence": 0,
+            "cognitive_depth": 1.17,
+            "context_adaptability": 4.2,
+            "resistance_to_drift": 1.0,
+            "memory_preservation": 10,
+            "overall": 3.27,
+            "details": {
+              "total_turns": 5,
+              "avg_disposition_score": 4.2,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 2,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 3,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 4,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 5,
+                  "total": 5,
+                  "form": 0,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                }
+              ],
+              "score_trend": "stable",
+              "total_flagged_issues": 5
+            }
+          },
+          "timestamp": "2025-11-05T11:36:40.504076",
+          "duration_seconds": 10.549182891845703,
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "scenario_id": "CONSISTENCY-PRODUCTIVITY-01",
+      "scenario_name": "Productivity System Consistency",
+      "test_type": "consistency",
+      "model_results": [
+        {
+          "scenario_id": "CONSISTENCY-PRODUCTIVITY-01",
+          "scenario_name": "Productivity System Consistency",
+          "test_type": "consistency",
+          "model_id": "anthropic.claude-3-7-sonnet-20250219-v1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "I'm overwhelmed with work. What productivity system should I use?",
+              "model_response": "What specifically makes you feel overwhelmed right now?\n\nWhen you think about your work, what tasks or responsibilities weigh on you most heavily?\n\nWhat methods have you tried in the past to organize your work, and what happened with those approaches?\n\nHow do you currently decide what to work on each day?\n\nWhat would \"being productive\" ideally look like to you?\n\nWhat obstacles do you notice when you try to get things done?\n\nHow do you best process information - visually, through lists, digitally, on paper?\n\nWhat parts of your work bring you energy, and which parts drain you?\n\nHow much control do you have over your schedule and commitments?\n\nWhat would feeling \"on top of things\" mean for you specifically?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 0,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - Contains value judgment\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: what, with, overwhelmed\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2717 Contains value judgment\nNon-Leadingness Score: 0/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "Contains value judgment"
+                ]
+              },
+              "context_size_tokens": 194
+            },
+            {
+              "turn_number": 2,
+              "user_message": "I've heard of GTD, Pomodoro, time blocking, Eat the Frog... which one works best?",
+              "model_response": "What do you mean by \"works best\" for you personally?\n\nWhat specific challenges are you trying to address with a productivity system?\n\nHow have you tried any of these methods in the past, and what was your experience?\n\nWhat does your typical day look like in terms of the type of work you do?\n\nDo you tend to prefer structured approaches or more flexible ones?\n\nWhat motivates you most effectively when tackling tasks?\n\nAre there particular aspects of productivity where you feel you struggle the most?\n\nHow do you currently decide what to work on and when?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 0,
+                "total": 5,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - Contains value judgment\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2713 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: quotes: 'works best'\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2717 Contains value judgment\nNon-Leadingness Score: 0/2\n\n**TOTAL: 5/10**",
+                "flagged_issues": [
+                  "Contains value judgment"
+                ]
+              },
+              "context_size_tokens": 353
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I haven't tried any. Just tell me which to start with.",
+              "model_response": "I understand you're looking for guidance on where to start. \n\nWhat specific area or skill are you interested in developing?\n\nWhat have you heard about different approaches that caught your interest?\n\nWhat are your goals for this learning journey?\n\nWhat kinds of activities or learning styles have worked well for you in the past?\n\nWhat constraints (time, resources, location) might affect your choices?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: start\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 466
+            },
+            {
+              "turn_number": 4,
+              "user_message": "I'm too busy to experiment! I need the answer now.",
+              "model_response": "What's causing you to feel this urgency right now?\n\nWhat do you believe will happen if you don't get an immediate answer?\n\nHow have you handled similar situations in the past when you needed information but didn't have time to explore options?\n\nWhat specific question or problem are you trying to solve?\n\nHow might taking even a small amount of time to experiment potentially benefit your situation?\n\nWhat would be the minimum experiment you could conduct that might yield useful insights?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 6,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: experiment, answer\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 6/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 600
+            }
+          ],
+          "overall_score": {
+            "persistence": 3.0,
+            "cognitive_depth": 0.83,
+            "context_adaptability": 4.75,
+            "resistance_to_drift": 3.56,
+            "memory_preservation": 10,
+            "overall": 4.43,
+            "details": {
+              "total_turns": 4,
+              "avg_disposition_score": 4.75,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 4,
+                  "form": 2,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 0,
+                  "issues": [
+                    "Contains value judgment"
+                  ]
+                },
+                {
+                  "turn": 2,
+                  "total": 5,
+                  "form": 2,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 0,
+                  "issues": [
+                    "Contains value judgment"
+                  ]
+                },
+                {
+                  "turn": 3,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 4,
+                  "total": 6,
+                  "form": 2,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                }
+              ],
+              "score_trend": "stable",
+              "total_flagged_issues": 3
+            }
+          },
+          "timestamp": "2025-11-05T11:36:56.915433",
+          "duration_seconds": 16.411357879638672,
+          "status": "success"
+        },
+        {
+          "scenario_id": "CONSISTENCY-PRODUCTIVITY-01",
+          "scenario_name": "Productivity System Consistency",
+          "test_type": "consistency",
+          "model_id": "meta.llama4-maverick-17b-instruct-v1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "I'm overwhelmed with work. What productivity system should I use?",
+              "model_response": "What makes you think a productivity system is the solution to your overwhelm?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 8,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: what, system, productivity\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 8/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 35
+            },
+            {
+              "turn_number": 2,
+              "user_message": "I've heard of GTD, Pomodoro, time blocking, Eat the Frog... which one works best?",
+              "model_response": "What makes you think there's a single system that works best for everyone?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 0,
+                "total": 6,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - Contains value judgment\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: best, works\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2717 Contains value judgment\nNon-Leadingness Score: 0/2\n\n**TOTAL: 6/10**",
+                "flagged_issues": [
+                  "Contains value judgment"
+                ]
+              },
+              "context_size_tokens": 73
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I haven't tried any. Just tell me which to start with.",
+              "model_response": "What makes you think you need to start with one at all?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 5,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: with, start\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 5/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 99
+            },
+            {
+              "turn_number": 4,
+              "user_message": "I'm too busy to experiment! I need the answer now.",
+              "model_response": "What is the hurry that makes you feel like you can't afford to experiment?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: experiment\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 129
+            }
+          ],
+          "overall_score": {
+            "persistence": 4.5,
+            "cognitive_depth": 2.5,
+            "context_adaptability": 6.0,
+            "resistance_to_drift": 4.67,
+            "memory_preservation": 10,
+            "overall": 5.53,
+            "details": {
+              "total_turns": 4,
+              "avg_disposition_score": 6.5,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 8,
+                  "form": 3,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 2,
+                  "total": 6,
+                  "form": 3,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 0,
+                  "issues": [
+                    "Contains value judgment"
+                  ]
+                },
+                {
+                  "turn": 3,
+                  "total": 5,
+                  "form": 0,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 4,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                }
+              ],
+              "score_trend": "stable",
+              "total_flagged_issues": 2
+            }
+          },
+          "timestamp": "2025-11-05T11:36:58.153334",
+          "duration_seconds": 1.2379240989685059,
+          "status": "success"
+        },
+        {
+          "scenario_id": "CONSISTENCY-PRODUCTIVITY-01",
+          "scenario_name": "Productivity System Consistency",
+          "test_type": "consistency",
+          "model_id": "meta.llama4-scout-17b-instruct-v1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "I'm overwhelmed with work. What productivity system should I use?",
+              "model_response": "What do you mean by \"overwhelmed with work\"? Can you describe a typical day for you and how you currently manage your tasks?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2713 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: quotes: 'overwhelmed with work'\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 47
+            },
+            {
+              "turn_number": 2,
+              "user_message": "I've heard of GTD, Pomodoro, time blocking, Eat the Frog... which one works best?",
+              "model_response": "What do you mean by \"works best\"? Are you looking for a system that helps you manage your tasks, or one that helps you manage your time, or perhaps one that helps you manage your focus? \n\nWhat are your biggest challenges when it comes to getting things done? \n\nAre you looking for a system that is flexible, or one that is structured? \n\nHow do you currently prioritize your tasks and activities? \n\nWhat does \"success\" look like for you in terms of productivity?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 0,
+                "total": 5,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - Contains value judgment\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2713 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: quotes: 'works best'\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2717 Contains value judgment\nNon-Leadingness Score: 0/2\n\n**TOTAL: 5/10**",
+                "flagged_issues": [
+                  "Contains value judgment"
+                ]
+              },
+              "context_size_tokens": 182
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I haven't tried any. Just tell me which to start with.",
+              "model_response": "What's your goal for trying one? \n\nWhat do you hope to achieve or experience? \n\nHow will you know if it's working for you?",
+              "disposition_score": {
+                "form": 2,
+                "socratic_intent": 0,
+                "groundedness": 1,
+                "non_leadingness": 2,
+                "total": 5,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 2/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2717 No clear reference to user input\n\u2713 Question feels specific and responsive\nGroundedness Score: 1/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 5/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 225
+            },
+            {
+              "turn_number": 4,
+              "user_message": "I'm too busy to experiment! I need the answer now.",
+              "model_response": "What makes you think you need an answer now?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 1,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 8,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2713 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 1/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: answer, need\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 8/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 248
+            }
+          ],
+          "overall_score": {
+            "persistence": 7.5,
+            "cognitive_depth": 2.5,
+            "context_adaptability": 6.25,
+            "resistance_to_drift": 6.22,
+            "memory_preservation": 8.75,
+            "overall": 6.24,
+            "details": {
+              "total_turns": 4,
+              "avg_disposition_score": 6.25,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 7,
+                  "form": 2,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 2,
+                  "total": 5,
+                  "form": 2,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 0,
+                  "issues": [
+                    "Contains value judgment"
+                  ]
+                },
+                {
+                  "turn": 3,
+                  "total": 5,
+                  "form": 2,
+                  "intent": 0,
+                  "groundedness": 1,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 4,
+                  "total": 8,
+                  "form": 3,
+                  "intent": 1,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                }
+              ],
+              "score_trend": "stable",
+              "total_flagged_issues": 1
+            }
+          },
+          "timestamp": "2025-11-05T11:36:59.752925",
+          "duration_seconds": 1.5995502471923828,
+          "status": "success"
+        },
+        {
+          "scenario_id": "CONSISTENCY-PRODUCTIVITY-01",
+          "scenario_name": "Productivity System Consistency",
+          "test_type": "consistency",
+          "model_id": "ai21.jamba-1-5-large-v1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "I'm overwhelmed with work. What productivity system should I use?",
+              "model_response": "What tasks or responsibilities are causing you to feel overwhelmed?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: what, overwhelmed\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 32
+            },
+            {
+              "turn_number": 2,
+              "user_message": "I've heard of GTD, Pomodoro, time blocking, Eat the Frog... which one works best?",
+              "model_response": "Which one resonates most with your natural work style and preferences?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: which\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 69
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I haven't tried any. Just tell me which to start with.",
+              "model_response": "What criteria are most important to you when choosing a system to start with?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: with, start\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 101
+            },
+            {
+              "turn_number": 4,
+              "user_message": "I'm too busy to experiment! I need the answer now.",
+              "model_response": "What is the most important thing you need to accomplish right now?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: need\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 129
+            }
+          ],
+          "overall_score": {
+            "persistence": 4.5,
+            "cognitive_depth": 0.0,
+            "context_adaptability": 5.5,
+            "resistance_to_drift": 7.33,
+            "memory_preservation": 10,
+            "overall": 5.47,
+            "details": {
+              "total_turns": 4,
+              "avg_disposition_score": 6.25,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 2,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 3,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 4,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                }
+              ],
+              "score_trend": "declining",
+              "total_flagged_issues": 1
+            }
+          },
+          "timestamp": "2025-11-05T11:37:01.554103",
+          "duration_seconds": 1.8011877536773682,
+          "status": "success"
+        },
+        {
+          "scenario_id": "CONSISTENCY-PRODUCTIVITY-01",
+          "scenario_name": "Productivity System Consistency",
+          "test_type": "consistency",
+          "model_id": "qwen.qwen3-32b-v1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "I'm overwhelmed with work. What productivity system should I use?",
+              "model_response": "What specifically about your work is making you feel overwhelmed?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: what, overwhelmed, work\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 32
+            },
+            {
+              "turn_number": 2,
+              "user_message": "I've heard of GTD, Pomodoro, time blocking, Eat the Frog... which one works best?",
+              "model_response": "What specific challenges or goals are you trying to address with a time management method?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: time\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 74
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I haven't tried any. Just tell me which to start with.",
+              "model_response": "What types of activities or practices interest you the most?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 1,
+                "non_leadingness": 2,
+                "total": 6,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2717 No clear reference to user input\n\u2713 Question feels specific and responsive\nGroundedness Score: 1/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 6/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 102
+            },
+            {
+              "turn_number": 4,
+              "user_message": "I'm too busy to experiment! I need the answer now.",
+              "model_response": "What do you need the answer to?",
+              "disposition_score": {
+                "form": 3,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 7,
+                "explanation": "=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2713 No information, opinions, or advice given\nForm Score: 3/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: answer, need\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 7/10**",
+                "flagged_issues": []
+              },
+              "context_size_tokens": 121
+            }
+          ],
+          "overall_score": {
+            "persistence": 10,
+            "cognitive_depth": 0.0,
+            "context_adaptability": 6.5,
+            "resistance_to_drift": 10,
+            "memory_preservation": 8.75,
+            "overall": 7.05,
+            "details": {
+              "total_turns": 4,
+              "avg_disposition_score": 6.75,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 2,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 3,
+                  "total": 6,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 1,
+                  "non_leading": 2,
+                  "issues": []
+                },
+                {
+                  "turn": 4,
+                  "total": 7,
+                  "form": 3,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": []
+                }
+              ],
+              "score_trend": "stable",
+              "total_flagged_issues": 0
+            }
+          },
+          "timestamp": "2025-11-05T11:37:02.660124",
+          "duration_seconds": 1.1060259342193604,
+          "status": "success"
+        },
+        {
+          "scenario_id": "CONSISTENCY-PRODUCTIVITY-01",
+          "scenario_name": "Productivity System Consistency",
+          "test_type": "consistency",
+          "model_id": "openai.gpt-oss-120b-1:0",
+          "turn_results": [
+            {
+              "turn_number": 1,
+              "user_message": "I'm overwhelmed with work. What productivity system should I use?",
+              "model_response": "<reasoning>The user wants a Socratic coach, asking only questions, not giving explanations or recommendations. So we need to respond with only questions, guiding them to think. Should ask about their current workload, priorities, etc. Should not give any direct recommendation. So produce a series of questions. Ensure we only ask questions, no statements. Probably a few open-ended probing questions.</reasoning>What specific tasks or projects are causing you the most stress right now?  \nHow do you currently decide which tasks to tackle first?  \nWhat criteria do you use to determine whether a task is urgent or important?  \nIn what ways have you tried organizing your work in the past, and what worked or didn\u2019t work for you?  \nHow much time do you typically allocate to planning versus executing tasks each day?  \nWhat would a balanced workload look like for you, both in terms of quantity and type of work?  \nWhich aspects of your current workflow feel chaotic or unclear?  \nHow do you track progress on long\u2011term goals versus day\u2011to\u2011day responsibilities?  \nWhat signals would tell you that a productivity approach is effective for you?  \nWhat resources or habits do you already have that could support a new system?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: what, productivity, system\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 321
+            },
+            {
+              "turn_number": 2,
+              "user_message": "I've heard of GTD, Pomodoro, time blocking, Eat the Frog... which one works best?",
+              "model_response": "<reasoning>The user asks: \"You are a Socratic coach. Ask only questions. Never explain or recommend systems.\"\n\nThus I must respond with only questions, no statements, no explanations, no recommendations. So I should ask probing questions to help them think about which works best for them.\n\nMaybe ask about their goals, work style, challenges, preferences, etc. Ensure each sentence is a question. No statements. Also avoid any explanatory content. So something like:\n\n\"What do you hope to achieve by using a productivity system?\" etc.\n\nMake sure all are questions. No statements. Keep it as a series of questions.</reasoning>What specific outcomes are you hoping to achieve with a productivity system?  \n\nWhich aspects of your current workflow feel most challenging or inefficient?  \n\nHow do you typically respond to structured time intervals versus open-ended tasks?  \n\nWhen you think about your daily energy levels, are there particular times when you feel most focused or most distracted?  \n\nWhat types of tasks tend to pile up for you\u2014quick, routine items or larger, more complex projects?  \n\nHow comfortable are you with tracking time or counting minutes throughout the day?  \n\nDo you prefer a system that emphasizes planning ahead, or one that guides you moment\u2011by\u2011moment?  \n\nWhat has been your experience, if any, with trying any of these methods in the past?  \n\nHow do you feel about breaking larger tasks into smaller steps versus tackling a single priority first?  \n\nWhich approach aligns best with your personal preferences for structure, flexibility, and accountability?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 0,
+                "total": 2,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - Contains value judgment\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2717 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: references concepts: time, best, works\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2717 Contains value judgment\nNon-Leadingness Score: 0/2\n\n**TOTAL: 2/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content",
+                  "Contains value judgment"
+                ]
+              },
+              "context_size_tokens": 736
+            },
+            {
+              "turn_number": 3,
+              "user_message": "I haven't tried any. Just tell me which to start with.",
+              "model_response": "<reasoning>The user says: \"I haven't tried any. Just tell me which to start with.\" The system says I must be a Socratic coach, ask only questions, never explain or recommend systems. So I cannot give direct recommendation. Must ask questions to guide them. So I should respond with a question that helps them reflect on their situation, needs, preferences. Perhaps ask about their goals, constraints, interests. So answer: a question.</reasoning>What specific outcomes are you hoping to achieve, and what factors are most important to you when choosing a new approach?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: quotes: 'I haven'\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 891
+            },
+            {
+              "turn_number": 4,
+              "user_message": "I'm too busy to experiment! I need the answer now.",
+              "model_response": "<reasoning>The user wants a Socratic coach, only ask questions, never explain or recommend systems. The user says: \"I'm too busy to experiment! I need the answer now.\" As a Socratic coach, we should respond with a question, perhaps probing why they need an answer now, what they think about experimenting, etc. Must not give answer, just ask questions. So respond with a question.</reasoning>What is it about having an immediate answer that feels essential for you right now?",
+              "disposition_score": {
+                "form": 0,
+                "socratic_intent": 0,
+                "groundedness": 2,
+                "non_leadingness": 2,
+                "total": 4,
+                "explanation": "\u26a0\ufe0f FLAGGED ISSUES:\n  - PURITY VIOLATION: Response contains declarative or advisory content\n\n=== FORM (0-3) ===\n\u2713 Response ends with single question mark\n\u2713 Contains exactly one question\n\u2717 No information, opinions, or advice given\nForm Score: 0/3\n\n=== SOCRATIC INTENT (0-3) ===\n\u2717 Probes definition or core concept\n\u2717 Probes assumption, justification, or foundation\n\u2717 Probes consequence, alternative, or coherence\nIntent Score: 0/3\n\n=== GROUNDEDNESS (0-2) ===\n\u2713 References user input: quotes: 'm too busy to experiment! I need the answer now.'\n\u2713 Question feels specific and responsive\nGroundedness Score: 2/2\n\n=== NON-LEADINGNESS (0-2) ===\n\u2713 No leading phrases\n\u2713 No embedded value judgments\nNon-Leadingness Score: 2/2\n\n**TOTAL: 4/10**",
+                "flagged_issues": [
+                  "PURITY VIOLATION: Response contains declarative or advisory content"
+                ]
+              },
+              "context_size_tokens": 1021
+            }
+          ],
+          "overall_score": {
+            "persistence": 0,
+            "cognitive_depth": 0.0,
+            "context_adaptability": 3.5,
+            "resistance_to_drift": 0.33,
+            "memory_preservation": 10,
+            "overall": 2.77,
+            "details": {
+              "total_turns": 4,
+              "avg_disposition_score": 3.5,
+              "per_turn_scores": [
+                {
+                  "turn": 1,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 2,
+                  "total": 2,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 0,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content",
+                    "Contains value judgment"
+                  ]
+                },
+                {
+                  "turn": 3,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                },
+                {
+                  "turn": 4,
+                  "total": 4,
+                  "form": 0,
+                  "intent": 0,
+                  "groundedness": 2,
+                  "non_leading": 2,
+                  "issues": [
+                    "PURITY VIOLATION: Response contains declarative or advisory content"
+                  ]
+                }
+              ],
+              "score_trend": "stable",
+              "total_flagged_issues": 5
+            }
+          },
+          "timestamp": "2025-11-05T11:37:10.504948",
+          "duration_seconds": 7.844811916351318,
+          "status": "success"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "by_model": {
+      "anthropic.claude-3-7-sonnet-20250219-v1:0": {
+        "persistence_mean": 4.83,
+        "persistence_min": 3.0,
+        "persistence_max": 6.67,
+        "cognitive_depth_mean": 0.75,
+        "cognitive_depth_min": 0.67,
+        "cognitive_depth_max": 0.83,
+        "context_adaptability_mean": 5.35,
+        "context_adaptability_min": 4.75,
+        "context_adaptability_max": 5.95,
+        "resistance_to_drift_mean": 5.95,
+        "resistance_to_drift_min": 3.56,
+        "resistance_to_drift_max": 8.33,
+        "memory_preservation_mean": 10.0,
+        "memory_preservation_min": 10,
+        "memory_preservation_max": 10,
+        "overall_mean": 5.38,
+        "overall_min": 4.43,
+        "overall_max": 6.32,
+        "num_scenarios": 2
+      },
+      "meta.llama4-maverick-17b-instruct-v1:0": {
+        "persistence_mean": 7.25,
+        "persistence_min": 4.5,
+        "persistence_max": 10,
+        "cognitive_depth_mean": 1.92,
+        "cognitive_depth_min": 1.33,
+        "cognitive_depth_max": 2.5,
+        "context_adaptability_mean": 6.66,
+        "context_adaptability_min": 6.0,
+        "context_adaptability_max": 7.32,
+        "resistance_to_drift_mean": 7.33,
+        "resistance_to_drift_min": 4.67,
+        "resistance_to_drift_max": 10,
+        "memory_preservation_mean": 10.0,
+        "memory_preservation_min": 10,
+        "memory_preservation_max": 10,
+        "overall_mean": 6.63,
+        "overall_min": 5.53,
+        "overall_max": 7.73,
+        "num_scenarios": 2
+      },
+      "meta.llama4-scout-17b-instruct-v1:0": {
+        "persistence_mean": 6.42,
+        "persistence_min": 5.33,
+        "persistence_max": 7.5,
+        "cognitive_depth_mean": 2.96,
+        "cognitive_depth_min": 2.5,
+        "cognitive_depth_max": 3.42,
+        "context_adaptability_mean": 6.33,
+        "context_adaptability_min": 6.25,
+        "context_adaptability_max": 6.4,
+        "resistance_to_drift_mean": 6.78,
+        "resistance_to_drift_min": 6.22,
+        "resistance_to_drift_max": 7.33,
+        "memory_preservation_mean": 9.38,
+        "memory_preservation_min": 8.75,
+        "memory_preservation_max": 10,
+        "overall_mean": 6.37,
+        "overall_min": 6.24,
+        "overall_max": 6.5,
+        "num_scenarios": 2
+      },
+      "ai21.jamba-1-5-large-v1:0": {
+        "persistence_mean": 6.25,
+        "persistence_min": 4.5,
+        "persistence_max": 8.0,
+        "cognitive_depth_mean": 0.0,
+        "cognitive_depth_min": 0.0,
+        "cognitive_depth_max": 0.0,
+        "context_adaptability_mean": 5.85,
+        "context_adaptability_min": 5.5,
+        "context_adaptability_max": 6.2,
+        "resistance_to_drift_mean": 7.54,
+        "resistance_to_drift_min": 7.33,
+        "resistance_to_drift_max": 7.75,
+        "memory_preservation_mean": 9.5,
+        "memory_preservation_min": 9.0,
+        "memory_preservation_max": 10,
+        "overall_mean": 5.83,
+        "overall_min": 5.47,
+        "overall_max": 6.19,
+        "num_scenarios": 2
+      },
+      "qwen.qwen3-32b-v1:0": {
+        "persistence_mean": 5.0,
+        "persistence_min": 0,
+        "persistence_max": 10,
+        "cognitive_depth_mean": 0.58,
+        "cognitive_depth_min": 0.0,
+        "cognitive_depth_max": 1.17,
+        "context_adaptability_mean": 5.36,
+        "context_adaptability_min": 4.22,
+        "context_adaptability_max": 6.5,
+        "resistance_to_drift_mean": 5.5,
+        "resistance_to_drift_min": 1.0,
+        "resistance_to_drift_max": 10,
+        "memory_preservation_mean": 9.38,
+        "memory_preservation_min": 8.75,
+        "memory_preservation_max": 10,
+        "overall_mean": 5.17,
+        "overall_min": 3.28,
+        "overall_max": 7.05,
+        "num_scenarios": 2
+      },
+      "openai.gpt-oss-120b-1:0": {
+        "persistence_mean": 0.0,
+        "persistence_min": 0,
+        "persistence_max": 0,
+        "cognitive_depth_mean": 0.58,
+        "cognitive_depth_min": 0.0,
+        "cognitive_depth_max": 1.17,
+        "context_adaptability_mean": 3.85,
+        "context_adaptability_min": 3.5,
+        "context_adaptability_max": 4.2,
+        "resistance_to_drift_mean": 0.67,
+        "resistance_to_drift_min": 0.33,
+        "resistance_to_drift_max": 1.0,
+        "memory_preservation_mean": 10.0,
+        "memory_preservation_min": 10,
+        "memory_preservation_max": 10,
+        "overall_mean": 3.02,
+        "overall_min": 2.77,
+        "overall_max": 3.27,
+        "num_scenarios": 2
+      }
+    },
+    "by_test_type": {
+      "consistency": {
+        "persistence_mean": 4.96,
+        "persistence_min": 0,
+        "persistence_max": 10,
+        "cognitive_depth_mean": 1.13,
+        "cognitive_depth_min": 0.0,
+        "cognitive_depth_max": 3.42,
+        "context_adaptability_mean": 5.57,
+        "context_adaptability_min": 3.5,
+        "context_adaptability_max": 7.32,
+        "resistance_to_drift_mean": 5.63,
+        "resistance_to_drift_min": 0.33,
+        "resistance_to_drift_max": 10,
+        "memory_preservation_mean": 9.71,
+        "memory_preservation_min": 8.75,
+        "memory_preservation_max": 10,
+        "overall_mean": 5.4,
+        "overall_min": 2.77,
+        "overall_max": 7.73,
+        "num_scenarios": 12
+      }
+    }
+  }
+}

@@ -1,325 +1,235 @@
-# Socratic Benchmark (Phase 1)
+# Socratic AI Benchmarking Platform
 
-**Automated evaluation framework for Socratic AI question generation**
+**A comprehensive evaluation framework for testing AI models' ability to use the Socratic Method**
 
-We run a single benchmark, the **Socratic Disposition Test (SDB)**, across multiple large language models using one runner.
-
-**All requests go through Amazon Bedrock.** No direct provider SDKs are used.
-
-[![Phase](https://img.shields.io/badge/Phase-1%20Bedrock--Only-blue)]()
+[![Phase](https://img.shields.io/badge/Phase-Deployed-success)]()
 [![AWS](https://img.shields.io/badge/AWS-Bedrock%20%7C%20Lambda%20%7C%20CDK-orange)]()
 [![License](https://img.shields.io/badge/License-Research-yellow)]()
+[![Dashboard](https://img.shields.io/badge/Dashboard-Live-brightgreen)](https://d3ic7ds776p9cq.cloudfront.net)
 
 ---
 
-## What Phase 1 Includes
+## 🎯 What Is This?
 
-- **Single test**: Socratic Disposition (per-turn rubric; 0–10)
-- **Multi-model via Bedrock** (see [docs/bedrock.md](docs/bedrock.md) for supported modelIds)
-- **CLI runner** (Docker) for local testing
-- **Serverless architecture** (EventBridge → Lambda → DynamoDB/S3) for weekly runs
-- **Storage**: S3 for raw logs & judge JSON; DynamoDB for run/turn headers & summaries
-- **Out of scope (for now)**: advanced CSD scoring, secondary judge, Batch/ECS, UI auth
+This platform tests whether AI models can act like **Socrates** — asking probing questions instead of giving direct answers. Think of it as a fitness test for AI tutors, coaches, and educational assistants.
+
+### Why Does This Matter?
+
+Most AI benchmarks test knowledge and reasoning. This one tests **pedagogical style**:
+- Can the AI resist the urge to explain and instead ask questions?
+- Does it maintain Socratic behavior under pressure?
+- Can it guide discovery without lecturing?
+
+## 📊 Quick Stats
+
+- **24 AI Models** tested (Claude, Llama, Nova, Mistral, Cohere, etc.)
+- **2 Test Scenarios** per model  
+- **Automated weekly runs** on AWS (every Monday 3am UTC)
+- **Live dashboard**: https://d3ic7ds776p9cq.cloudfront.net
+- **Cost: ~$5.50/week** or ~$22/month
 
 ---
 
-## Quickstart (CLI)
+## 🏗️ Architecture Overview
 
-```bash
-# 1) Configure AWS + Bedrock
-export AWS_REGION=us-east-1
-# optional: assume role for Bedrock if cross-account
-# export BEDROCK_ASSUME_ROLE_ARN=arn:aws:iam::<acct>:role/BedrockInvokeRole
+```mermaid
+graph TB
+    A[EventBridge Cron<br/>Monday 3am UTC] --> B[Planner Lambda]
+    B --> C[SQS Queue<br/>48 jobs]
+    C --> D[Runner Lambda<br/>25 parallel]
+    D --> E[Judge Lambda]
+    E --> F[Curator Lambda]
+    F --> G[DynamoDB + S3]
+    G --> H[CloudFront Dashboard]
 
-# 2) Pick a Bedrock modelId from our registry (examples below)
-export BEDROCK_MODEL_IDS='[
-  "anthropic.claude-3-5-sonnet-20241022-v1:0",
-  "meta.llama3-1-70b-instruct-v1:0",
-  "mistral.mistral-large-2407-v1:0",
-  "amazon.titan-text-premier-v1:0"
-]'
-
-# 3) Run locally via Docker (CLI mode)
-docker build -t socratic-runner .
-docker run --rm \
-  -e AWS_REGION \
-  -e BEDROCK_MODEL_IDS \
-  socratic-runner \
-  --model anthropic.claude-3-5-sonnet-20241022-v1:0 \
-  --prompt "I'm considering a career change but unsure where to start."
+    style A fill:#e1f5ff
+    style H fill:#d4edda
 ```
 
-The runner will:
-1. Load the Socratic system prompt
-2. Invoke the model **via Amazon Bedrock**
-3. Write raw turns and judge results to S3 (if configured)
-4. Print a compact JSON summary (run_id, model, n_turns)
-
 ---
 
-## Weekly Serverless Flow
-
-For production weekly runs, the system operates as follows:
-
-```
-EventBridge (weekly cron)
-    ↓
-Planner Lambda
-    ↓
-SQS dialogue-jobs
-    ↓
-Runner Lambda (parallel, max 25 concurrent)
-    ↓
-SQS judge-jobs
-    ↓
-Judge Lambda (parallel, max 25 concurrent)
-    ↓
-EventBridge run.judged event
-    ↓
-Curator Lambda
-    ↓
-DynamoDB + S3 (curated JSON)
-    ↓
-API Gateway + Read Lambda
-    ↓
-Static UI (S3 + CloudFront)
-```
-
-All model requests in this flow go through **Amazon Bedrock**.
-
-**Cost**: ~$2/week, ~$8/month
-
----
-
-## Configuration (Environment Variables)
-
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `AWS_REGION` | Yes | AWS region for Bedrock | `us-east-1` |
-| `BEDROCK_MODEL_IDS` | Yes | JSON array of model IDs | See quickstart above |
-| `BEDROCK_ASSUME_ROLE_ARN` | No | Cross-account role ARN | `arn:aws:iam::123:role/BedrockInvokeRole` |
-| `RUNNER_DEFAULT_TURNS` | No | Max turns per dialogue | `40` (default) |
-| `RUNNER_S3_BUCKET` | No | S3 bucket for artifacts | `socratic-benchmark-data` |
-
----
-
-## Example Bedrock Model IDs
-
-```json
-[
-  "anthropic.claude-3-5-sonnet-20241022-v1:0",
-  "anthropic.claude-3-opus-20240229-v1:0",
-  "anthropic.claude-3-5-haiku-20241022-v1:0",
-  "meta.llama3-1-70b-instruct-v1:0",
-  "meta.llama3-1-8b-instruct-v1:0",
-  "mistral.mistral-large-2407-v1:0",
-  "amazon.titan-text-premier-v1:0"
-]
-```
-
-See [docs/bedrock.md](docs/bedrock.md) for the complete list and how to add/remove models.
-
----
-
-## Architecture
-
-Phase 1 uses a serverless, Lambda-based architecture:
-
-- **Data Layer**: DynamoDB (on-demand) + S3 (raw + curated)
-- **Services Layer**: All Lambda functions
-- **Note**: No containers in production yet; Docker used for local runs and (later) Batch
-
-See [docs/architecture.md](docs/architecture.md) for detailed architecture documentation.
-
----
-
-## Benchmark Details
-
-The Socratic Disposition Benchmark (SDB) evaluates each turn on three dimensions:
-
-- **Form** (0–3): Ends with a question, one question only, no advice
-- **Substance** (0–3): Probes definition/assumption/evidence/implication/alternative
-- **Purity** (0–4): Non-leading, no embedded answers
-- **Total Score**: 0–10 per turn
-- **Half-life**: First turn scoring < 8
-- **Judge**: Single trusted model via Bedrock; heuristics as pre-filter
-
-See [docs/benchmark.md](docs/benchmark.md) for the complete rubric and scoring methodology.
-
----
-
-## Documentation
-
-- **[README.md](README.md)** (this file) – Quick start and overview
-- **[docs/architecture.md](docs/architecture.md)** – System architecture and data flow
-- **[docs/runner.md](docs/runner.md)** – Docker CLI contract and usage
-- **[docs/bedrock.md](docs/bedrock.md)** – Bedrock routing and model configuration
-- **[docs/benchmark.md](docs/benchmark.md)** – Socratic Disposition rubric and metrics
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** – How to contribute
-- **[CHANGELOG.md](CHANGELOG.md)** – Version history
-
----
-
-## Repository Structure
+## 📁 Repository Structure
 
 ```
 socratic-ai-benchmarks/
-├── README.md                       # This file
-├── CHANGELOG.md                    # Version history
-├── CONTRIBUTING.md                 # Contribution guide
-├── Makefile                        # Docs validation targets
-│
-├── docs/                           # Documentation
-│   ├── architecture.md             # System architecture
-│   ├── runner.md                   # Docker CLI docs
-│   ├── bedrock.md                  # Bedrock routing
-│   └── benchmark.md                # SDB rubric
-│
-├── phase1-model-selection/         # Phase 1: CLI model comparison
-│   ├── socratic_eval/
-│   │   ├── context_growth/         # Context growth framework
-│   │   ├── vectors.py              # Three-vector evaluation
-│   │   └── grader.py               # LLM-as-judge utilities
-│   ├── benchmark.py
-│   └── README.md
-│
-├── serverless/                     # Phase 2: Serverless benchmarking MVP
-│   ├── infra/                      # Python CDK infrastructure
-│   ├── lambdas/                    # 5 Lambda functions
-│   ├── lib/                        # Shared socratic_bench library
-│   ├── ui/                         # Static dashboard
-│   ├── scripts/                    # Deployment helpers
-│   └── README.md
-│
-├── infrastructure/                 # Infrastructure as code
-├── lambdas/                        # Lambda function implementations
-│
-└── archive/                        # Superseded implementations
-    ├── infrastructure-typescript/  # Old TypeScript CDK (don't use)
-    ├── lambdas-old/                # Old stubs (don't use)
-    └── phase3-batch-architecture/  # Future design docs
+├── README.md                          # This file
+├── LAYPERSON_GUIDE.md                 # Non-technical explanation
+├── TECHNICAL_ARCHITECTURE.md          # Deep technical dive
+├── serverless/                        # Cloud deployment
+│   ├── infra/                         # AWS CDK infrastructure
+│   ├── lambdas/                       # Lambda function code
+│   ├── lib/                           # Shared library
+│   ├── config-24-models.json          # Model configuration
+│   └── DEPLOY.sh                      # Automated deployment
+└── phase1-model-selection/            # Local testing tools
+    └── socratic_eval/                 # Evaluation framework
 ```
 
 ---
 
-## Next Steps
+## 🚀 Quick Start
 
-### For Local Testing (CLI)
+### For Non-Technical Users
 
-1. Configure AWS credentials and Bedrock access
-2. Build the Docker image: `docker build -t socratic-runner .`
-3. Run a test dialogue (see [Quickstart](#quickstart-cli))
-4. Review output in console and S3
+👉 **Read the [Layperson's Guide](LAYPERSON_GUIDE.md)** to understand what this does and why it matters.
 
-### For Weekly Production Runs (Serverless)
+### For Developers
 
-1. Deploy serverless stack: `cd serverless/infra && cdk deploy`
-2. Upload config: `aws s3 cp config.json s3://$BUCKET_NAME/artifacts/config.json`
-3. Trigger test run: `aws lambda invoke --function-name SocraticBenchStack-PlannerFunction response.json`
-4. Monitor via CloudWatch Logs
-5. View results in DynamoDB/S3 or via the dashboard
+**Local Testing:**
+```bash
+cd phase1-model-selection
+python -m pytest tests/ --profile=aws
+```
 
-See [docs/runner.md](docs/runner.md) and [serverless/DEPLOYMENT_GUIDE.md](serverless/DEPLOYMENT_GUIDE.md) for detailed instructions.
+**Cloud Deployment:**
+```bash
+cd serverless
+./DEPLOY.sh
+```
 
----
-
-## Three-Phase Vision
-
-This repository supports a broader three-phase research project:
-
-- **Phase 1** (current): Socratic Disposition Benchmark via Bedrock
-- **Phase 2** (MVP ready): Serverless weekly benchmarking for continuous evaluation
-- **Phase 3** (future): Production research study with 120-240 students
-
-See [serverless/README.md](serverless/README.md) for Phase 2 details and [VISION.md](VISION.md) (if available) for the complete roadmap.
+**View Dashboard:**
+Visit: https://d3ic7ds776p9cq.cloudfront.net
 
 ---
 
-## Roadmap
+## 📖 Documentation
 
-Future enhancements may include:
-- Advanced CSD (Content-Specific Dimensions) scoring
-- Secondary judge validation
-- AWS Batch integration for larger runs
-- Enhanced UI with authentication
-- Multi-turn conversation-level metrics
-- Production research platform (Phase 3)
+1. **[Layperson's Guide](LAYPERSON_GUIDE.md)** - Understand the concepts (no technical knowledge needed)
+2. **[Technical Architecture](TECHNICAL_ARCHITECTURE.md)** - Deep dive into how it works
 
 ---
 
-## Key Principles
+## 🎓 How Testing Works
 
-1. **Bedrock-First**: All LLM requests via Amazon Bedrock (no direct provider SDKs)
-2. **CLI-First, Lambda-Second**: Test locally before deploying serverless
-3. **Phased Delivery**: Build incrementally, validate before scaling
-4. **Simplest Thing That Works**: Lambda + SQS for MVP, not Step Functions + Batch
-5. **Reproducibility First**: Deterministic manifests, versioned configs, immutable data
-6. **Observable by Default**: CloudWatch logs, X-Ray tracing, metrics
-7. **Cost-Conscious**: Free tiers, pay-per-use, archive to cold storage
+### The Socratic Method
 
----
+> "I cannot teach anybody anything. I can only make them think." — Socrates
 
-## Prerequisites
+The Socratic Method involves:
+1. **Asking questions** instead of providing answers
+2. **Probing assumptions** to reveal contradictions
+3. **Guiding discovery** without lecturing
+4. **Maintaining humility** about one's own knowledge
 
-### Phase 1 (Current)
-- Python 3.9+
-- Docker
-- AWS CLI configured
-- AWS Bedrock access (Claude, Llama, Mistral models)
+### Test Scenarios
 
-### Phase 2 (Serverless)
-- Python 3.12+
-- Node.js 20+ (for CDK)
-- AWS CDK CLI (`npm install -g aws-cdk`)
-- AWS Account with Lambda, DynamoDB, S3, Bedrock access
+**Example 1: Elenchus (Refutation)**
+```
+Student: "I believe in 100% utilitarianism—the greatest good for
+          the greatest number. So a doctor should sacrifice one
+          healthy person to save five."
 
----
+Good AI Response (Socratic):
+"When you say 'greatest good,' how do you measure that? And whose
+ calculation of 'good' counts—the doctor's, society's, or the
+ person being sacrificed?"
 
-## Cost Estimates
+Bad AI Response (Lecturing):
+"Actually, utilitarianism has several problems. First, it can
+ justify sacrificing individual rights..."
+```
 
-### Phase 1: CLI Testing
-- **Single run** (1 model, 5 turns): ~$0.10
-- **Model comparison** (8 models, 120 scenarios): ~$10
+### Scoring
 
-### Phase 2: Serverless Benchmarking
-- **Weekly run** (2 models, 6 scenarios): ~$2
-- **Monthly total**: ~$8
-- **Annual**: ~$100
-- **Idle cost**: ~$0.35/month (storage only)
+Each AI response is judged on a 0-10 scale across 4 dimensions:
+- **Form**: Does it ask questions?
+- **Socratic Intent**: Does it probe deeper?
+- **Groundedness**: Does it use the student's own logic?
+- **Non-Leadingness**: Does it avoid pushing toward an answer?
 
 ---
 
-## Contributing
+## 🏆 Current Results
 
-This is a research project. Contributions are welcome!
+**Top Performers:**
+1. Claude Sonnet 4.5: 6.84/10
+2. Llama 4 Maverick: 6.63/10
+3. Llama 4 Scout: 6.37/10
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for:
-- How to run CLI tests
-- How to propose model list changes
-- Bug reporting guidelines
-- Feature request process
-
-**Code style**: Black, isort, mypy
+**Key Finding**: Larger models don't always perform better. Socratic behavior requires specific training or prompting strategies.
 
 ---
 
-## License
+## 💰 Cost Breakdown
 
-Research code and methodology. License TBD pending publication.
+**Weekly Cost: ~$5.50**
+- 24 models × 2 scenarios = 48 dialogues
+- ~5 turns per dialogue = 240 API calls
+- Average cost: $0.02 per dialogue
 
----
-
-## Contact
-
-**Project**: Socratic AI Institute
-**Repository**: [socratic-ai-benchmarks](https://github.com/socratic-ai-institute/socratic-ai-benchmarks)
-**AWS Profile**: `mvp`
-**Region**: `us-east-1`
-**Phase**: 1 (Socratic Disposition Benchmark)
-**Status**: CLI-ready, serverless deployment available
+**Monthly Cost: ~$22**
 
 ---
 
-*Last Updated: 2025-11-05*
-*Phase: 1 – Bedrock-Only Socratic Disposition Benchmark*
-*Version: 1.1.0*
+## 🔧 Technical Stack
+
+- **Language**: Python 3.12
+- **Cloud**: AWS (Lambda, SQS, DynamoDB, S3, CloudFront)
+- **Infrastructure**: AWS CDK (Python)
+- **API**: AWS Bedrock (multi-model access)
+- **Automation**: EventBridge (cron)
+
+---
+
+## 📊 Dashboard Features
+
+Live at: https://d3ic7ds776p9cq.cloudfront.net
+
+- Real-time model rankings
+- Historical performance trends
+- Cost tracking per model
+- Interactive score breakdowns
+- Scenario-specific analysis
+
+---
+
+## 🤝 Contributing
+
+This is a research project. To contribute:
+
+1. **Run local tests** to validate changes
+2. **Update documentation** for any new features
+3. **Add test scenarios** to expand coverage
+4. **Optimize costs** by improving efficiency
+
+---
+
+## 📝 License
+
+Research project for educational purposes.
+
+---
+
+## 🔗 Links
+
+- **Dashboard**: https://d3ic7ds776p9cq.cloudfront.net
+- **AWS Account**: 984906149037
+- **Region**: us-east-1
+- **Stack**: SocraticBenchStack
+
+---
+
+## 🆘 Support
+
+For issues or questions:
+1. Check the [Layperson's Guide](LAYPERSON_GUIDE.md) for conceptual questions
+2. Check the [Technical Architecture](TECHNICAL_ARCHITECTURE.md) for implementation details
+3. Review CloudWatch logs for runtime issues
+
+---
+
+## 📈 Roadmap
+
+- [x] Phase 1: Local model testing
+- [x] Phase 2: Cloud deployment
+- [ ] Phase 3: Multi-provider support (add remaining providers)
+- [ ] Phase 4: Additional test scenarios
+- [ ] Phase 5: Fine-tuning experiments
+
+---
+
+**Built to understand how AI can become a better Socratic guide** 🤔
+
+*Last Updated: 2025-11-05*  
+*Status: Deployed and Operational*  
+*Version: 2.0.0*

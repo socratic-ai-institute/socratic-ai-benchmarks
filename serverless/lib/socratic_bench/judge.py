@@ -40,7 +40,10 @@ class JudgeResult:
         """Get the overall score (0 if error)."""
         if self.error or not self.scores:
             return 0.0
-        return float(self.scores.get("overall", 0.0))
+        overall = self.scores.get("overall", {})
+        if isinstance(overall, dict):
+            return float(overall.get("score", 0.0))
+        return float(overall)
 
 
 def judge_turn(
@@ -49,7 +52,7 @@ def judge_turn(
     turn_index: int,
     student_utterance: str,
     ai_response: str,
-    judge_model_id: str = "anthropic.claude-3-5-sonnet-20241022-v2:0",
+    judge_model_id: str = "anthropic.claude-3-5-sonnet-20240620-v1:0",
     bedrock_client: Optional[BedrockClient] = None,
 ) -> JudgeResult:
     """

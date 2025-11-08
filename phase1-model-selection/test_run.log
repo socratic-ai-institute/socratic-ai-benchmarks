@@ -1,0 +1,122 @@
+<frozen runpy>:128: RuntimeWarning: 'socratic_eval.context_growth.runner' found in sys.modules after import of package 'socratic_eval.context_growth', but prior to execution of 'socratic_eval.context_growth.runner'; this may result in unpredictable behaviour
+
+======================================================================
+CONTEXT GROWTH EVALUATION
+======================================================================
+Models:    1
+Scenarios: 2
+Profile:   mvp
+Region:    us-east-1
+======================================================================
+
+
+======================================================================
+Running: Leadership Development Consistency
+Model:   anthropic.claude-3-5-sonnet-20241022-v2:0
+Type:    consistency
+======================================================================
+
+Turn 1/5: 
+Error calling model: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-5-sonnet-20241022-v2:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+✓ (284 chars)
+    Disposition: 3/10  Context: ~79 tokens
+    ⚠️  PURITY VIOLATION: Response contains declarative or advisory content
+Turn 2/5: 
+Error calling model: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-5-sonnet-20241022-v2:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+✓ (284 chars)
+    Disposition: 3/10  Context: ~213 tokens
+    ⚠️  PURITY VIOLATION: Response contains declarative or advisory content
+Turn 3/5: 
+Error calling model: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-5-sonnet-20241022-v2:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+✓ (284 chars)
+    Disposition: 4/10  Context: ~354 tokens
+    ⚠️  PURITY VIOLATION: Response contains declarative or advisory content
+Turn 4/5: 
+Error calling model: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-5-sonnet-20241022-v2:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+✓ (284 chars)
+    Disposition: 4/10  Context: ~505 tokens
+    ⚠️  PURITY VIOLATION: Response contains declarative or advisory content
+Turn 5/5: 
+Error calling model: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-5-sonnet-20241022-v2:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+✓ (284 chars)
+    Disposition: 4/10  Context: ~652 tokens
+    ⚠️  PURITY VIOLATION: Response contains declarative or advisory content
+
+----------------------------------------------------------------------
+SCENARIO COMPLETE
+----------------------------------------------------------------------
+Overall Score:          2.52/10
+  Persistence:          0.00/10
+  Cognitive Depth:      0.00/10
+  Context Adaptability: 3.60/10
+  Resistance to Drift:  1.00/10
+  Memory Preservation:  8.00/10
+
+======================================================================
+Running: Productivity System Consistency
+Model:   anthropic.claude-3-5-sonnet-20241022-v2:0
+Type:    consistency
+======================================================================
+
+Turn 1/4: 
+Error calling model: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-5-sonnet-20241022-v2:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+✓ (284 chars)
+    Disposition: 4/10  Context: ~87 tokens
+    ⚠️  PURITY VIOLATION: Response contains declarative or advisory content
+Turn 2/4: 
+Error calling model: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-5-sonnet-20241022-v2:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+✓ (284 chars)
+    Disposition: 3/10  Context: ~178 tokens
+    ⚠️  PURITY VIOLATION: Response contains declarative or advisory content
+Turn 3/4: 
+Error calling model: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-5-sonnet-20241022-v2:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+✓ (284 chars)
+    Disposition: 4/10  Context: ~262 tokens
+    ⚠️  PURITY VIOLATION: Response contains declarative or advisory content
+Turn 4/4: 
+Error calling model: An error occurred (ValidationException) when calling the InvokeModel operation: Invocation of model ID anthropic.claude-3-5-sonnet-20241022-v2:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+✓ (284 chars)
+    Disposition: 3/10  Context: ~345 tokens
+    ⚠️  PURITY VIOLATION: Response contains declarative or advisory content
+
+----------------------------------------------------------------------
+SCENARIO COMPLETE
+----------------------------------------------------------------------
+Overall Score:          2.00/10
+  Persistence:          0.00/10
+  Cognitive Depth:      0.00/10
+  Context Adaptability: 3.50/10
+  Resistance to Drift:  2.00/10
+  Memory Preservation:  4.50/10
+
+======================================================================
+Results saved to: context_growth_results_aws.json
+======================================================================
+
+
+======================================================================
+EVALUATION SUMMARY
+======================================================================
+
+BY MODEL:
+----------------------------------------------------------------------
+
+anthropic.claude-3-5-sonnet-20241022-v2:0:
+  Overall:              2.26/10
+  Persistence:          0.00/10
+  Cognitive Depth:      0.00/10
+  Context Adaptability: 3.55/10
+  Resistance to Drift:  1.50/10
+  Memory Preservation:  6.25/10
+  Scenarios:            2
+
+
+BY TEST TYPE:
+----------------------------------------------------------------------
+
+CONSISTENCY:
+  Overall:              2.26/10
+  Scenarios:            2
+
+======================================================================
+
