@@ -245,7 +245,7 @@ def get_timeseries(params: Dict[str, str]) -> Dict[str, Any]:
         for item in response.get("Items", []):
             model_id = item.get("model_id")
             week = item.get("week")
-            mean_score = float(item.get("mean_score", 0))
+            mean_score = float(item.get("mean_score", 0)) / 10  # Normalize 0-100 to 0-10 for UI
 
             if model_id:
                 model_ids.add(model_id)
@@ -302,7 +302,7 @@ def get_latest_rankings(params: Dict[str, str]) -> Dict[str, Any]:
         for item in response.get("Items", []):
             rankings.append({
                 "model_id": item.get("model_id"),
-                "mean_score": float(item.get("mean_score", 0)),
+                "mean_score": float(item.get("mean_score", 0)) / 10,  # Normalize 0-100 to 0-10 for UI
                 "mean_compliance": float(item.get("mean_compliance", 0)),
                 "run_count": int(item.get("run_count", 0)),
             })
@@ -367,7 +367,7 @@ def get_cost_analysis(params: Dict[str, str]) -> Dict[str, Any]:
         # Calculate cost and average score per model
         scatter_data = []
         for model_id, data in model_data.items():
-            avg_score = sum(data["scores"]) / len(data["scores"]) if data["scores"] else 0
+            avg_score = (sum(data["scores"]) / len(data["scores"]) / 10) if data["scores"] else 0  # Normalize 0-100 to 0-10
 
             # Get pricing for this model (default to mid-range if not found)
             model_pricing = pricing.get(model_id, {"input": 0.002, "output": 0.010})
