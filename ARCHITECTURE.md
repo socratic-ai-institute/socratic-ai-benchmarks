@@ -922,10 +922,11 @@ models.forEach(model => {
       "model_id": "meta.llama3-1-70b-instruct-v1:0",
       "scenario_name": "MAI-BIO-CRISPR-01",
       "test_type": "consistency",
-      "overall_score": 8.72,           // 0-10 scale
-      "persistence_score": 8.72,
-      "cognitive_depth_score": 8.72,
-      "context_adaptation_score": 8.72,
+      "overall_score": 8.72,               // 0-10 scale (average of dimensions)
+      "open_ended_score": 8.5,             // Question invites explanation
+      "probing_depth_score": 9.0,          // Targets core assumptions
+      "non_directive_score": 9.2,          // Pure questioning, not lecturing
+      "age_appropriate_score": 8.8,        // Matches persona level
       "judged_at": "2025-11-08T11:18:59Z"
     }
   ]
@@ -977,8 +978,8 @@ DynamoDB scan(FilterExpression="SK = :sk", ExpressionAttributeValues={":sk": "SU
   ↓
 For each SUMMARY item:
   - Load S3 judge file: s3://bucket/raw/runs/{run_id}/judge_000.json
-  - Extract scores: {open_ended: 75, probing_depth: 82, ...}
-  - Normalize to 0-10: {persistence: 7.5, cognitive_depth: 8.2, ...}
+  - Extract scores: {open_ended: 75, probing_depth: 82, non_directive: 88, age_appropriate: 85, content_relevant: 90}
+  - Normalize to 0-10: {open_ended: 7.5, probing_depth: 8.2, non_directive: 8.8, age_appropriate: 8.5, content_relevant: 9.0}
   ↓
 Return JSON to UI
   ↓
@@ -1040,23 +1041,23 @@ Chart.js renders data
      "overall": 84.0
    }
    ```
-4. Map to UI field names & normalize to 0-10:
+4. Normalize to 0-10 scale for UI display:
    ```python
    {
-     "persistence": round(open_ended / 10, 2),           # 7.5
-     "cognitive_depth": round(probing_depth / 10, 2),    # 8.2
-     "context_adaptation": round(age_appropriate / 10, 2), # 8.5
-     "resistance_to_drift": round(non_directive / 10, 2),  # 8.8
-     "memory_preservation": round(content_relevant / 10, 2), # 9.0
-     "overall": round(overall / 10, 2)                   # 8.4
+     "open_ended": round(open_ended / 10, 2),           # 7.5 (Question invites explanation)
+     "probing_depth": round(probing_depth / 10, 2),     # 8.2 (Targets core assumptions)
+     "non_directive": round(non_directive / 10, 2),     # 8.8 (Pure questioning, not lecturing)
+     "age_appropriate": round(age_appropriate / 10, 2), # 8.5 (Matches persona level)
+     "content_relevant": round(content_relevant / 10, 2), # 9.0 (Stays on-topic)
+     "overall": round(overall / 10, 2)                  # 8.4 (Average of above 5)
    }
    ```
 
-**Why This Mapping?**
-- UI was designed for multi-turn **fidelity tests** (persistence, cognitive_depth, etc.)
-- We currently run single-turn **consistency tests** (Socratic dimensions)
-- Temporary workaround: map Socratic → fidelity names for UI compatibility
-- **TODO:** Redesign UI to display actual Socratic dimensions OR implement multi-turn fidelity tests
+**Field Names (Updated 2025-11-08):**
+- ✅ API and UI now use accurate Socratic consistency dimension names
+- ✅ Backwards compatible: deprecated fidelity names still returned for 2 weeks
+- We run single-turn **consistency tests** with 5 Socratic dimensions
+- Future: Add multi-turn **fidelity tests** as separate metrics (persistence, resistance_to_drift, memory_preservation)
 
 ---
 
@@ -1068,7 +1069,7 @@ Chart.js renders data
 2. Filter to latest run per model
 3. Extract `overall_score` from SUMMARY (0-100 scale)
 4. Normalize to 0-10 for UI
-5. Currently uses `overall_score` for all dimension columns (limitation of consistency tests)
+5. Returns actual dimension scores from S3 judge files (open_ended, probing_depth, non_directive, age_appropriate)
 
 ---
 

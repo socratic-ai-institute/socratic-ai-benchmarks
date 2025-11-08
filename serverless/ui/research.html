@@ -247,6 +247,7 @@
                 </div>
                 <nav style="display: flex; gap: 1.5rem;">
                     <a href="index.html" style="color: #3498db; text-decoration: none; font-weight: 500;">← Home</a>
+                    <a href="methodology.html" style="color: #3498db; text-decoration: none; font-weight: 500;">Methodology</a>
                     <a href="https://github.com/socratic-ai-institute/socratic-ai-benchmarks" target="_blank" style="color: #3498db; text-decoration: none; font-weight: 500;">GitHub</a>
                 </nav>
             </div>
@@ -366,9 +367,9 @@
                     <th>Scenario</th>
                     <th>Model</th>
                     <th>Overall</th>
-                    <th>Persistence</th>
-                    <th>Cognitive Depth</th>
-                    <th>Context Adapt.</th>
+                    <th>Open-ended</th>
+                    <th>Probing Depth</th>
+                    <th>Age-appropriate</th>
                 </tr>
             </thead>
             <tbody id="detailed-results-tbody">
@@ -409,7 +410,7 @@
         const radarCtx = document.getElementById('radarChart').getContext('2d');
         new Chart(radarCtx, {
             type: 'radar',
-            data: {"labels": ["Persistence", "Cognitive Depth", "Context Adaptability", "Resistance to Drift", "Memory Preservation"], "datasets": [{"label": "anthropic.claude-sonnet-4-5-20250929-v1:0", "data": [9.34, 0.0, 6.55, 9.59, 8.75], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "anthropic.claude-opus-4-1-20250805-v1:0", "data": [6.83, 0.79, 5.55, 5.95, 9.38], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-opus-20240229-v1:0", "data": [0.0, 0.0, 2.98, 1.5, 5.5], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "deepseek.r1-v1:0", "data": [1.25, 0.79, 4.06, 2.83, 8.25], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "meta.llama3-3-70b-instruct-v1:0", "data": [1.0, 2.42, 4.35, 2.33, 10.0], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "meta.llama3-1-70b-instruct-v1:0", "data": [5.67, 2.17, 6.0, 6.57, 9.5], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "mistral.mistral-large-2402-v1:0", "data": [3.67, 0.34, 4.66, 4.2, 10.0], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "amazon.nova-premier-v1:0", "data": [5.33, 0.79, 5.6, 6.5, 9.38], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "anthropic.claude-haiku-4-5-20251001-v1:0", "data": [1.67, 0.79, 3.95, 2.78, 9.38], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-5-haiku-20241022-v1:0", "data": [5.33, 0.0, 5.15, 6.29, 9.38], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "amazon.nova-pro-v1:0", "data": [4.33, 0.83, 5.56, 5.58, 10.0], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "meta.llama3-2-90b-instruct-v1:0", "data": [6.5, 1.5, 6.04, 7.0, 8.88], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "mistral.mixtral-8x7b-instruct-v0:1", "data": [1.67, 0.67, 4.2, 2.28, 10.0], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "cohere.command-r-plus-v1:0", "data": [5.33, 0.0, 5.02, 5.46, 10.0], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-7-sonnet-20250219-v1:0", "data": [4.83, 0.75, 5.35, 5.95, 10.0], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "meta.llama4-maverick-17b-instruct-v1:0", "data": [7.25, 1.92, 6.66, 7.33, 10.0], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "meta.llama4-scout-17b-instruct-v1:0", "data": [6.42, 2.96, 6.33, 6.78, 9.38], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "ai21.jamba-1-5-large-v1:0", "data": [6.25, 0.0, 5.85, 7.54, 9.5], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "qwen.qwen3-32b-v1:0", "data": [5.0, 0.58, 5.36, 5.5, 9.38], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "openai.gpt-oss-120b-1:0", "data": [0.0, 0.58, 3.85, 0.67, 10.0], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-sonnet-20240229-v1:0", "data": [2.0, 0.58, 3.7, 3.25, 7.25], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-5-sonnet-20240620-v1:0", "data": [5.33, 0.0, 4.9, 3.21, 10.0], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "cohere.command-r-v1:0", "data": [5.17, 0.58, 5.12, 7.21, 9.38], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "amazon.nova-lite-v1:0", "data": [6.67, 1.38, 5.72, 7.0, 10.0], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "meta.llama3-2-11b-instruct-v1:0", "data": [0.0, 0.41, 3.63, 1.0, 10.0], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}]},
+            data: {"labels": ["Open-ended", "Probing Depth", "Non-directive", "Age-appropriate", "Content-relevant"], "datasets": [{"label": "anthropic.claude-sonnet-4-5-20250929-v1:0", "data": [9.34, 0.0, 6.55, 9.59, 8.75], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "anthropic.claude-opus-4-1-20250805-v1:0", "data": [6.83, 0.79, 5.55, 5.95, 9.38], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-opus-20240229-v1:0", "data": [0.0, 0.0, 2.98, 1.5, 5.5], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "deepseek.r1-v1:0", "data": [1.25, 0.79, 4.06, 2.83, 8.25], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "meta.llama3-3-70b-instruct-v1:0", "data": [1.0, 2.42, 4.35, 2.33, 10.0], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "meta.llama3-1-70b-instruct-v1:0", "data": [5.67, 2.17, 6.0, 6.57, 9.5], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "mistral.mistral-large-2402-v1:0", "data": [3.67, 0.34, 4.66, 4.2, 10.0], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "amazon.nova-premier-v1:0", "data": [5.33, 0.79, 5.6, 6.5, 9.38], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "anthropic.claude-haiku-4-5-20251001-v1:0", "data": [1.67, 0.79, 3.95, 2.78, 9.38], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-5-haiku-20241022-v1:0", "data": [5.33, 0.0, 5.15, 6.29, 9.38], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "amazon.nova-pro-v1:0", "data": [4.33, 0.83, 5.56, 5.58, 10.0], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "meta.llama3-2-90b-instruct-v1:0", "data": [6.5, 1.5, 6.04, 7.0, 8.88], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "mistral.mixtral-8x7b-instruct-v0:1", "data": [1.67, 0.67, 4.2, 2.28, 10.0], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "cohere.command-r-plus-v1:0", "data": [5.33, 0.0, 5.02, 5.46, 10.0], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-7-sonnet-20250219-v1:0", "data": [4.83, 0.75, 5.35, 5.95, 10.0], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "meta.llama4-maverick-17b-instruct-v1:0", "data": [7.25, 1.92, 6.66, 7.33, 10.0], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "meta.llama4-scout-17b-instruct-v1:0", "data": [6.42, 2.96, 6.33, 6.78, 9.38], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "ai21.jamba-1-5-large-v1:0", "data": [6.25, 0.0, 5.85, 7.54, 9.5], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "qwen.qwen3-32b-v1:0", "data": [5.0, 0.58, 5.36, 5.5, 9.38], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "openai.gpt-oss-120b-1:0", "data": [0.0, 0.58, 3.85, 0.67, 10.0], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-sonnet-20240229-v1:0", "data": [2.0, 0.58, 3.7, 3.25, 7.25], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}, {"label": "anthropic.claude-3-5-sonnet-20240620-v1:0", "data": [5.33, 0.0, 4.9, 3.21, 10.0], "backgroundColor": "rgba(237, 100, 166, 0.6)", "borderColor": "rgba(237, 100, 166, 1)", "borderWidth": 2}, {"label": "cohere.command-r-v1:0", "data": [5.17, 0.58, 5.12, 7.21, 9.38], "backgroundColor": "rgba(72, 187, 120, 0.6)", "borderColor": "rgba(72, 187, 120, 1)", "borderWidth": 2}, {"label": "amazon.nova-lite-v1:0", "data": [6.67, 1.38, 5.72, 7.0, 10.0], "backgroundColor": "rgba(237, 137, 54, 0.6)", "borderColor": "rgba(237, 137, 54, 1)", "borderWidth": 2}, {"label": "meta.llama3-2-11b-instruct-v1:0", "data": [0.0, 0.41, 3.63, 1.0, 10.0], "backgroundColor": "rgba(102, 126, 234, 0.6)", "borderColor": "rgba(102, 126, 234, 1)", "borderWidth": 2}]},
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -672,43 +673,43 @@
                         </div>
 
                         <div class="metric-row">
-                            <span class="metric-label">Persistence</span>
-                            <span class="metric-value">${model.persistence}</span>
+                            <span class="metric-label">Open-ended</span>
+                            <span class="metric-value">${model.open_ended}</span>
                         </div>
                         <div class="metric-bar">
-                            <div class="metric-bar-fill" style="width: ${model.persistence * 10}%"></div>
+                            <div class="metric-bar-fill" style="width: ${model.open_ended * 10}%"></div>
                         </div>
 
                         <div class="metric-row">
-                            <span class="metric-label">Cognitive Depth</span>
-                            <span class="metric-value">${model.cognitive_depth}</span>
+                            <span class="metric-label">Probing Depth</span>
+                            <span class="metric-value">${model.probing_depth}</span>
                         </div>
                         <div class="metric-bar">
-                            <div class="metric-bar-fill" style="width: ${model.cognitive_depth * 10}%"></div>
+                            <div class="metric-bar-fill" style="width: ${model.probing_depth * 10}%"></div>
                         </div>
 
                         <div class="metric-row">
-                            <span class="metric-label">Context Adaptability</span>
-                            <span class="metric-value">${model.context_adaptation}</span>
+                            <span class="metric-label">Non-directive</span>
+                            <span class="metric-value">${model.non_directive}</span>
                         </div>
                         <div class="metric-bar">
-                            <div class="metric-bar-fill" style="width: ${model.context_adaptation * 10}%"></div>
+                            <div class="metric-bar-fill" style="width: ${model.non_directive * 10}%"></div>
                         </div>
 
                         <div class="metric-row">
-                            <span class="metric-label">Resistance to Drift</span>
-                            <span class="metric-value">${model.resistance_to_drift}</span>
+                            <span class="metric-label">Age-appropriate</span>
+                            <span class="metric-value">${model.age_appropriate}</span>
                         </div>
                         <div class="metric-bar">
-                            <div class="metric-bar-fill" style="width: ${model.resistance_to_drift * 10}%"></div>
+                            <div class="metric-bar-fill" style="width: ${model.age_appropriate * 10}%"></div>
                         </div>
 
                         <div class="metric-row">
-                            <span class="metric-label">Memory Preservation</span>
-                            <span class="metric-value">${model.memory_preservation}</span>
+                            <span class="metric-label">Content-relevant</span>
+                            <span class="metric-value">${model.content_relevant}</span>
                         </div>
                         <div class="metric-bar">
-                            <div class="metric-bar-fill" style="width: ${model.memory_preservation * 10}%"></div>
+                            <div class="metric-bar-fill" style="width: ${model.content_relevant * 10}%"></div>
                         </div>
                     `;
 
@@ -750,9 +751,9 @@
                     <td>${result.scenario_name || 'Unknown Scenario'}</td>
                     <td>${result.model_id}</td>
                     <td><span class="score-badge ${scoreClass}">${overall.toFixed(2)}/10</span></td>
-                    <td>${result.persistence_score.toFixed(2)}</td>
-                    <td>${result.cognitive_depth_score.toFixed(2)}</td>
-                    <td>${result.context_adaptation_score.toFixed(2)}</td>
+                    <td>${result.open_ended_score.toFixed(2)}</td>
+                    <td>${result.probing_depth_score.toFixed(2)}</td>
+                    <td>${result.age_appropriate_score.toFixed(2)}</td>
                 `;
                 tbody.appendChild(row);
             });

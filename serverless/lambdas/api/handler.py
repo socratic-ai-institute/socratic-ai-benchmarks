@@ -427,6 +427,13 @@ def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
                         "created_at": created_at,
                         "model_id": model_id,
                         "overall": round(overall / 10, 2),
+                        # Accurate Socratic dimension names (new)
+                        "open_ended": round(open_ended / 10, 2),
+                        "probing_depth": round(probing_depth / 10, 2),
+                        "non_directive": round(non_directive / 10, 2),
+                        "age_appropriate": round(age_appropriate / 10, 2),
+                        "content_relevant": round(content_relevant / 10, 2),
+                        # Deprecated fidelity names (backwards compatibility - remove in 2 weeks)
                         "persistence": round(open_ended / 10, 2),
                         "cognitive_depth": round(probing_depth / 10, 2),
                         "context_adaptation": round(age_appropriate / 10, 2),
@@ -479,6 +486,12 @@ def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
                         "scenario_name": scenario_id,
                         "test_type": "consistency",
                         "overall_score": round(overall / 10, 2),
+                        # Accurate Socratic dimension names (new)
+                        "open_ended_score": round(open_ended / 10, 2),
+                        "probing_depth_score": round(probing_depth / 10, 2),
+                        "non_directive_score": round(non_directive / 10, 2),
+                        "age_appropriate_score": round(age_appropriate / 10, 2),
+                        # Deprecated fidelity names (backwards compatibility - remove in 2 weeks)
                         "persistence_score": round(open_ended / 10, 2),
                         "cognitive_depth_score": round(probing_depth / 10, 2),
                         "context_adaptation_score": round(age_appropriate / 10, 2),

@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Methodology | Socratic AI Benchmarking</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            color: #2d3748;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .nav {
+            background: #edf2f7;
+            padding: 15px 40px;
+            border-bottom: 2px solid #cbd5e0;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .nav a:hover {
+            color: #764ba2;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .subsection {
+            margin: 30px 0;
+        }
+
+        .subsection h3 {
+            font-size: 1.4em;
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            font-size: 1.05em;
+            line-height: 1.8;
+        }
+
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .dimension-card {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .dimension-card h4 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .dimension-card .score-range {
+            background: #edf2f7;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .example-box {
+            background: #f0f4f8;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .example-box strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .vector-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            padding: 30px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+
+        .vector-section h3 {
+            color: #667eea;
+            font-size: 1.6em;
+            margin-bottom: 15px;
+        }
+
+        .rubric-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .rubric-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .rubric-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .rubric-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .score-band {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .band-excellent { background: #48bb78; color: white; }
+        .band-good { background: #38b2ac; color: white; }
+        .band-fair { background: #ed8936; color: white; }
+        .band-poor { background: #f56565; color: white; }
+
+        code {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .data-flow {
+            background: #2d3748;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.8;
+        }
+
+        .data-flow .arrow {
+            color: #48bb78;
+            font-weight: bold;
+        }
+
+        ul {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Methodology</h1>
+            <p>How We Evaluate AI Models on the Socratic Method</p>
+        </div>
+
+        <div class="nav">
+            <a href="index.html">← Home</a>
+            <a href="research.html">Research Dashboard</a>
+            <a href="https://github.com/socratic-ai-institute/socratic-ai-benchmarks" target="_blank">GitHub</a>
+        </div>
+
+        <div class="content">
+            <!-- Overview -->
+            <div class="section">
+                <h2 class="section-title">Overview</h2>
+                <p>
+                    The Socratic AI Benchmarking Platform evaluates 24 AI language models on their ability to 
+                    practice <strong>Socratic pedagogy</strong>—teaching through carefully crafted questions 
+                    rather than lecturing or immediately providing answers.
+                </p>
+                <p>
+                    Each week, we run <strong>48 automated tests</strong> (24 models × 2 scenarios) and score 
+                    each response across 5 distinct dimensions of Socratic quality.
+                </p>
+            </div>
+
+            <!-- Test Types -->
+            <div class="section">
+                <h2 class="section-title">Test Types</h2>
+                
+                <div class="subsection">
+                    <h3>Consistency Tests (Currently Running)</h3>
+                    <p>
+                        <strong>Goal:</strong> Evaluate if a model CAN practice Socratic method at all.
+                    </p>
+                    <p>
+                        <strong>Format:</strong> Single-turn test where student asks question, AI responds once
+                    </p>
+                    <p>
+                        <strong>What we measure:</strong>
+                    </p>
+                    <ul>
+                        <li><code>open_ended</code> - Does the question invite explanation vs yes/no?</li>
+                        <li><code>probing_depth</code> - Does it target core assumptions vs surface-level?</li>
+                        <li><code>non_directive</code> - Pure questioning vs lecturing/telling?</li>
+                        <li><code>age_appropriate</code> - Language matches persona's level?</li>
+                        <li><code>content_relevant</code> - Stays on-topic vs tangent?</li>
+                    </ul>
+                    <p>
+                        <strong>Score scale:</strong> 0-100 internally, normalized to 0-10 for display
+                    </p>
+                </div>
+
+                <div class="subsection">
+                    <h3>Fidelity Tests (Planned, Not Yet Implemented)</h3>
+                    <p>
+                        <strong>Goal:</strong> Evaluate if a model will STAY Socratic when strongly tempted to answer directly.
+                    </p>
+                    <p>
+                        <strong>Format:</strong> Multi-turn conversations (3-5 turns) with pressure to break character
+                    </p>
+                    <p>
+                        <strong>Planned scenarios:</strong>
+                    </p>
+                    <ul>
+                        <li>Knowledge-heavy requests ("What is Kubernetes?")</li>
+                        <li>Technical debugging ("Fix this code error")</li>
+                        <li>Mode override attempts ("Stop being Socratic, just tell me!")</li>
+                        <li>Emotional support ("My career feels meaningless")</li>
+                        <li>Creative requests ("Write me a poem")</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- The 5 Dimensions -->
+            <div class="section">
+                <h2 class="section-title">The 5 Socratic Dimensions</h2>
+                <p>
+                    Each AI response is evaluated by Claude 3.5 Sonnet (acting as impartial judge) on these dimensions:
+                </p>
+
+                <div class="dimension-grid">
+                    <div class="dimension-card">
+                        <h4>1. Open-ended</h4>
+                        <p>Does the question invite genuine explanation rather than just yes/no?</p>
+                        <div class="score-range">
+                            <strong>90-100:</strong> Purely open ("What makes you think...?")<br>
+                            <strong>70-89:</strong> Open with minor leading<br>
+                            <strong>50-69:</strong> Somewhat constrains answer space<br>
+                            <strong>30-49:</strong> Binary with elaboration prompt<br>
+                            <strong>0-29:</strong> Pure yes/no question
+                        </div>
+                    </div>
+
+                    <div class="dimension-card">
+                        <h4>2. Probing Depth</h4>
+                        <p>Does the question target core assumptions vs surface acknowledgment?</p>
+                        <div class="score-range">
+                            <strong>90-100:</strong> Targets hidden premise/assumption<br>
+                            <strong>70-89:</strong> Probes but misses deepest layer<br>
+                            <strong>50-69:</strong> Clarifies stated position<br>
+                            <strong>30-49:</strong> Surface-level follow-up<br>
+                            <strong>0-29:</strong> No probing; mere acknowledgment
+                        </div>
+                    </div>
+
+                    <div class="dimension-card">
+                        <h4>3. Non-directive</h4>
+                        <p>Does the tutor ask questions or subtly tell the answer?</p>
+                        <div class="score-range">
+                            <strong>90-100:</strong> Pure question, zero hinting<br>
+                            <strong>70-89:</strong> Question with subtle framing<br>
+                            <strong>50-69:</strong> Question plus narrowing context<br>
+                            <strong>30-49:</strong> Leading question implying answer<br>
+                            <strong>0-29:</strong> Tells answer or lectures
+                        </div>
+                    </div>
+
+                    <div class="dimension-card">
+                        <h4>4. Age-appropriate</h4>
+                        <p>Is language and cognitive demand matched to the student persona?</p>
+                        <div class="score-range">
+                            <strong>90-100:</strong> Perfect match to persona level<br>
+                            <strong>70-89:</strong> Mostly appropriate<br>
+                            <strong>50-69:</strong> Somewhat mismatched<br>
+                            <strong>30-49:</strong> Clearly inappropriate<br>
+                            <strong>0-29:</strong> Completely wrong level
+                        </div>
+                    </div>
+
+                    <div class="dimension-card">
+                        <h4>5. Content-relevant</h4>
+                        <p>Does the question address the subject matter vs go off-topic?</p>
+                        <div class="score-range">
+                            <strong>90-100:</strong> Directly addresses core subject<br>
+                            <strong>70-89:</strong> Relevant but slightly tangential<br>
+                            <strong>50-69:</strong> Loosely connected<br>
+                            <strong>30-49:</strong> Barely related<br>
+                            <strong>0-29:</strong> Off-topic
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <strong>Overall Score Calculation:</strong>
+                    <code>overall = mean(open_ended, probing_depth, non_directive, age_appropriate, content_relevant)</code>
+                </div>
+            </div>
+
+            <!-- Three Socratic Vectors -->
+            <div class="section">
+                <h2 class="section-title">The Three Socratic Vectors</h2>
+                <p>
+                    We test AI models on three distinct Socratic teaching techniques, each requiring different 
+                    pedagogical approaches:
+                </p>
+
+                <div class="vector-section">
+                    <h3>1. Elenchus (Refutation / Contradiction Surfacing)</h3>
+                    <p><strong>Etymology:</strong> Greek "to refute" or "to cross-examine"</p>
+                    <p>
+                        <strong>Goal:</strong> Elicit and probe contradictions in the student's stated beliefs using their own logic.
+                    </p>
+                    <p><strong>Key Principles:</strong></p>
+                    <ul>
+                        <li>Surface internal contradictions without resolving them</li>
+                        <li>Use the student's own words against their position</li>
+                        <li>Force recognition of logical inconsistency</li>
+                        <li>Do NOT lecture or provide the "correct answer"</li>
+                        <li>Leave the student in productive discomfort</li>
+                    </ul>
+
+                    <div class="example-box" style="background: white;">
+                        <strong>Example Scenario: EL-ETH-UTIL-DEON-01</strong>
+                        <p><strong>Student says:</strong> "I believe in 100% utilitarianism—the greatest good is the only moral rule. Therefore, a doctor should harvest organs from one healthy person to save five others."</p>
+                        <p><strong>Good Socratic response:</strong> "You said the greatest good matters most. What if the healthy person doesn't volunteer—does their choice not matter in your framework?"</p>
+                        <p><strong>Bad response (lecturing):</strong> "That's actually problematic because utilitarianism conflicts with individual autonomy and rights, which is why most ethical frameworks are hybrid..."</p>
+                    </div>
+                </div>
+
+                <div class="vector-section">
+                    <h3>2. Maieutics (Scaffolding / Guided Discovery)</h3>
+                    <p><strong>Etymology:</strong> Greek "midwifery"—drawing out knowledge that already exists</p>
+                    <p>
+                        <strong>Goal:</strong> Scaffold from the student's correct foundational understanding to deeper levels through stepwise questions.
+                    </p>
+                    <p><strong>Key Principles:</strong></p>
+                    <ul>
+                        <li>Student has correct Level-1 knowledge but incomplete understanding</li>
+                        <li>Introduce ONE new idea per question</li>
+                        <li>Move from concrete → abstract, simple → complex</li>
+                        <li>Avoid information dumps</li>
+                        <li>Build progressively toward mastery</li>
+                    </ul>
+
+                    <div class="example-box" style="background: white;">
+                        <strong>Example Scenario: MAI-BIO-CRISPR-01</strong>
+                        <p><strong>Student says:</strong> "I know CRISPR's Cas9 is like molecular scissors that cuts DNA. But how does it know where to cut? The genome is huge."</p>
+                        <p><strong>Good Socratic response:</strong> "If Cas9 is scissors, what would help scissors find the right spot to cut?"</p>
+                        <p><strong>Bad response (lecturing):</strong> "The guide RNA (gRNA) provides specificity by binding to complementary DNA sequences. The Cas9 also requires a PAM sequence to recognize..."</p>
+                    </div>
+                </div>
+
+                <div class="vector-section">
+                    <h3>3. Aporia (Puzzlement / Misconception Deconstruction)</h3>
+                    <p><strong>Etymology:</strong> Greek "without passage"—being stuck</p>
+                    <p>
+                        <strong>Goal:</strong> Deconstruct a deep misconception, guide the student into productive puzzlement, then rebuild with questions.
+                    </p>
+                    <p><strong>Key Principles:</strong></p>
+                    <ul>
+                        <li>Student holds a false or incomplete mental model</li>
+                        <li>Tutor does NOT immediately correct</li>
+                        <li>Tutor exposes the flaw through questioning</li>
+                        <li>Student experiences cognitive dissonance (productive confusion)</li>
+                        <li>Then tutor scaffolds toward accurate model</li>
+                        <li>Three-phase: Challenge → Discomfort → Rebuild</li>
+                    </ul>
+
+                    <div class="example-box" style="background: white;">
+                        <strong>Example Scenario: APO-PHY-HEAT-TEMP-01</strong>
+                        <p><strong>Student misconception:</strong> "Metal spoons get hotter than soup, so they transfer more heat."</p>
+                        <p><strong>Good Socratic response:</strong> "If the metal spoon is already hotter, why does it eventually match the soup's temperature?"</p>
+                        <p><strong>Bad response (lecturing):</strong> "That's a common misconception. Heat and temperature are different—heat is energy transfer, temperature is molecular kinetic energy..."</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Flow -->
+            <div class="section">
+                <h2 class="section-title">System Architecture & Data Flow</h2>
+                
+                <div class="subsection">
+                    <h3>Weekly Benchmark Flow</h3>
+                    <div class="data-flow">
+EventBridge (Monday 3am UTC) <span class="arrow">→</span> Planner Lambda
+  <span class="arrow">↓</span>
+Generates 48 test jobs (24 models × 2 scenarios)
+  <span class="arrow">↓</span>
+SQS Queue: dialogue-jobs
+  <span class="arrow">↓</span>
+Runner Lambda (25x parallel) <span class="arrow">→</span> Invoke test model via Bedrock
+  <span class="arrow">↓</span>
+Save turn to S3: raw/runs/{run_id}/turn_000.json
+  <span class="arrow">↓</span>
+SQS Queue: judge-jobs
+  <span class="arrow">↓</span>
+Judge Lambda (25x parallel) <span class="arrow">→</span> Claude 3.5 Sonnet scores response
+  <span class="arrow">↓</span>
+Save judge to S3: raw/runs/{run_id}/judge_000.json
+  {
+    "scores": {
+      "open_ended": 75,      <span class="arrow">←</span> 0-100 scale
+      "probing_depth": 82,
+      "non_directive": 88,
+      "age_appropriate": 85,
+      "content_relevant": 90,
+      "overall": 84.0
+    }
+  }
+  <span class="arrow">↓</span>
+EventBridge: run.judged
+  <span class="arrow">↓</span>
+Curator Lambda <span class="arrow">→</span> Aggregate scores, write to DynamoDB
+  <span class="arrow">↓</span>
+API Gateway <span class="arrow">→</span> Read Lambda serves data
+  <span class="arrow">↓</span>
+CloudFront <span class="arrow">→</span> Static UI displays charts (0-10 scale)
+                    </div>
+                </div>
+
+                <div class="subsection">
+                    <h3>Score Scale Transformations</h3>
+                    <table class="rubric-table">
+                        <thead>
+                            <tr>
+                                <th>Stage</th>
+                                <th>Scale</th>
+                                <th>Location</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Judge output</td>
+                                <td><span class="score-band band-excellent">0-100</span></td>
+                                <td>LLM response</td>
+                                <td><code>{"open_ended": 75}</code></td>
+                            </tr>
+                            <tr>
+                                <td>S3 storage</td>
+                                <td><span class="score-band band-excellent">0-100</span></td>
+                                <td>judge_000.json</td>
+                                <td><code>{"open_ended": 75}</code></td>
+                            </tr>
+                            <tr>
+                                <td>DynamoDB summary</td>
+                                <td><span class="score-band band-excellent">0-100</span></td>
+                                <td>overall_score only</td>
+                                <td><code>{"overall_score": "84"}</code></td>
+                            </tr>
+                            <tr>
+                                <td>API response</td>
+                                <td><span class="score-band band-good">0-10</span></td>
+                                <td>÷ 10 normalization</td>
+                                <td><code>{"open_ended": 7.5}</code></td>
+                            </tr>
+                            <tr>
+                                <td>Chart Y-axis</td>
+                                <td><span class="score-band band-good">0-10</span></td>
+                                <td>Direct display</td>
+                                <td>Y=7.5</td>
+                            </tr>
+                            <tr>
+                                <td>Bar width</td>
+                                <td><span class="score-band band-fair">0-100%</span></td>
+                                <td>× 10 for CSS</td>
+                                <td><code>width: 75%</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Test Scenarios -->
+            <div class="section">
+                <h2 class="section-title">Current Test Scenarios (9 Total)</h2>
+
+                <div class="subsection">
+                    <h3>Elenchus Scenarios (2)</h3>
+                    <ul>
+                        <li><strong>EL-ETH-UTIL-DEON-01:</strong> Utilitarian Absolutism vs Rights/Deontology (11th grade ethics)</li>
+                        <li><strong>EL-CIV-FREE-HARM-01:</strong> Free Speech Absolutism vs Harm/Punishment (10th grade civics)</li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <h3>Maieutics Scenarios (2)</h3>
+                    <ul>
+                        <li><strong>MAI-BIO-CRISPR-01:</strong> CRISPR Gene Editing - Mechanism to Application (12th grade AP Bio)</li>
+                        <li><strong>MAI-ECO-INFL-01:</strong> Inflation - Simple to Nuanced Understanding (11th grade economics)</li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <h3>Aporia Scenarios (4)</h3>
+                    <ul>
+                        <li><strong>APO-PHY-HEAT-TEMP-01:</strong> Heat vs Temperature Misconception (10th grade physics)</li>
+                        <li><strong>APO-BIO-GENE-DETERM-01:</strong> One-Gene-One-Trait Determinism (12th grade genetics)</li>
+                        <li><strong>APO-BIO-EVOL-LAM-01:</strong> Evolution - Lamarckian Misconception (11th grade biology)</li>
+                        <li><strong>APO-PHY-QUANT-OBS-01:</strong> Quantum Observation Anthropomorphism (12th grade physics)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Judge Model -->
+            <div class="section">
+                <h2 class="section-title">Judge Model & Calibration</h2>
+                
+                <p>
+                    <strong>Judge:</strong> <code>anthropic.claude-3-5-sonnet-20240620-v1:0</code> (temperature=0.3 for consistency)
+                </p>
+
+                <p>
+                    <strong>Judge Calibration:</strong>
+                </p>
+                <ul>
+                    <li>Most responses should score <strong>40-80</strong></li>
+                    <li>Reserve <strong>90+</strong> for truly exemplary Socratic questioning</li>
+                    <li>Use <strong>0-30</strong> for poor responses</li>
+                    <li>Be discriminating; use full 0-100 range</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Why Claude 3.5 Sonnet as Judge?</strong>
+                    <ul>
+                        <li>Strong pedagogical reasoning capabilities</li>
+                        <li>Consistent scoring (low temperature)</li>
+                        <li>Can distinguish subtle differences in question quality</li>
+                        <li>Cost-effective: ~$0.10 per full benchmark run</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Cost & Performance -->
+            <div class="section">
+                <h2 class="section-title">Cost & Performance</h2>
+                
+                <table class="rubric-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Value</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Models Tested</td>
+                            <td>24</td>
+                            <td>All AWS Bedrock models</td>
+                        </tr>
+                        <tr>
+                            <td>Tests Per Week</td>
+                            <td>48</td>
+                            <td>24 models × 2 scenarios</td>
+                        </tr>
+                        <tr>
+                            <td>Parallel Workers</td>
+                            <td>25</td>
+                            <td>Concurrent Lambda executions</td>
+                        </tr>
+                        <tr>
+                            <td>Total Runtime</td>
+                            <td>~8 minutes</td>
+                            <td>End-to-end weekly benchmark</td>
+                        </tr>
+                        <tr>
+                            <td>Monthly Cost</td>
+                            <td>~$22</td>
+                            <td>Lambda + Bedrock + DynamoDB + S3</td>
+                        </tr>
+                        <tr>
+                            <td>Data Retention</td>
+                            <td>90 days hot, then Glacier</td>
+                            <td>All judge files archived</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Data Storage -->
+            <div class="section">
+                <h2 class="section-title">Data Storage & Access Patterns</h2>
+
+                <div class="subsection">
+                    <h3>DynamoDB: socratic_core</h3>
+                    <p><strong>Access Pattern:</strong> Single-table design with GSIs</p>
+                    
+                    <table class="rubric-table">
+                        <thead>
+                            <tr>
+                                <th>Item Type</th>
+                                <th>PK</th>
+                                <th>SK</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Run metadata</td>
+                                <td><code>RUN#{run_id}</code></td>
+                                <td><code>META</code></td>
+                                <td>model_id, scenario_id, status</td>
+                            </tr>
+                            <tr>
+                                <td>Turn header</td>
+                                <td><code>RUN#{run_id}</code></td>
+                                <td><code>TURN#000</code></td>
+                                <td>tokens, latency, s3_key</td>
+                            </tr>
+                            <tr>
+                                <td>Judge header</td>
+                                <td><code>RUN#{run_id}</code></td>
+                                <td><code>JUDGE#000</code></td>
+                                <td>overall_score, s3_key</td>
+                            </tr>
+                            <tr>
+                                <td>Run summary</td>
+                                <td><code>RUN#{run_id}</code></td>
+                                <td><code>SUMMARY</code></td>
+                                <td>overall_score, total_tokens</td>
+                            </tr>
+                            <tr>
+                                <td>Weekly aggregate</td>
+                                <td><code>WEEK#{week}#MODEL#{id}</code></td>
+                                <td><code>SUMMARY</code></td>
+                                <td>mean_score, run_count</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="subsection">
+                    <h3>S3: socratic-bench-data</h3>
+                    <p><strong>Structure:</strong></p>
+                    <ul>
+                        <li><code>raw/runs/{run_id}/turn_000.json</code> - Full conversation turn with prompts</li>
+                        <li><code>raw/runs/{run_id}/judge_000.json</code> - All 5 dimension scores (0-100 scale)</li>
+                        <li><code>curated/runs/{run_id}.json</code> - Aggregated run summary</li>
+                        <li><code>artifacts/manifest.json</code> - Test configuration</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Future Roadmap -->
+            <div class="section">
+                <h2 class="section-title">Future Roadmap</h2>
+                
+                <div class="subsection">
+                    <h3>Short-term (Next 4 Weeks)</h3>
+                    <ul>
+                        <li>✅ Terminology unified (accurate Socratic dimension names)</li>
+                        <li>Add 5 more elenchus scenarios (STEM domains)</li>
+                        <li>Implement multi-turn maieutics tests</li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <h3>Medium-term (2-3 Months)</h3>
+                    <ul>
+                        <li>Launch 15 fidelity tests (context-based stress tests)</li>
+                        <li>Add new dimensions: persistence, drift_resistance, context_memory</li>
+                        <li>Historical trend analysis (model improvements over time)</li>
+                    </ul>
+                </div>
+
+                <div class="subsection">
+                    <h3>Long-term (6 Months)</h3>
+                    <ul>
+                        <li>Expand to 100+ scenarios across all major academic domains</li>
+                        <li>Multi-modal scenarios (diagrams, images)</li>
+                        <li>Public leaderboard and API</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- References -->
+            <div class="section">
+                <h2 class="section-title">Documentation References</h2>
+                <ul>
+                    <li><strong>SCENARIOS.md:</strong> Complete scenario catalog with pedagogical notes</li>
+                    <li><strong>ARCHITECTURE.md:</strong> Full system architecture and data flow</li>
+                    <li><strong>TERMINOLOGY_DOCUMENTATION.md:</strong> Naming conventions and terminology resolution</li>
+                    <li><strong>UNIFICATION_PLAN.md:</strong> Migration plan for accurate terminology</li>
+                    <li><strong>GitHub:</strong> <a href="https://github.com/socratic-ai-institute/socratic-ai-benchmarks" target="_blank" style="color: #667eea;">socratic-ai-institute/socratic-ai-benchmarks</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
