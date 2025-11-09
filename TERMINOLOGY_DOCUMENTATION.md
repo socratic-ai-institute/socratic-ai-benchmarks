@@ -7,7 +7,7 @@
 We have a **terminology mismatch** between what we measure and what we display:
 
 **Backend (Judge & S3):**
-- Measures: **Socratic Consistency Dimensions** (single-turn quality)
+- Measures: **Socratic Disposition Dimensions** (single-turn quality)
 - Storage: `open_ended`, `probing_depth`, `non_directive`, `age_appropriate`, `content_relevant`
 - Scale: 0-100
 
@@ -73,7 +73,7 @@ content_relevant = scores.get("content_relevant") # On-topic vs tangent
 
 ## What We Actually Have Deployed
 
-### Test Type: **Socratic Consistency** (Single-Turn)
+### Test Type: **Socratic Disposition** (Single-Turn)
 
 **Judge:** `anthropic.claude-3-5-sonnet-20240620-v1:0` (temperature=0.3)
 
@@ -219,7 +219,7 @@ Fidelity tests will ADD new dimensions, not replace existing ones:
 
 ```json
 {
-  // Consistency dimensions (single-turn quality)
+  // Disposition dimensions (single-turn quality)
   "open_ended": 7.5,
   "probing_depth": 8.2,
   "non_directive": 8.8,

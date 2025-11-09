@@ -484,7 +484,7 @@ def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
                         "run_id": run_id,
                         "model_id": model_id,
                         "scenario_name": scenario_id,
-                        "test_type": "consistency",
+                        "test_type": "disposition",
                         "overall_score": round(overall / 10, 2),
                         # Accurate Socratic dimension names (new)
                         "open_ended_score": round(open_ended / 10, 2),

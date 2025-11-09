@@ -2,7 +2,7 @@
 
 **Date**: November 5, 2025  
 **Models Tested**: 25  
-**Test Type**: Consistency Tests (2 scenarios per model)  
+**Test Type**: Disposition Tests (2 scenarios per model)  
 **Total Evaluations**: 50 scenario runs  
 **AWS Profile**: mvp (us-east-1)
 
@@ -198,7 +198,7 @@ This is the **most critical finding** - no model truly understands Socratic peda
 - **System Prompt**: Standard Socratic instruction template
 - **Temperature**: 0.7
 - **Max Tokens**: 500
-- **Scenarios**: 2 consistency tests per model
+- **Scenarios**: 2 disposition tests per model
   - Leadership Development (5 turns)
   - Productivity System (4 turns)
 - **Context Growth**: Added distractor text to stress-test context window

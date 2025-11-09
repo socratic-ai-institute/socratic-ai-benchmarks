@@ -921,7 +921,7 @@ models.forEach(model => {
       "run_id": "01K9HK...",
       "model_id": "meta.llama3-1-70b-instruct-v1:0",
       "scenario_name": "MAI-BIO-CRISPR-01",
-      "test_type": "consistency",
+      "test_type": "disposition",
       "overall_score": 8.72,               // 0-10 scale (average of dimensions)
       "open_ended_score": 8.5,             // Question invites explanation
       "probing_depth_score": 9.0,          // Targets core assumptions
@@ -934,7 +934,7 @@ models.forEach(model => {
 ```
 
 **Filters:**
-- Test type (consistency/fidelity)
+- Test type (disposition/fidelity)
 - Provider (anthropic/meta/amazon/etc.)
 - Model dropdown
 - Scenario dropdown
@@ -1054,9 +1054,9 @@ Chart.js renders data
    ```
 
 **Field Names (Updated 2025-11-08):**
-- ✅ API and UI now use accurate Socratic consistency dimension names
+- ✅ API and UI now use accurate Socratic disposition dimension names
 - ✅ Backwards compatible: deprecated fidelity names still returned for 2 weeks
-- We run single-turn **consistency tests** with 5 Socratic dimensions
+- We run single-turn **disposition tests** with 5 Socratic dimensions
 - Future: Add multi-turn **fidelity tests** as separate metrics (persistence, resistance_to_drift, memory_preservation)
 
 ---
@@ -1069,7 +1069,7 @@ Chart.js renders data
 2. Filter to latest run per model
 3. Extract `overall_score` from SUMMARY (0-100 scale)
 4. Normalize to 0-10 for UI
-5. Returns actual dimension scores from S3 judge files (open_ended, probing_depth, non_directive, age_appropriate)
+5. Returns actual dimension scores from S3 judge files (open_ended, probing_depth, non_directive, age_appropriate, content_relevant)
 
 ---
 
@@ -1122,7 +1122,7 @@ scales: {
 
 ### Why Dimension Scores Look Identical
 
-**Current State:** We run **single-turn consistency tests**
+**Current State:** We run **single-turn disposition tests**
 - Each run = 1 dialogue turn
 - Judge scores 5 Socratic dimensions
 - SUMMARY only stores `overall_score` (average of 5 dimensions)

@@ -211,7 +211,7 @@
             text-transform: uppercase;
         }
 
-        .badge-consistency { background: #bee3f8; color: #2c5282; }
+        .badge-disposition { background: #bee3f8; color: #2c5282; }
         .badge-complexity { background: #fbd38d; color: #7c2d12; }
         .badge-ambiguity { background: #c6f6d5; color: #22543d; }
         .badge-interrupt_redirect { background: #fed7d7; color: #742a2a; }
@@ -315,7 +315,7 @@
                     <label style="display: block; color: #495057; font-size: 0.85rem; margin-bottom: 0.5rem; font-weight: 600;">Test Type</label>
                     <select id="filter-test-type" style="width: 100%; padding: 0.5rem; background: white; color: #495057; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;">
                         <option value="">All Types</option>
-                        <option value="consistency">Consistency</option>
+                        <option value="disposition">Disposition</option>
                         <option value="fidelity">Fidelity</option>
                     </select>
                 </div>
@@ -739,7 +739,7 @@
 
             results.forEach(result => {
                 const row = document.createElement('tr');
-                const testTypeBadge = result.test_type === 'fidelity' ? 'badge-fidelity' : 'badge-consistency';
+                const testTypeBadge = result.test_type === 'fidelity' ? 'badge-fidelity' : 'badge-disposition';
                 let scoreClass = 'score-excellent';
                 const overall = result.overall_score;
                 if (overall < 4) scoreClass = 'score-poor';
