@@ -12,7 +12,6 @@ Flow:
 5. Write JUDGE item to DynamoDB + full rationale JSON to S3
 6. Check if all turns judged → emit run.judged event
 """
-
 import json
 import os
 from datetime import datetime, timezone
@@ -20,12 +19,7 @@ from typing import Dict, Any, Optional
 import boto3
 
 # Import from layer
-from socratic_bench import (
-    judge_turn,
-    compute_heuristic_scores,
-    compute_vector_scores,
-    BedrockClient,
-)
+from socratic_bench import compute_heuristic_scores, compute_vector_scores, BedrockClient
 
 # AWS clients
 s3 = boto3.client("s3")
@@ -54,10 +48,8 @@ def lambda_handler(event, context):
 
             result = judge_turn_job(job)
 
-            print(
-                f"Judge complete: {job['run_id']} / {job['turn_index']}, "
-                f"score={result.get('overall_score', 0)}"
-            )
+            print(f"Judge complete: {job['run_id']} / {job['turn_index']}, "
+                  f"score={result.get('overall_score', 0)}")
 
         except Exception as e:
             print(f"Error judging turn: {e}")
@@ -180,9 +172,7 @@ def save_judge_result(
             "run_id": run_id,
             "turn_index": turn_index,
             "s3_key": s3_key,
-            "overall_score": str(
-                overall_score
-            ),  # DynamoDB doesn't support float natively
+            "overall_score": str(overall_score),  # DynamoDB doesn't support float natively
             "has_question": heuristics["has_question"],
             "is_open_ended": heuristics["is_open_ended"],
             "judge_model": judge_result.judge_model_id,

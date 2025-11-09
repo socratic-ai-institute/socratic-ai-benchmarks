@@ -135,7 +135,71 @@ print(f"Estimated tokens: {stats['estimated_tokens']}")
 
 ---
 
-### 4. Scorer (`scorer.py`)
+### 4. Socratic Answer Evaluator (`socratic_answer_evaluator.py`)
+
+**Purpose**: AI-powered evaluation of answer quality along three dimensions.
+
+**Three Core Metrics**:
+
+1. **Verbosity** (raw measurement)
+   - Raw token count from API response
+   - Not AI-evaluated, just measured
+   - Penalty threshold: 200 tokens
+
+2. **Ends with Socratic Question** (binary, AI-evaluated)
+   - Does the answer end with a genuine Socratic question?
+   - Distinguishes from procedural questions ("Would you like me to proceed?")
+   - Distinguishes from yes/no confirmations ("Is that clear?")
+
+3. **Directional Socraticism** (0.00-1.00, AI-evaluated)
+   - Measures whether answer guides toward introspection vs. providing information
+   - 0.90-1.00: Pure Socratic (only probing questions)
+   - 0.70-0.89: Highly Socratic (mostly questions, minimal context)
+   - 0.50-0.69: Moderately Socratic (balanced)
+   - 0.30-0.49: Slightly Socratic (mostly information)
+   - 0.00-0.29: Not Socratic (pure data/answers)
+
+**Composite Scoring Formula**:
+```python
+composite_score = (
+    directional_socraticism * 0.50 +    # Most critical
+    question_ending_score * 0.35 +       # Nearly as important
+    verbosity_score * 0.15               # Important but less critical
+)
+```
+
+Where:
+- `verbosity_score = max(0.0, 1.0 - (token_count / 200))`
+- `question_ending_score = 1.0 if ends_with_socratic_question else 0.0`
+
+**Usage**:
+```python
+from socratic_eval.context_growth import evaluate_socratic_answer
+
+# Evaluate an answer
+score = evaluate_socratic_answer(
+    response="What assumptions are you making about what makes someone a good leader?",
+    token_count=13  # From API response metadata
+)
+
+print(f"Composite Quality: {score['composite_score']:.2f}/1.00")
+print(f"Directional: {score['directional_socraticism']:.2f}")
+print(f"Socratic Ending: {'✓' if score['ends_with_socratic_question'] else '✗'}")
+print(f"Verbosity: {score['verbosity_tokens']} tokens")
+```
+
+**Example Scores**:
+| Response | Tokens | Ending | Directional | Composite |
+|----------|--------|--------|-------------|-----------|
+| "What do you mean by 'leadership'?" | 12 | ✓ | 0.92 | 0.86 |
+| "Let me explain three key traits..." | 45 | ✗ | 0.15 | 0.16 |
+| "Have you considered alternatives?" | 8 | ✓ | 0.88 | 0.83 |
+
+**Note**: This evaluator is automatically used by the runner unless disabled with `--no-answer-quality` flag.
+
+---
+
+### 5. Scorer (`scorer.py`)
 
 **Purpose**: Aggregate per-turn disposition scores into overall metrics.
 
@@ -160,6 +224,12 @@ print(f"Estimated tokens: {stats['estimated_tokens']}")
 5. **Memory Preservation**: Maintains conversational coherence
    - Based on Groundedness scores
    - Penalizes decline in later turns
+
+**Answer Quality Metrics** (aggregated):
+- **Average Verbosity**: Mean token count across all answers
+- **% Socratic Endings**: Percentage of answers ending with Socratic questions
+- **Average Directional Socraticism**: Mean directional score (0.00-1.00)
+- **Average Composite Quality**: Mean composite answer quality score (0.00-1.00)
 
 **Usage**:
 ```python
@@ -210,6 +280,11 @@ python -m socratic_eval.context_growth.runner \
 python -m socratic_eval.context_growth.runner \
   --models "test-model" \
   --mock
+
+# Disable answer quality evaluation (faster)
+python -m socratic_eval.context_growth.runner \
+  --models "claude-sonnet-4" \
+  --no-answer-quality
 ```
 
 **Python API**:
@@ -221,7 +296,8 @@ results = run_context_growth_evaluation(
     output_file="my_results.json",
     test_types=["consistency", "complexity"],
     use_llm_judge=False,
-    mock_mode=False
+    mock_mode=False,
+    enable_answer_quality=True  # Default, set to False to disable
 )
 
 print(results['summary'])
@@ -248,7 +324,11 @@ print(results['summary'])
             "context_adaptability": 8.8,
             "resistance_to_drift": 9.0,
             "memory_preservation": 8.3,
-            "overall": 8.76
+            "overall": 8.76,
+            "avg_verbosity_tokens": 15.3,
+            "pct_socratic_endings": 95.5,
+            "avg_directional_socraticism": 0.88,
+            "avg_composite_quality": 0.84
           },
           "turn_results": [...]
         }
@@ -452,23 +532,27 @@ python -m socratic_eval.context_growth.runner \
 
 ```
 context_growth/
-├── __init__.py                 # Package exports
-├── disposition_rubric.py       # 0-10 per-turn scoring
-├── test_scenarios.py           # 10 structured test cases
-├── context_expander.py         # Context growth utilities
-├── scorer.py                   # 5 aggregate metrics
-├── runner.py                   # Main orchestrator
-├── generate_dashboard.py       # HTML visualization
-└── README.md                   # This file
+├── __init__.py                    # Package exports
+├── disposition_rubric.py          # 0-10 per-turn scoring
+├── socratic_answer_evaluator.py   # AI-powered answer quality scoring
+├── test_scenarios.py              # 10 structured test cases
+├── context_expander.py            # Context growth utilities
+├── scorer.py                      # 5 aggregate metrics + answer quality
+├── runner.py                      # Main orchestrator
+├── generate_dashboard.py          # HTML visualization
+└── README.md                      # This file
 ```
 
 **Data Flow**:
 ```
-Scenario → Runner → Model → Response
-                      ↓
-          Disposition Rubric (0-10)
-                      ↓
-           Scorer (5 metrics)
+Scenario → Runner → Model → Response (with token count)
+                      ↓              ↓
+                      ↓    Answer Quality Evaluator
+                      ↓    (verbosity, ending, directional)
+                      ↓              ↓
+          Disposition Rubric (0-10) ↓
+                      ↓              ↓
+           Scorer (5 metrics + 4 quality metrics)
                       ↓
               Results JSON
                       ↓
