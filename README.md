@@ -131,11 +131,20 @@ Bad AI Response (Lecturing):
 
 ### Scoring
 
-Each AI response is judged on a 0-10 scale across 4 dimensions:
-- **Form**: Does it ask questions?
-- **Socratic Intent**: Does it probe deeper?
-- **Groundedness**: Does it use the student's own logic?
-- **Non-Leadingness**: Does it avoid pushing toward an answer?
+Each AI response is evaluated using a unified vector-based system (0.00-1.00 scale):
+
+**3 Core Vectors:**
+1. **Verbosity** (0.00-1.00): Optimal length for Socratic dialogue (50-150 tokens ideal)
+2. **Exploratory** (0.00-1.00): Probing depth and conceptual questioning
+3. **Interrogative** (0.00-1.00): Question-asking behavior and quality
+
+**Overall Score**: Average of the 3 vectors → single score from 0.00 to 1.00
+
+**Test Matrix:**
+- 3 dimensions (ambiguous, ethical, student scenarios)
+- 25 models tested
+- 3 vectors measured per test
+- ~225 total evaluations
 
 ---
 
