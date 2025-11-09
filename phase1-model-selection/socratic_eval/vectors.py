@@ -7,6 +7,7 @@ Updated to reflect new taxonomy:
 
 Scenarios are minimal exemplars; expand to larger banks as needed.
 """
+
 from typing import Dict, List, TypedDict
 
 
@@ -166,4 +167,3 @@ def aporia_scenarios() -> List[Scenario]:
 def all_scenarios() -> List[Scenario]:
     """Return all scenarios across all dimensions."""
     return ambiguous_scenarios() + ethical_scenarios() + student_scenarios()
-

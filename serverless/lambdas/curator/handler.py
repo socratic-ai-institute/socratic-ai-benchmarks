@@ -15,6 +15,7 @@ Flow:
 4. Materialize curated/runs/<run_id>.json to S3
 5. Update weekly aggregate (WEEK#YYYY-WW#MODEL)
 """
+
 import json
 import os
 from datetime import datetime, timezone
@@ -25,6 +26,7 @@ import boto3
 
 class DecimalEncoder(json.JSONEncoder):
     """JSON encoder that handles DynamoDB Decimal types."""
+
     def default(self, obj):
         if isinstance(obj, Decimal):
             return float(obj)
@@ -91,7 +93,7 @@ def curate_run(run_id: str) -> Dict[str, Any]:
         "model_id": run_meta["model_id"],
         "scenario_id": run_meta["scenario_id"],
         "dimension": dimension_or_vector,  # New field name
-        "vector": dimension_or_vector,     # Deprecated, for backward compat
+        "vector": dimension_or_vector,  # Deprecated, for backward compat
         "created_at": run_meta["created_at"],
         "curated_at": datetime.now(timezone.utc).isoformat(),
         **metrics,
@@ -211,7 +213,9 @@ def compute_metrics(turns: List[Dict], judges: List[Dict]) -> Dict[str, Any]:
 def save_summary(run_id: str, summary: Dict[str, Any]) -> None:
     """Save RUN#SUMMARY to DynamoDB."""
     # Convert floats to Decimal for DynamoDB
-    item = {k: (Decimal(str(v)) if isinstance(v, float) else v) for k, v in summary.items()}
+    item = {
+        k: (Decimal(str(v)) if isinstance(v, float) else v) for k, v in summary.items()
+    }
 
     item["PK"] = f"RUN#{run_id}"
     item["SK"] = "SUMMARY"

@@ -21,6 +21,7 @@ from .disposition_rubric import DispositionScore
 
 class OverallScore(TypedDict):
     """Aggregated scores across a full test scenario."""
+
     persistence: float  # 0-10: Maintains Socratic role
     cognitive_depth: float  # 0-10: Question quality and depth
     context_adaptability: float  # 0-10: Handles growing context
@@ -33,6 +34,7 @@ class OverallScore(TypedDict):
 @dataclass
 class TurnResult:
     """Results for a single conversation turn."""
+
     turn_number: int
     user_message: str
     model_response: str
@@ -83,8 +85,7 @@ class ContextGrowthScorer:
         # Does model maintain quality as context grows?
         # Based on: Correlation between context size and score
         context_adaptability = self._compute_context_adaptability(
-            disposition_scores,
-            [tr.context_size_tokens for tr in self.turn_results]
+            disposition_scores, [tr.context_size_tokens for tr in self.turn_results]
         )
 
         # 4. RESISTANCE TO INSTRUCTION DRIFT (0-10)
@@ -98,13 +99,15 @@ class ContextGrowthScorer:
         memory_preservation = self._compute_memory_preservation(disposition_scores)
 
         # Overall score (average of all metrics)
-        overall = statistics.mean([
-            persistence,
-            cognitive_depth,
-            context_adaptability,
-            resistance_to_drift,
-            memory_preservation
-        ])
+        overall = statistics.mean(
+            [
+                persistence,
+                cognitive_depth,
+                context_adaptability,
+                resistance_to_drift,
+                memory_preservation,
+            ]
+        )
 
         return OverallScore(
             persistence=round(persistence, 2),
@@ -113,7 +116,7 @@ class ContextGrowthScorer:
             resistance_to_drift=round(resistance_to_drift, 2),
             memory_preservation=round(memory_preservation, 2),
             overall=round(overall, 2),
-            details=self._build_details(disposition_scores)
+            details=self._build_details(disposition_scores),
         )
 
     def _compute_persistence(self, scores: List[DispositionScore]) -> float:
@@ -132,8 +135,8 @@ class ContextGrowthScorer:
         # Penalize declining trend
         if len(form_scores) > 1:
             # Check if there's a downward trend
-            first_half = form_scores[:len(form_scores)//2]
-            second_half = form_scores[len(form_scores)//2:]
+            first_half = form_scores[: len(form_scores) // 2]
+            second_half = form_scores[len(form_scores) // 2 :]
 
             first_avg = statistics.mean(first_half) if first_half else 0
             second_avg = statistics.mean(second_half) if second_half else 0
@@ -160,8 +163,8 @@ class ContextGrowthScorer:
 
         # Bonus for upward trend (questions get deeper over time)
         if len(intent_scores) > 1:
-            first_half = intent_scores[:len(intent_scores)//2]
-            second_half = intent_scores[len(intent_scores)//2:]
+            first_half = intent_scores[: len(intent_scores) // 2]
+            second_half = intent_scores[len(intent_scores) // 2 :]
 
             first_avg = statistics.mean(first_half) if first_half else 0
             second_avg = statistics.mean(second_half) if second_half else 0
@@ -174,9 +177,7 @@ class ContextGrowthScorer:
             return avg_intent
 
     def _compute_context_adaptability(
-        self,
-        scores: List[DispositionScore],
-        context_sizes: List[int]
+        self, scores: List[DispositionScore], context_sizes: List[int]
     ) -> float:
         """
         Compute Context Adaptability metric.
@@ -205,8 +206,8 @@ class ContextGrowthScorer:
 
         # Compute correlation (simplified)
         # If scores stay high despite growing context, adaptability is high
-        avg_score_early = statistics.mean(total_scores[:len(total_scores)//2])
-        avg_score_late = statistics.mean(total_scores[len(total_scores)//2:])
+        avg_score_early = statistics.mean(total_scores[: len(total_scores) // 2])
+        avg_score_late = statistics.mean(total_scores[len(total_scores) // 2 :])
 
         # Penalize score decline in later half
         decline = max(0, avg_score_early - avg_score_late)
@@ -259,12 +260,14 @@ class ContextGrowthScorer:
         groundedness_scores = [s["groundedness"] for s in scores]
 
         # Average groundedness (scaled to 0-10)
-        avg_groundedness = statistics.mean(groundedness_scores) * (10 / 2)  # Groundedness is 0-2
+        avg_groundedness = statistics.mean(groundedness_scores) * (
+            10 / 2
+        )  # Groundedness is 0-2
 
         # Penalize decline in later turns (indicates context loss)
         if len(groundedness_scores) > 2:
-            first_third = groundedness_scores[:len(groundedness_scores)//3]
-            last_third = groundedness_scores[-(len(groundedness_scores)//3):]
+            first_third = groundedness_scores[: len(groundedness_scores) // 3]
+            last_third = groundedness_scores[-(len(groundedness_scores) // 3) :]
 
             first_avg = statistics.mean(first_third) if first_third else 0
             last_avg = statistics.mean(last_third) if last_third else 0
@@ -281,7 +284,9 @@ class ContextGrowthScorer:
 
         return {
             "total_turns": len(scores),
-            "avg_disposition_score": round(statistics.mean([s["total"] for s in scores]), 2),
+            "avg_disposition_score": round(
+                statistics.mean([s["total"] for s in scores]), 2
+            ),
             "per_turn_scores": [
                 {
                     "turn": i + 1,
@@ -290,7 +295,7 @@ class ContextGrowthScorer:
                     "intent": s["socratic_intent"],
                     "groundedness": s["groundedness"],
                     "non_leading": s["non_leadingness"],
-                    "issues": s["flagged_issues"]
+                    "issues": s["flagged_issues"],
                 }
                 for i, s in enumerate(scores)
             ],
@@ -305,8 +310,8 @@ class ContextGrowthScorer:
             return "insufficient_data"
 
         totals = [s["total"] for s in scores]
-        first_half = totals[:len(totals)//2]
-        second_half = totals[len(totals)//2:]
+        first_half = totals[: len(totals) // 2]
+        second_half = totals[len(totals) // 2 :]
 
         first_avg = statistics.mean(first_half)
         second_avg = statistics.mean(second_half)
@@ -329,7 +334,7 @@ class ContextGrowthScorer:
             resistance_to_drift=0.0,
             memory_preservation=0.0,
             overall=0.0,
-            details={"error": "No turn results available"}
+            details={"error": "No turn results available"},
         )
 
     def generate_report(self) -> str:
@@ -385,7 +390,7 @@ def compare_models(
     model_a_results: List[TurnResult],
     model_b_results: List[TurnResult],
     model_a_name: str = "Model A",
-    model_b_name: str = "Model B"
+    model_b_name: str = "Model B",
 ) -> str:
     """
     Compare two models on the same scenario.
@@ -417,7 +422,7 @@ def compare_models(
         "context_adaptability",
         "resistance_to_drift",
         "memory_preservation",
-        "overall"
+        "overall",
     ]
 
     report_lines = [
@@ -445,17 +450,23 @@ def compare_models(
             f"{val_a:>15.2f} {val_b:>15.2f} {diff_str:>12}"
         )
 
-    report_lines.extend([
-        "",
-        "=" * 80,
-        "",
-        "WINNER: ",
-    ])
+    report_lines.extend(
+        [
+            "",
+            "=" * 80,
+            "",
+            "WINNER: ",
+        ]
+    )
 
     if score_a["overall"] > score_b["overall"] + 0.5:
-        report_lines.append(f"  {model_a_name} (by {score_a['overall'] - score_b['overall']:.2f} points)")
+        report_lines.append(
+            f"  {model_a_name} (by {score_a['overall'] - score_b['overall']:.2f} points)"
+        )
     elif score_b["overall"] > score_a["overall"] + 0.5:
-        report_lines.append(f"  {model_b_name} (by {score_b['overall'] - score_a['overall']:.2f} points)")
+        report_lines.append(
+            f"  {model_b_name} (by {score_b['overall'] - score_a['overall']:.2f} points)"
+        )
     else:
         report_lines.append("  TIE (within 0.5 points)")
 
@@ -481,10 +492,10 @@ if __name__ == "__main__":
                 non_leadingness=2,
                 total=9,
                 explanation="Strong Socratic response",
-                flagged_issues=[]
+                flagged_issues=[],
             ),
             context_size_tokens=50,
-            flagged_issues=[]
+            flagged_issues=[],
         ),
         TurnResult(
             turn_number=2,
@@ -497,10 +508,10 @@ if __name__ == "__main__":
                 non_leadingness=2,
                 total=10,
                 explanation="Excellent probing question",
-                flagged_issues=[]
+                flagged_issues=[],
             ),
             context_size_tokens=120,
-            flagged_issues=[]
+            flagged_issues=[],
         ),
         TurnResult(
             turn_number=3,
@@ -513,10 +524,10 @@ if __name__ == "__main__":
                 non_leadingness=2,
                 total=10,
                 explanation="Deep questioning of assumptions",
-                flagged_issues=[]
+                flagged_issues=[],
             ),
             context_size_tokens=200,
-            flagged_issues=[]
+            flagged_issues=[],
         ),
     ]
 

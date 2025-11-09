@@ -24,7 +24,7 @@ STUDENT_PROFILES = [
     {"age": 17, "grade": 12, "depth_preference": "deep"},
     {"age": 18, "grade": 12, "depth_preference": "moderate"},
     {"age": 14, "grade": 9, "depth_preference": "deep"},
-    {"age": 18, "grade": 12, "depth_preference": "surface"}
+    {"age": 18, "grade": 12, "depth_preference": "surface"},
 ]
 
 # 4 Content Segments (Richmond/Tredegar Iron Works History)
@@ -37,10 +37,10 @@ CONTENT_SEGMENTS = [
             "Industrial Revolution",
             "Richmond's geographic advantages",
             "Railroad expansion",
-            "Southern industrialization"
+            "Southern industrialization",
         ],
         "difficulty_level": "introductory",
-        "time_period": "1837-1860"
+        "time_period": "1837-1860",
     },
     {
         "id": 2,
@@ -50,10 +50,10 @@ CONTENT_SEGMENTS = [
             "Confederate war industry",
             "Munitions production",
             "Enslaved labor in industry",
-            "Strategic military importance"
+            "Strategic military importance",
         ],
         "difficulty_level": "intermediate",
-        "time_period": "1861-1865"
+        "time_period": "1861-1865",
     },
     {
         "id": 3,
@@ -63,10 +63,10 @@ CONTENT_SEGMENTS = [
             "Post-war economic transition",
             "Labor movements and strikes",
             "Wage labor vs. enslaved labor",
-            "Reconstruction challenges"
+            "Reconstruction challenges",
         ],
         "difficulty_level": "intermediate",
-        "time_period": "1865-1900"
+        "time_period": "1865-1900",
     },
     {
         "id": 4,
@@ -76,11 +76,11 @@ CONTENT_SEGMENTS = [
             "Historical preservation",
             "Public memory and commemoration",
             "Multiple historical perspectives",
-            "Museums and interpretation"
+            "Museums and interpretation",
         ],
         "difficulty_level": "advanced",
-        "time_period": "1957-present"
-    }
+        "time_period": "1957-present",
+    },
 ]
 
 # Synthetic Q&A for Q2 and Q3 scenarios
@@ -88,44 +88,45 @@ SAMPLE_QA_EXCHANGES = {
     1: [
         {
             "question": "What geographical features made Richmond a good location for an ironworks?",
-            "answer": "Richmond was near the James River for transportation and had access to coal deposits needed for iron production."
+            "answer": "Richmond was near the James River for transportation and had access to coal deposits needed for iron production.",
         },
         {
             "question": "Based on your answer about location, why might controlling Richmond have been strategically important during the Civil War?",
-            "answer": "Because Tredegar was there and it was the South's main source of weapons and military supplies."
-        }
+            "answer": "Because Tredegar was there and it was the South's main source of weapons and military supplies.",
+        },
     ],
     2: [
         {
             "question": "What types of weapons did Tredegar produce during the Civil War?",
-            "answer": "They made cannons, artillery shells, and armor for ships. Also railroad materials for moving troops."
+            "answer": "They made cannons, artillery shells, and armor for ships. Also railroad materials for moving troops.",
         },
         {
             "question": "You mentioned multiple products. Which do you think was most critical to Confederate military operations and why?",
-            "answer": "Probably the cannons because they needed artillery for battles. Without cannons they couldn't fight effectively."
-        }
+            "answer": "Probably the cannons because they needed artillery for battles. Without cannons they couldn't fight effectively.",
+        },
     ],
     3: [
         {
             "question": "How did the workforce at Tredegar change after the Civil War ended?",
-            "answer": "They couldn't use enslaved labor anymore so they had to hire wage workers instead."
+            "answer": "They couldn't use enslaved labor anymore so they had to hire wage workers instead.",
         },
         {
             "question": "What challenges might this transition from enslaved to wage labor have created for both the company and the workers?",
-            "answer": "The company had to pay wages now which costs more. Workers had to negotiate for fair pay and might have needed to strike to get better treatment."
-        }
+            "answer": "The company had to pay wages now which costs more. Workers had to negotiate for fair pay and might have needed to strike to get better treatment.",
+        },
     ],
     4: [
         {
             "question": "Why do you think it's important to preserve historical sites like Tredegar?",
-            "answer": "So people can learn about what happened there and understand history better by seeing the actual place."
+            "answer": "So people can learn about what happened there and understand history better by seeing the actual place.",
         },
         {
             "question": "You mentioned seeing the actual place helps understanding. What specific aspects of the Civil War might be harder to understand if Tredegar hadn't been preserved?",
-            "answer": "It would be harder to understand how important industry was to the war, not just battles. Also harder to see where enslaved people worked and how they were part of the war effort."
-        }
-    ]
+            "answer": "It would be harder to understand how important industry was to the war, not just battles. Also harder to see where enslaved people worked and how they were part of the war effort.",
+        },
+    ],
 }
+
 
 def generate_scenarios() -> List[Dict]:
     """Generate all 120 test scenarios"""
@@ -139,22 +140,23 @@ def generate_scenarios() -> List[Dict]:
                 # Build previous Q&A for Q2 and Q3
                 previous_qa = []
                 if question_num == 2:
-                    previous_qa = [SAMPLE_QA_EXCHANGES[segment['id']][0]]
+                    previous_qa = [SAMPLE_QA_EXCHANGES[segment["id"]][0]]
                 elif question_num == 3:
-                    previous_qa = SAMPLE_QA_EXCHANGES[segment['id']][:2]
+                    previous_qa = SAMPLE_QA_EXCHANGES[segment["id"]][:2]
 
                 scenario = {
                     "id": f"scenario_{scenario_id:03d}",
                     "student_profile": profile,
                     "content_segment": segment,
                     "question_number": question_num,
-                    "previous_qa": previous_qa
+                    "previous_qa": previous_qa,
                 }
 
                 scenarios.append(scenario)
                 scenario_id += 1
 
     return scenarios
+
 
 def main():
     print("🔧 Generating test scenarios...")
@@ -165,11 +167,13 @@ def main():
     print(f"   - {len(STUDENT_PROFILES)} student profiles")
     print(f"   - {len(CONTENT_SEGMENTS)} content segments")
     print(f"   - 3 question positions (Q1, Q2, Q3)")
-    print(f"   - Total: {len(STUDENT_PROFILES)} × {len(CONTENT_SEGMENTS)} × 3 = {len(scenarios)}")
+    print(
+        f"   - Total: {len(STUDENT_PROFILES)} × {len(CONTENT_SEGMENTS)} × 3 = {len(scenarios)}"
+    )
 
     # Save to JSON
     output_file = "test_scenarios.json"
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         json.dump(scenarios, f, indent=2)
 
     print(f"\n💾 Saved to: {output_file}")
@@ -180,6 +184,7 @@ def main():
     print(json.dumps(scenarios[0], indent=2))
 
     print("\n✅ Ready to run benchmark.py!")
+
 
 if __name__ == "__main__":
     main()

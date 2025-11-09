@@ -8,6 +8,7 @@ Current scope:
 
 Next: extend Vector 3 to multi-turn dialogues with aporia detection.
 """
+
 from __future__ import annotations
 import argparse
 import json
@@ -27,24 +28,41 @@ AWS_REGION = "us-east-1"
 
 # Example model list (reuses IDs from phase1 benchmark)
 DEFAULT_MODELS = [
-    {"id": "anthropic.claude-3-5-sonnet-20241022-v2:0", "name": "Claude 3.5 Sonnet v2", "provider": "anthropic"},
-    {"id": "anthropic.claude-3-5-haiku-20241022-v1:0", "name": "Claude 3.5 Haiku", "provider": "anthropic"},
+    {
+        "id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "name": "Claude 3.5 Sonnet v2",
+        "provider": "anthropic",
+    },
+    {
+        "id": "anthropic.claude-3-5-haiku-20241022-v1:0",
+        "name": "Claude 3.5 Haiku",
+        "provider": "anthropic",
+    },
 ]
 
 
 session = boto3.Session(profile_name=AWS_PROFILE, region_name=AWS_REGION)
-bedrock_runtime = session.client('bedrock-runtime')
+bedrock_runtime = session.client("bedrock-runtime")
 
 
 def call_model(model_id: str, provider: str, prompt: str) -> Dict[str, Any]:
     body: Dict[str, Any]
     if provider == "anthropic":
-        body = {"anthropic_version": "bedrock-2023-05-31", "max_tokens": 200, "temperature": 0.7,
-                "messages": [{"role": "user", "content": prompt}]}
+        body = {
+            "anthropic_version": "bedrock-2023-05-31",
+            "max_tokens": 200,
+            "temperature": 0.7,
+            "messages": [{"role": "user", "content": prompt}],
+        }
     elif provider == "meta":
         body = {"prompt": prompt, "max_gen_len": 200, "temperature": 0.7, "top_p": 0.9}
     elif provider == "mistral":
-        body = {"prompt": f"<s>[INST] {prompt} [/INST]", "max_tokens": 200, "temperature": 0.7, "top_p": 0.9}
+        body = {
+            "prompt": f"<s>[INST] {prompt} [/INST]",
+            "max_tokens": 200,
+            "temperature": 0.7,
+            "top_p": 0.9,
+        }
     else:
         raise ValueError(f"Unknown provider: {provider}")
 
@@ -63,7 +81,9 @@ def call_model(model_id: str, provider: str, prompt: str) -> Dict[str, Any]:
     return {"text": text, "latency_ms": latency}
 
 
-def run_vector(models: List[Dict[str, str]], vector: str, scenarios: List[Dict[str, Any]]) -> Dict[str, Any]:
+def run_vector(
+    models: List[Dict[str, str]], vector: str, scenarios: List[Dict[str, Any]]
+) -> Dict[str, Any]:
     out = {"vector": vector, "results": []}
     for m in models:
         per_model: Dict[str, Any] = {
@@ -77,17 +97,25 @@ def run_vector(models: List[Dict[str, str]], vector: str, scenarios: List[Dict[s
             gen = call_model(m["id"], m["provider"], tutor_prompt)
             transcript = f"Student: {s['prompt']}\nAI: {gen['text']}"
             grade = grade_transcript(vector, s["persona"], transcript)
-            per_model["scenarios"].append({
-                "scenario_id": s["id"],
-                "persona": s["persona"],
-                "student_prompt": s["prompt"],
-                "ai_response": gen["text"],
-                "tutor_latency_ms": gen["latency_ms"],
-                "judge": grade,
-            })
+            per_model["scenarios"].append(
+                {
+                    "scenario_id": s["id"],
+                    "persona": s["persona"],
+                    "student_prompt": s["prompt"],
+                    "ai_response": gen["text"],
+                    "tutor_latency_ms": gen["latency_ms"],
+                    "judge": grade,
+                }
+            )
         # Aggregate simple averages (1–5 scale)
         scored = [x for x in per_model["scenarios"] if x["judge"]["scores"]]
-        for key in ("ped_stance", "concept_fidelity", "persona_adapt", "dialectical_progress", "overall"):
+        for key in (
+            "ped_stance",
+            "concept_fidelity",
+            "persona_adapt",
+            "dialectical_progress",
+            "overall",
+        ):
             vals = [x["judge"]["scores"].get(key, 0) for x in scored]
             per_model[key] = sum(vals) / len(vals) if vals else 0
         out["results"].append(per_model)
@@ -96,10 +124,18 @@ def run_vector(models: List[Dict[str, str]], vector: str, scenarios: List[Dict[s
 
 def main():
     parser = argparse.ArgumentParser(description="Run Socratic 3-vector benchmark")
-    parser.add_argument("--models", nargs="*", help="Optional model IDs (defaults to two Anthropic models)")
+    parser.add_argument(
+        "--models",
+        nargs="*",
+        help="Optional model IDs (defaults to two Anthropic models)",
+    )
     args = parser.parse_args()
 
-    models = DEFAULT_MODELS if not args.models else [{"id": mid, "name": mid, "provider": "anthropic"} for mid in args.models]
+    models = (
+        DEFAULT_MODELS
+        if not args.models
+        else [{"id": mid, "name": mid, "provider": "anthropic"} for mid in args.models]
+    )
 
     payload = {
         "metadata": {
@@ -108,7 +144,7 @@ def main():
             "aws_region": AWS_REGION,
             "models": [m["id"] for m in models],
         },
-        "vectors": []
+        "vectors": [],
     }
 
     payload["vectors"].append(run_vector(models, "elenchus", elenchus_scenarios()))
@@ -123,4 +159,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

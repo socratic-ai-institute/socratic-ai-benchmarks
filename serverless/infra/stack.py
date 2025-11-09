@@ -9,6 +9,7 @@ Architecture:
 - Curator → DynamoDB + S3
 - API Gateway + Read Lambda → Static UI
 """
+
 from aws_cdk import (
     Stack,
     Duration,
@@ -385,9 +386,7 @@ class SocraticBenchStack(Stack):
 
         # Origin Access Identity for CloudFront
         oai = cloudfront.OriginAccessIdentity(
-            self,
-            "UIOriginAccessIdentity",
-            comment="OAI for Socratic Bench UI bucket"
+            self, "UIOriginAccessIdentity", comment="OAI for Socratic Bench UI bucket"
         )
 
         # Grant CloudFront read access to bucket
@@ -398,10 +397,7 @@ class SocraticBenchStack(Stack):
             self,
             "UIDistribution",
             default_behavior=cloudfront.BehaviorOptions(
-                origin=origins.S3Origin(
-                    ui_bucket,
-                    origin_access_identity=oai
-                ),
+                origin=origins.S3Origin(ui_bucket, origin_access_identity=oai),
                 viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
             ),
             default_root_object="index.html",
@@ -434,5 +430,7 @@ class SocraticBenchStack(Stack):
         CfnOutput(self, "BucketName", value=self.data_bucket.bucket_name)
         CfnOutput(self, "ApiUrl", value=api.url)
         CfnOutput(self, "ApiKeyId", value=api_key.key_id)
-        CfnOutput(self, "UIUrl", value=f"https://{distribution.distribution_domain_name}")
+        CfnOutput(
+            self, "UIUrl", value=f"https://{distribution.distribution_domain_name}"
+        )
         CfnOutput(self, "EventBusName", value=self.event_bus.event_bus_name)

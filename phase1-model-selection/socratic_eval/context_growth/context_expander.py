@@ -68,7 +68,7 @@ class ContextExpander:
         self,
         user_message: str,
         assistant_response: Optional[str] = None,
-        distractor_text: Optional[str] = None
+        distractor_text: Optional[str] = None,
     ):
         """
         Add a conversation turn and apply expansion strategy.
@@ -124,7 +124,7 @@ class ContextExpander:
             "total_turns": len(self.conversation_history),
             "estimated_tokens": self.get_current_context_size(),
             "distractors_added": len(self.distractors_added),
-            "strategy": self.strategy
+            "strategy": self.strategy,
         }
 
 
@@ -226,8 +226,7 @@ class DistractorGenerator:
 
     @staticmethod
     def generate_distractor(
-        length: str = "medium",
-        domain: Optional[str] = None
+        length: str = "medium", domain: Optional[str] = None
     ) -> str:
         """
         Generate a distractor text snippet.
@@ -260,8 +259,7 @@ class DistractorGenerator:
 
     @staticmethod
     def generate_progressive_distractors(
-        count: int = 5,
-        domain: Optional[str] = None
+        count: int = 5, domain: Optional[str] = None
     ) -> List[str]:
         """
         Generate a series of progressively longer distractors.
@@ -280,8 +278,7 @@ class DistractorGenerator:
         for i in range(count):
             length = lengths[min(i, len(lengths) - 1)]
             distractor = DistractorGenerator.generate_distractor(
-                length=length,
-                domain=domain
+                length=length, domain=domain
             )
             distractors.append(distractor)
 
@@ -343,27 +340,25 @@ class ComplexityBuilder:
 
         if complexity_level >= 2:
             result = ComplexityBuilder.add_tangent(
-                result,
-                "this connects to something else I've been thinking about"
+                result, "this connects to something else I've been thinking about"
             )
 
         if complexity_level >= 3:
             result = ComplexityBuilder.add_contradiction(
-                result,
-                "maybe that's not the right way to think about it"
+                result, "maybe that's not the right way to think about it"
             )
 
         if complexity_level >= 4:
             result = ComplexityBuilder.add_multiple_questions(
                 result,
-                ["What do you think?", "Is that even the right question to ask?"]
+                ["What do you think?", "Is that even the right question to ask?"],
             )
 
         if complexity_level >= 5:
             # Add parenthetical asides
             result = result.replace(
                 "this connects",
-                "(and by the way, I've been reading about this topic extensively) this connects"
+                "(and by the way, I've been reading about this topic extensively) this connects",
             )
 
         return result
@@ -377,8 +372,7 @@ if __name__ == "__main__":
     print("1. Progressive Distractors:")
     print("-" * 60)
     distractors = DistractorGenerator.generate_progressive_distractors(
-        count=3,
-        domain="leadership"
+        count=3, domain="leadership"
     )
     for i, d in enumerate(distractors, 1):
         print(f"Distractor {i} ({len(d)} chars):")
@@ -402,20 +396,19 @@ if __name__ == "__main__":
 
     expander.add_turn(
         user_message="How can I improve my leadership?",
-        distractor_text=distractors[0] if len(distractors) > 0 else None
+        distractor_text=distractors[0] if len(distractors) > 0 else None,
     )
     expander.add_turn(
         user_message="What are the key skills?",
         assistant_response="What does 'key skills' mean to you?",
-        distractor_text=distractors[1] if len(distractors) > 1 else None
+        distractor_text=distractors[1] if len(distractors) > 1 else None,
     )
 
     stats = expander.get_context_stats()
     print("Context stats:", stats)
 
     full_prompt = expander.build_prompt(
-        system_prompt="You are a Socratic guide.",
-        include_history=True
+        system_prompt="You are a Socratic guide.", include_history=True
     )
     print(f"\nFull prompt length: {len(full_prompt)} chars")
     print(f"Estimated tokens: {expander.estimate_tokens(full_prompt)}")

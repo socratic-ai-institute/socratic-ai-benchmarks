@@ -46,10 +46,7 @@ class ContextGrowthEvaluator:
     """
 
     def __init__(
-        self,
-        model_ids: List[str],
-        use_llm_judge: bool = False,
-        mock_mode: bool = False
+        self, model_ids: List[str], use_llm_judge: bool = False, mock_mode: bool = False
     ):
         """
         Args:
@@ -62,11 +59,7 @@ class ContextGrowthEvaluator:
         self.mock_mode = mock_mode
         self.rubric = SocraticDispositionRubric(use_llm_judge=use_llm_judge)
 
-    def run_scenario(
-        self,
-        model_id: str,
-        scenario: TestScenario
-    ) -> Dict[str, any]:
+    def run_scenario(self, model_id: str, scenario: TestScenario) -> Dict[str, any]:
         """
         Run a single scenario for one model.
 
@@ -78,11 +71,11 @@ class ContextGrowthEvaluator:
             Results dict with scores and metadata
         """
 
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print(f"Running: {scenario['name']}")
         print(f"Model:   {model_id}")
         print(f"Type:    {scenario['test_type']}")
-        print(f"{'='*70}\n")
+        print(f"{'=' * 70}\n")
 
         # Initialize context expander
         expander = ContextExpander(strategy=scenario["context_growth_strategy"])
@@ -94,28 +87,31 @@ class ContextGrowthEvaluator:
         turn_results = []
 
         for i, turn in enumerate(scenario["conversation_turns"], 1):
-            print(f"Turn {i}/{len(scenario['conversation_turns'])}: ", end="", flush=True)
+            print(
+                f"Turn {i}/{len(scenario['conversation_turns'])}: ", end="", flush=True
+            )
 
             # Build prompt with current context
             full_prompt = expander.build_prompt(
-                system_prompt=scenario["system_prompt"],
-                include_history=True
+                system_prompt=scenario["system_prompt"], include_history=True
             )
 
             # Add current user message to context
             expander.add_turn(
                 user_message=turn["user_message"],
-                distractor_text=turn.get("distractor_text")
+                distractor_text=turn.get("distractor_text"),
             )
 
             # Get user message for this turn (with distractors if applicable)
             current_user_message = expander.conversation_history[-1]["user"]
 
             # Build full prompt with new turn
-            full_prompt = expander.build_prompt(
-                system_prompt=scenario["system_prompt"],
-                include_history=False
-            ) + f"\n\nUser: {current_user_message}\n\nAssistant:"
+            full_prompt = (
+                expander.build_prompt(
+                    system_prompt=scenario["system_prompt"], include_history=False
+                )
+                + f"\n\nUser: {current_user_message}\n\nAssistant:"
+            )
 
             # Call model
             if self.mock_mode:
@@ -131,7 +127,9 @@ class ContextGrowthEvaluator:
             # Score disposition
             disposition_score = self.rubric.evaluate(
                 response=model_response,
-                user_message=turn["user_message"]  # Use original message without distractors
+                user_message=turn[
+                    "user_message"
+                ],  # Use original message without distractors
             )
 
             # Get context stats
@@ -144,7 +142,7 @@ class ContextGrowthEvaluator:
                 model_response=model_response,
                 disposition_score=disposition_score,
                 context_size_tokens=context_stats["estimated_tokens"],
-                flagged_issues=disposition_score["flagged_issues"]
+                flagged_issues=disposition_score["flagged_issues"],
             )
 
             turn_results.append(turn_result)
@@ -161,9 +159,9 @@ class ContextGrowthEvaluator:
         # Compute overall scores
         overall_score = scorer.compute_overall_score()
 
-        print(f"\n{'-'*70}")
+        print(f"\n{'-' * 70}")
         print(f"SCENARIO COMPLETE")
-        print(f"{'-'*70}")
+        print(f"{'-' * 70}")
         print(f"Overall Score:          {overall_score['overall']:.2f}/10")
         print(f"  Persistence:          {overall_score['persistence']:.2f}/10")
         print(f"  Cognitive Depth:      {overall_score['cognitive_depth']:.2f}/10")
@@ -182,12 +180,12 @@ class ContextGrowthEvaluator:
                     "user_message": tr.user_message,
                     "model_response": tr.model_response,
                     "disposition_score": dict(tr.disposition_score),
-                    "context_size_tokens": tr.context_size_tokens
+                    "context_size_tokens": tr.context_size_tokens,
                 }
                 for tr in turn_results
             ],
             "overall_score": dict(overall_score),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         # Include context_type if present (for fidelity tests)
@@ -223,7 +221,7 @@ class ContextGrowthEvaluator:
     def run_full_evaluation(
         self,
         scenarios: Optional[List[TestScenario]] = None,
-        test_types: Optional[List[str]] = None
+        test_types: Optional[List[str]] = None,
     ) -> Dict[str, any]:
         """
         Run full evaluation across multiple models and scenarios.
@@ -245,14 +243,14 @@ class ContextGrowthEvaluator:
             else:
                 scenarios = get_all_test_scenarios()
 
-        print(f"\n{'='*70}")
+        print(f"\n{'=' * 70}")
         print(f"CONTEXT GROWTH EVALUATION")
-        print(f"{'='*70}")
+        print(f"{'=' * 70}")
         print(f"Models:    {len(self.model_ids)}")
         print(f"Scenarios: {len(scenarios)}")
         print(f"Profile:   {AWS_PROFILE}")
         print(f"Region:    {AWS_REGION}")
-        print(f"{'='*70}\n")
+        print(f"{'=' * 70}\n")
 
         results = {
             "metadata": {
@@ -263,9 +261,9 @@ class ContextGrowthEvaluator:
                 "aws_profile": AWS_PROFILE,
                 "aws_region": AWS_REGION,
                 "use_llm_judge": self.use_llm_judge,
-                "mock_mode": self.mock_mode
+                "mock_mode": self.mock_mode,
             },
-            "scenario_results": []
+            "scenario_results": [],
         }
 
         # Run each scenario for each model
@@ -274,7 +272,7 @@ class ContextGrowthEvaluator:
                 "scenario_id": scenario["id"],
                 "scenario_name": scenario["name"],
                 "test_type": scenario["test_type"],
-                "model_results": []
+                "model_results": [],
             }
 
             for model_id in self.model_ids:
@@ -289,7 +287,7 @@ class ContextGrowthEvaluator:
                         "model_id": model_id,
                         "status": "error",
                         "error": str(e),
-                        "duration_seconds": time.time() - start_time
+                        "duration_seconds": time.time() - start_time,
                     }
                     print(f"\n❌ Error running scenario: {e}\n")
 
@@ -305,10 +303,7 @@ class ContextGrowthEvaluator:
     def _compute_summary(self, results: Dict) -> Dict[str, any]:
         """Compute summary statistics across all scenarios."""
 
-        summary = {
-            "by_model": {},
-            "by_test_type": {}
-        }
+        summary = {"by_model": {}, "by_test_type": {}}
 
         # Aggregate by model
         for model_id in self.model_ids:
@@ -316,8 +311,10 @@ class ContextGrowthEvaluator:
 
             for scenario_result in results["scenario_results"]:
                 for model_result in scenario_result["model_results"]:
-                    if (model_result.get("model_id") == model_id and
-                        model_result.get("status") == "success"):
+                    if (
+                        model_result.get("model_id") == model_id
+                        and model_result.get("status") == "success"
+                    ):
                         model_scores.append(model_result["overall_score"])
 
             if model_scores:
@@ -349,7 +346,7 @@ class ContextGrowthEvaluator:
             "context_adaptability",
             "resistance_to_drift",
             "memory_preservation",
-            "overall"
+            "overall",
         ]
 
         aggregated = {}
@@ -371,7 +368,7 @@ def run_context_growth_evaluation(
     output_file: Optional[str] = None,
     test_types: Optional[List[str]] = None,
     use_llm_judge: bool = False,
-    mock_mode: bool = False
+    mock_mode: bool = False,
 ) -> Dict:
     """
     Main entry point for running context growth evaluation.
@@ -388,9 +385,7 @@ def run_context_growth_evaluation(
     """
 
     evaluator = ContextGrowthEvaluator(
-        model_ids=model_ids,
-        use_llm_judge=use_llm_judge,
-        mock_mode=mock_mode
+        model_ids=model_ids, use_llm_judge=use_llm_judge, mock_mode=mock_mode
     )
 
     results = evaluator.run_full_evaluation(test_types=test_types)
@@ -403,9 +398,9 @@ def run_context_growth_evaluation(
     with open(output_file, "w") as f:
         json.dump(results, f, indent=2)
 
-    print(f"\n{'='*70}")
+    print(f"\n{'=' * 70}")
     print(f"Results saved to: {output_file}")
-    print(f"{'='*70}\n")
+    print(f"{'=' * 70}\n")
 
     # Print summary
     print_summary(results)
@@ -416,38 +411,46 @@ def run_context_growth_evaluation(
 def print_summary(results: Dict):
     """Print human-readable summary of results."""
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("EVALUATION SUMMARY")
-    print("="*70)
+    print("=" * 70)
 
     summary = results.get("summary", {})
 
     # Print by-model summary
     if "by_model" in summary:
         print("\nBY MODEL:")
-        print("-"*70)
+        print("-" * 70)
 
         for model_id, scores in summary["by_model"].items():
             print(f"\n{model_id}:")
             print(f"  Overall:              {scores.get('overall_mean', 0):.2f}/10")
             print(f"  Persistence:          {scores.get('persistence_mean', 0):.2f}/10")
-            print(f"  Cognitive Depth:      {scores.get('cognitive_depth_mean', 0):.2f}/10")
-            print(f"  Context Adaptability: {scores.get('context_adaptability_mean', 0):.2f}/10")
-            print(f"  Resistance to Drift:  {scores.get('resistance_to_drift_mean', 0):.2f}/10")
-            print(f"  Memory Preservation:  {scores.get('memory_preservation_mean', 0):.2f}/10")
+            print(
+                f"  Cognitive Depth:      {scores.get('cognitive_depth_mean', 0):.2f}/10"
+            )
+            print(
+                f"  Context Adaptability: {scores.get('context_adaptability_mean', 0):.2f}/10"
+            )
+            print(
+                f"  Resistance to Drift:  {scores.get('resistance_to_drift_mean', 0):.2f}/10"
+            )
+            print(
+                f"  Memory Preservation:  {scores.get('memory_preservation_mean', 0):.2f}/10"
+            )
             print(f"  Scenarios:            {scores.get('num_scenarios', 0)}")
 
     # Print by-test-type summary
     if "by_test_type" in summary:
         print("\n\nBY TEST TYPE:")
-        print("-"*70)
+        print("-" * 70)
 
         for test_type, scores in summary["by_test_type"].items():
             print(f"\n{test_type.upper()}:")
             print(f"  Overall:              {scores.get('overall_mean', 0):.2f}/10")
             print(f"  Scenarios:            {scores.get('num_scenarios', 0)}")
 
-    print("\n" + "="*70 + "\n")
+    print("\n" + "=" * 70 + "\n")
 
 
 def main():
@@ -461,33 +464,33 @@ def main():
         "--models",
         type=str,
         required=True,
-        help="Comma-separated list of model IDs to evaluate"
+        help="Comma-separated list of model IDs to evaluate",
     )
 
     parser.add_argument(
         "--test-types",
         type=str,
         default=None,
-        help="Comma-separated list of test types to run (consistency,complexity,ambiguity,interrupt_redirect,chain_of_thought)"
+        help="Comma-separated list of test types to run (consistency,complexity,ambiguity,interrupt_redirect,chain_of_thought)",
     )
 
     parser.add_argument(
         "--output",
         type=str,
         default=None,
-        help="Output file path (default: context_growth_results_TIMESTAMP.json)"
+        help="Output file path (default: context_growth_results_TIMESTAMP.json)",
     )
 
     parser.add_argument(
         "--use-llm-judge",
         action="store_true",
-        help="Use LLM for disposition scoring (slower, more nuanced)"
+        help="Use LLM for disposition scoring (slower, more nuanced)",
     )
 
     parser.add_argument(
         "--mock",
         action="store_true",
-        help="Use mock mode for testing (doesn't call real models)"
+        help="Use mock mode for testing (doesn't call real models)",
     )
 
     args = parser.parse_args()
@@ -506,7 +509,7 @@ def main():
         output_file=args.output,
         test_types=test_types,
         use_llm_judge=args.use_llm_judge,
-        mock_mode=args.mock
+        mock_mode=args.mock,
     )
 
 

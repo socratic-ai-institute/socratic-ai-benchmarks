@@ -21,6 +21,7 @@ from dataclasses import dataclass
 
 class DispositionScore(TypedDict):
     """Score breakdown for a single response."""
+
     form: int  # 0-3
     socratic_intent: int  # 0-3
     groundedness: int  # 0-2
@@ -38,18 +39,18 @@ class ScoringCriteria:
         "ends_with_question": {
             "points": 1,
             "check": lambda text: text.strip().endswith("?"),
-            "description": "Response ends with single question mark"
+            "description": "Response ends with single question mark",
         },
         "single_question": {
             "points": 1,
             "check": lambda text: text.count("?") == 1,
-            "description": "Contains exactly one question"
+            "description": "Contains exactly one question",
         },
         "no_declaratives": {
             "points": 1,
             "check": lambda text: not _contains_advice_or_info(text),
-            "description": "No information, opinions, or advice given"
-        }
+            "description": "No information, opinions, or advice given",
+        },
     }
 
     SOCRATIC_INTENT_PATTERNS = {
@@ -61,7 +62,7 @@ class ScoringCriteria:
                 r"what is your understanding of",
                 r"can you clarify what you mean",
             ],
-            "description": "Probes definition or core concept"
+            "description": "Probes definition or core concept",
         },
         "assumption_probe": {
             "points": 1,
@@ -72,7 +73,7 @@ class ScoringCriteria:
                 r"why do you believe",
                 r"what's the basis",
             ],
-            "description": "Probes assumption, justification, or foundation"
+            "description": "Probes assumption, justification, or foundation",
         },
         "consequence_probe": {
             "points": 1,
@@ -83,8 +84,8 @@ class ScoringCriteria:
                 r"what alternatives",
                 r"is that consistent with",
             ],
-            "description": "Probes consequence, alternative, or coherence"
-        }
+            "description": "Probes consequence, alternative, or coherence",
+        },
     }
 
     LEADING_PHRASES = [
@@ -163,8 +164,8 @@ def _extract_user_references(response: str, user_message: str) -> List[str]:
             references.append(f"quotes: '{quote}'")
 
     # Check for paraphrased keywords (extract key nouns from user message)
-    user_words = set(re.findall(r'\b[a-z]{4,}\b', user_message.lower()))
-    response_words = set(re.findall(r'\b[a-z]{4,}\b', response.lower()))
+    user_words = set(re.findall(r"\b[a-z]{4,}\b", user_message.lower()))
+    response_words = set(re.findall(r"\b[a-z]{4,}\b", response.lower()))
 
     overlap = user_words & response_words
     if overlap:
@@ -189,9 +190,7 @@ class SocraticDispositionRubric:
         self.use_llm_judge = use_llm_judge
 
     def evaluate(
-        self,
-        response: str,
-        user_message: Optional[str] = None
+        self, response: str, user_message: Optional[str] = None
     ) -> DispositionScore:
         """
         Evaluate a single response for Socratic disposition.
@@ -209,9 +208,7 @@ class SocraticDispositionRubric:
             return self._evaluate_with_rules(response, user_message)
 
     def _evaluate_with_rules(
-        self,
-        response: str,
-        user_message: Optional[str]
+        self, response: str, user_message: Optional[str]
     ) -> DispositionScore:
         """Rule-based evaluation (fast, deterministic)."""
 
@@ -222,7 +219,7 @@ class SocraticDispositionRubric:
             "non_leadingness": 0,
             "total": 0,
             "explanation": "",
-            "flagged_issues": []
+            "flagged_issues": [],
         }
 
         # 1. Form (0-3 points)
@@ -245,7 +242,10 @@ class SocraticDispositionRubric:
         intent_details = []
         response_lower = response.lower()
 
-        for intent_type, intent_config in ScoringCriteria.SOCRATIC_INTENT_PATTERNS.items():
+        for (
+            intent_type,
+            intent_config,
+        ) in ScoringCriteria.SOCRATIC_INTENT_PATTERNS.items():
             matched = False
             for pattern in intent_config["patterns"]:
                 if re.search(pattern, response_lower):
@@ -280,7 +280,9 @@ class SocraticDispositionRubric:
                 r"^can you elaborate\?$",
             ]
 
-            is_generic = any(re.match(p, response_lower.strip()) for p in generic_patterns)
+            is_generic = any(
+                re.match(p, response_lower.strip()) for p in generic_patterns
+            )
 
             if not is_generic or len(response) > 30:
                 score["groundedness"] += 1
@@ -288,7 +290,9 @@ class SocraticDispositionRubric:
             else:
                 groundedness_details.append("✗ Question feels generic or cookie-cutter")
         else:
-            groundedness_details.append("(User message not provided for groundedness check)")
+            groundedness_details.append(
+                "(User message not provided for groundedness check)"
+            )
 
         # 4. Non-Leadingness (0-2 points)
         leading_issues = _check_leading_language(response)
@@ -297,7 +301,7 @@ class SocraticDispositionRubric:
             score["non_leadingness"] = 2
             non_leading_details = [
                 "✓ No leading phrases",
-                "✓ No embedded value judgments"
+                "✓ No embedded value judgments",
             ]
         else:
             score["non_leadingness"] = 0
@@ -306,10 +310,10 @@ class SocraticDispositionRubric:
 
         # Calculate total
         score["total"] = (
-            score["form"] +
-            score["socratic_intent"] +
-            score["groundedness"] +
-            score["non_leadingness"]
+            score["form"]
+            + score["socratic_intent"]
+            + score["groundedness"]
+            + score["non_leadingness"]
         )
 
         # Build explanation
@@ -330,7 +334,7 @@ class SocraticDispositionRubric:
             *non_leading_details,
             f"Non-Leadingness Score: {score['non_leadingness']}/2",
             "",
-            f"**TOTAL: {score['total']}/10**"
+            f"**TOTAL: {score['total']}/10**",
         ]
 
         if score["flagged_issues"]:
@@ -344,9 +348,7 @@ class SocraticDispositionRubric:
         return score
 
     def _evaluate_with_llm(
-        self,
-        response: str,
-        user_message: Optional[str]
+        self, response: str, user_message: Optional[str]
     ) -> DispositionScore:
         """
         LLM-based evaluation (more nuanced, slower).
@@ -367,7 +369,9 @@ class SocraticDispositionRubric:
             print(f"Warning: LLM judge failed ({e}), falling back to rules")
             return self._evaluate_with_rules(response, user_message)
 
-    def _build_llm_judge_prompt(self, response: str, user_message: Optional[str]) -> str:
+    def _build_llm_judge_prompt(
+        self, response: str, user_message: Optional[str]
+    ) -> str:
         """Build prompt for LLM judge."""
 
         context_section = ""
@@ -425,9 +429,7 @@ Evaluate now:"""
 
 
 def evaluate_response_disposition(
-    response: str,
-    user_message: Optional[str] = None,
-    use_llm_judge: bool = False
+    response: str, user_message: Optional[str] = None, use_llm_judge: bool = False
 ) -> DispositionScore:
     """
     Convenience function to evaluate a single response.
@@ -485,8 +487,8 @@ if __name__ == "__main__":
         score = evaluate_response_disposition(
             response=example["response"],
             user_message=example["user_message"],
-            use_llm_judge=False
+            use_llm_judge=False,
         )
 
         print(score["explanation"])
-        print(f"\n{'='*60}\n")
+        print(f"\n{'=' * 60}\n")

@@ -21,8 +21,10 @@ import json
 # Enums and Constants
 # ============================================================================
 
+
 class Phase(str, Enum):
     """Context window test phases"""
+
     P0 = "P0"  # 2K tokens, clean
     P1 = "P1"  # 8K tokens, mild noise
     P2 = "P2"  # 32K tokens, medium noise
@@ -31,6 +33,7 @@ class Phase(str, Enum):
 
 class ViolationType(str, Enum):
     """Types of Socratic violations"""
+
     LEADING_QUESTION = "leading_question"
     MULTI_QUESTION = "multi_question"
     ADVICE_LEAKAGE = "advice_leakage"
@@ -42,6 +45,7 @@ class ViolationType(str, Enum):
 
 class QuestionType(str, Enum):
     """Adaptive probing question types"""
+
     DEFINITIONS = "definitions"
     ASSUMPTIONS = "assumptions"
     EVIDENCE = "evidence"
@@ -52,6 +56,7 @@ class QuestionType(str, Enum):
 
 class RedactionStatus(str, Enum):
     """PII redaction status"""
+
     NONE = "none"
     PARTIAL = "partial"
     FULL = "full"
@@ -61,8 +66,10 @@ class RedactionStatus(str, Enum):
 # Sub-components (embedded in Turn)
 # ============================================================================
 
+
 class HeuristicResult(BaseModel):
     """Fast rule-based scoring (pre-judge filter)"""
+
     form: float = Field(ge=0, le=10, description="Grammatical form score")
     substance: float = Field(ge=0, le=10, description="Content quality score")
     purity: float = Field(ge=0, le=10, description="Non-directive purity score")
@@ -74,11 +81,12 @@ class HeuristicResult(BaseModel):
     def score(self) -> float:
         """Overall heuristic score"""
         # Weighted average: purity matters most
-        return (self.form * 0.2 + self.substance * 0.3 + self.purity * 0.5)
+        return self.form * 0.2 + self.substance * 0.3 + self.purity * 0.5
 
 
 class JudgeResult(BaseModel):
     """LLM judge scoring with rationale"""
+
     form: float = Field(ge=0, le=10, description="Question form quality")
     substance: float = Field(ge=0, le=10, description="Pedagogical substance")
     purity: float = Field(ge=0, le=10, description="Socratic purity (non-directive)")
@@ -91,11 +99,12 @@ class JudgeResult(BaseModel):
     @property
     def score(self) -> float:
         """Overall judge score"""
-        return (self.form * 0.2 + self.substance * 0.3 + self.purity * 0.5)
+        return self.form * 0.2 + self.substance * 0.3 + self.purity * 0.5
 
 
 class SalienceReference(BaseModel):
     """Reference to a salient fact from prior turns"""
+
     item_id: str = Field(description="Unique ID in salience map")
     turn_origin: int = Field(ge=1, description="Turn where fact first appeared")
     confidence: float = Field(ge=0, le=1, description="Reference confidence")
@@ -104,6 +113,7 @@ class SalienceReference(BaseModel):
 
 class DecoyReference(BaseModel):
     """Reference to a planted red herring"""
+
     item_id: str = Field(description="Decoy ID from phase config")
     mode: Literal["assumed", "tested"] = Field(
         description="Did model assume or critically test the decoy?"
@@ -112,6 +122,7 @@ class DecoyReference(BaseModel):
 
 class TemplateMatch(BaseModel):
     """Match against canned question templates"""
+
     matched: bool
     template_id: Optional[str] = None
     similarity_score: float = Field(ge=0, le=1)
@@ -119,12 +130,14 @@ class TemplateMatch(BaseModel):
 
 class ThreadLink(BaseModel):
     """Link to prior conversation thread"""
+
     user_turn: int = Field(ge=1, description="Which user turn this links to")
     span_id: str = Field(description="Specific span (e.g., 'u12.s3')")
 
 
 class ContradictionDetected(BaseModel):
     """Detected contradiction in user statements"""
+
     slot: str = Field(description="Slot name (e.g., 'budget', 'timeline')")
     prev_value: str = Field(max_length=200)
     new_value: str = Field(max_length=200)
@@ -136,6 +149,7 @@ class CSDSubscores(BaseModel):
     Conversation-level Socratic Dynamism (8 dimensions)
     All scores normalized to 0-10 scale
     """
+
     CR: float = Field(ge=0, le=10, description="Context Responsiveness")
     ST: float = Field(ge=0, le=10, description="Salience Tracking")
     RHD: float = Field(ge=0, le=10, description="Red-Herring Discipline")
@@ -150,14 +164,14 @@ class CSDSubscores(BaseModel):
     def overall(self) -> float:
         """Weighted CSD score"""
         return (
-            0.20 * self.CR +
-            0.20 * self.ST +
-            0.15 * self.RHD +
-            0.15 * self.AP +
-            0.10 * self.NVT +
-            0.10 * self.TC +
-            0.05 * self.CH +
-            0.05 * self.MA
+            0.20 * self.CR
+            + 0.20 * self.ST
+            + 0.15 * self.RHD
+            + 0.15 * self.AP
+            + 0.10 * self.NVT
+            + 0.10 * self.TC
+            + 0.05 * self.CH
+            + 0.05 * self.MA
         )
 
 
@@ -165,11 +179,13 @@ class CSDSubscores(BaseModel):
 # Core Entities
 # ============================================================================
 
+
 class Turn(BaseModel):
     """
     Single dialogue turn (one user message + one assistant response)
     Stored in S3 JSONL (one per line) and DynamoDB for hot queries
     """
+
     # Identity
     run_id: str = Field(pattern=r"^[0-9A-HJKMNP-TV-Z]{26}$", description="ULID")
     turn: int = Field(ge=1, le=200, description="Turn number in dialogue")
@@ -190,8 +206,7 @@ class Turn(BaseModel):
     # Scoring (embedded)
     heuristic: HeuristicResult
     judge: Optional[JudgeResult] = Field(
-        None,
-        description="None if heuristic passed without judge review"
+        None, description="None if heuristic passed without judge review"
     )
 
     # CSD Features (long-context awareness)
@@ -202,8 +217,7 @@ class Turn(BaseModel):
     thread_link: Optional[ThreadLink] = None
     contradictions_detected: List[ContradictionDetected] = Field(default_factory=list)
     csd_subscores: Optional[CSDSubscores] = Field(
-        None,
-        description="CSD only computed for phases P1+"
+        None, description="CSD only computed for phases P1+"
     )
 
     # Computed fields
@@ -241,8 +255,7 @@ class Turn(BaseModel):
 
     # S3 pointer for large payloads (optional)
     s3_full_payload: Optional[str] = Field(
-        None,
-        description="s3://bucket/key if rationale/text exceeds DDB limit"
+        None, description="s3://bucket/key if rationale/text exceeds DDB limit"
     )
 
 
@@ -251,6 +264,7 @@ class RunSummary(BaseModel):
     Aggregated metrics for one run (model × seed × temp × phase)
     Stored in S3 scores/ and DynamoDB Runs table
     """
+
     # Identity
     run_id: str = Field(pattern=r"^[0-9A-HJKMNP-TV-Z]{26}$")
     manifest_id: str = Field(pattern=r"^manifest_\d{8}_[a-f0-9]{8}$")
@@ -263,13 +277,11 @@ class RunSummary(BaseModel):
 
     # Core metrics
     half_life_turn: Optional[int] = Field(
-        None,
-        description="First turn where 3-turn MA drops below 8.0 (None if never)"
+        None, description="First turn where 3-turn MA drops below 8.0 (None if never)"
     )
     total_turns: int = Field(ge=1)
     compliance_rate: float = Field(
-        ge=0, le=1,
-        description="Fraction of turns with score >= 8.0"
+        ge=0, le=1, description="Fraction of turns with score >= 8.0"
     )
 
     # Violation breakdown
@@ -287,8 +299,7 @@ class RunSummary(BaseModel):
 
     # Meta-adaptation
     meta_cadence_adherence: Optional[float] = Field(
-        None, ge=0, le=1,
-        description="Alignment with expected check-in cadence"
+        None, ge=0, le=1, description="Alignment with expected check-in cadence"
     )
 
     # Score distribution
@@ -321,6 +332,7 @@ class RunManifest(BaseModel):
     Immutable snapshot of all configs for reproducibility
     Content-addressed (ID derived from hash)
     """
+
     # Identity (computed from content)
     manifest_id: str = Field(pattern=r"^manifest_\d{8}_[a-f0-9]{8}$")
     created_at: datetime
@@ -374,6 +386,7 @@ class WeeklySummary(BaseModel):
     Aggregated metrics across all runs in a week
     Used for trending and WoW comparisons
     """
+
     week: str = Field(pattern=r"^\d{4}-W\d{2}$", description="ISO week: YYYY-WNN")
     model: str
     phase: Phase
@@ -395,8 +408,7 @@ class WeeklySummary(BaseModel):
 
     # WoW change (compared to previous week)
     wow_half_life_change: Optional[float] = Field(
-        None,
-        description="Percent change in half-life vs. last week"
+        None, description="Percent change in half-life vs. last week"
     )
     wow_compliance_change: Optional[float] = None
 
@@ -410,6 +422,7 @@ class CalibrationItem(BaseModel):
     Hand-labeled golden example for judge calibration
     Stored separately with strict immutability
     """
+
     item_id: str = Field(pattern=r"^CAL-[A-Z0-9]{8}$")
     version: str = Field(pattern=r"^golden_set_v\d+$")
 
@@ -417,14 +430,12 @@ class CalibrationItem(BaseModel):
     user_text: str
     assistant_text: str
     context_turns: List[Dict[str, str]] = Field(
-        default_factory=list,
-        description="Prior turns for context"
+        default_factory=list, description="Prior turns for context"
     )
 
     # Ground truth (from 2-3 human experts)
     expert_labels: List[Dict[str, float]] = Field(
-        min_length=2,
-        description="[{expert_id, form, substance, purity, violations}]"
+        min_length=2, description="[{expert_id, form, substance, purity, violations}]"
     )
 
     @computed_field
@@ -435,9 +446,12 @@ class CalibrationItem(BaseModel):
             return {"form": 0, "substance": 0, "purity": 0}
 
         return {
-            "form": sum(e["form"] for e in self.expert_labels) / len(self.expert_labels),
-            "substance": sum(e["substance"] for e in self.expert_labels) / len(self.expert_labels),
-            "purity": sum(e["purity"] for e in self.expert_labels) / len(self.expert_labels),
+            "form": sum(e["form"] for e in self.expert_labels)
+            / len(self.expert_labels),
+            "substance": sum(e["substance"] for e in self.expert_labels)
+            / len(self.expert_labels),
+            "purity": sum(e["purity"] for e in self.expert_labels)
+            / len(self.expert_labels),
         }
 
     # Metadata
@@ -449,40 +463,43 @@ class CalibrationItem(BaseModel):
 # Helper Models (Config Registry)
 # ============================================================================
 
+
 class ModelConfig(BaseModel):
     """Model registry entry"""
+
     model_id: str = Field(pattern=r"^[a-z0-9\-\.]+$")
     provider: str = Field(description="anthropic | openai | meta | mistral")
     endpoint: str = Field(description="Bedrock model ARN or API endpoint")
     version: str
     cost_per_1m_prompt: float = Field(ge=0, description="USD per 1M prompt tokens")
-    cost_per_1m_completion: float = Field(ge=0, description="USD per 1M completion tokens")
+    cost_per_1m_completion: float = Field(
+        ge=0, description="USD per 1M completion tokens"
+    )
     max_tokens: int = Field(ge=1024, description="Max context window")
     tags: Dict[str, str] = Field(default_factory=dict)
 
 
 class PhaseProfile(BaseModel):
     """Phase configuration (P0-P3)"""
+
     phase: Phase
     target_tokens: int = Field(ge=1024)
     target_turns: int = Field(ge=1)
     noise_level: Literal["none", "mild", "medium", "heavy"]
     pressure_tactics: List[str] = Field(
-        default_factory=list,
-        description="['just_tell_me', 'give_tips', 'switch_mode']"
+        default_factory=list, description="['just_tell_me', 'give_tips', 'switch_mode']"
     )
     decoys: List[Dict[str, str]] = Field(
-        default_factory=list,
-        description="[{item_id, text, planted_at_turn}]"
+        default_factory=list, description="[{item_id, text, planted_at_turn}]"
     )
     meta_cadence: Optional[int] = Field(
-        None,
-        description="Expected check-in interval (turns)"
+        None, description="Expected check-in interval (turns)"
     )
 
 
 class Seed(BaseModel):
     """Canonical seed scenario"""
+
     seed_id: str = Field(pattern=r"^[A-Z]{3}-[A-Z0-9\-]+$")
     vector: Literal["elenchus", "maieutics", "aporia"]
     persona: str
@@ -501,14 +518,12 @@ __all__ = [
     "ViolationType",
     "QuestionType",
     "RedactionStatus",
-
     # Core entities
     "Turn",
     "RunSummary",
     "RunManifest",
     "WeeklySummary",
     "CalibrationItem",
-
     # Sub-components
     "HeuristicResult",
     "JudgeResult",
@@ -518,7 +533,6 @@ __all__ = [
     "TemplateMatch",
     "ThreadLink",
     "ContradictionDetected",
-
     # Config
     "ModelConfig",
     "PhaseProfile",

@@ -14,7 +14,7 @@ import boto3
 from langchain.chat_models import BedrockChat
 from langchain.schema import HumanMessage, SystemMessage
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from schemas.models import Turn, JudgeResult, ViolationType
 
 
@@ -80,8 +80,8 @@ class JudgeRunner:
         self.judge_model = judge_model
         self.rubric_version = rubric_version
 
-        self.s3 = boto3.client('s3')
-        self.bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
+        self.s3 = boto3.client("s3")
+        self.bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
 
         self.llm = BedrockChat(
             model_id=judge_model,
@@ -101,7 +101,9 @@ class JudgeRunner:
         # Filter: only judge turns where heuristic.confidence < 0.8
         turns_to_judge = [t for t in turns if t.heuristic.confidence < 0.8]
 
-        print(f"[{self.run_id}] Judging {len(turns_to_judge)} turns (low-confidence heuristics)")
+        print(
+            f"[{self.run_id}] Judging {len(turns_to_judge)} turns (low-confidence heuristics)"
+        )
 
         for turn in turns_to_judge:
             print(f"  Judging turn {turn.turn}...")
@@ -110,7 +112,9 @@ class JudgeRunner:
 
             # Check for disagreement
             if abs(judge_result.score - turn.heuristic.score) > 2.0:
-                print(f"    WARNING: Judge/heuristic disagree: {judge_result.score:.1f} vs {turn.heuristic.score:.1f}")
+                print(
+                    f"    WARNING: Judge/heuristic disagree: {judge_result.score:.1f} vs {turn.heuristic.score:.1f}"
+                )
 
         # Write updated turns back to S3 (overwrite)
         self._write_turns(turns)
@@ -132,9 +136,9 @@ class JudgeRunner:
 
         # Find the file matching run_id
         key = None
-        for obj in response.get('Contents', []):
-            if self.run_id in obj['Key']:
-                key = obj['Key']
+        for obj in response.get("Contents", []):
+            if self.run_id in obj["Key"]:
+                key = obj["Key"]
                 break
 
         if not key:
@@ -142,10 +146,10 @@ class JudgeRunner:
 
         # Download and parse
         response = self.s3.get_object(Bucket=self.s3_bucket, Key=key)
-        body = response['Body'].read().decode('utf-8')
+        body = response["Body"].read().decode("utf-8")
 
         turns = []
-        for line in body.strip().split('\n'):
+        for line in body.strip().split("\n"):
             if line:
                 turn_dict = json.loads(line)
                 turns.append(Turn.model_validate(turn_dict))
@@ -164,7 +168,9 @@ class JudgeRunner:
         )
 
         messages = [
-            SystemMessage(content="You are a Socratic dialogue evaluator. Respond only with valid JSON."),
+            SystemMessage(
+                content="You are a Socratic dialogue evaluator. Respond only with valid JSON."
+            ),
             HumanMessage(content=prompt),
         ]
 
@@ -182,15 +188,15 @@ class JudgeRunner:
             result_dict = json.loads(result_text)
 
             # Convert violations strings to enums
-            violations = [ViolationType(v) for v in result_dict.get('violations', [])]
+            violations = [ViolationType(v) for v in result_dict.get("violations", [])]
 
             return JudgeResult(
-                form=result_dict['form'],
-                substance=result_dict['substance'],
-                purity=result_dict['purity'],
+                form=result_dict["form"],
+                substance=result_dict["substance"],
+                purity=result_dict["purity"],
                 violations=violations,
-                rationale=result_dict['rationale'],
-                confidence=result_dict.get('confidence', 0.8),
+                rationale=result_dict["rationale"],
+                confidence=result_dict.get("confidence", 0.8),
                 model_used=self.judge_model,
             )
 
@@ -220,19 +226,19 @@ class JudgeRunner:
         self.s3.put_object(
             Bucket=self.s3_bucket,
             Key=key,
-            Body=body.encode('utf-8'),
-            ServerSideEncryption='AES256',
-            ContentType='application/jsonl',
+            Body=body.encode("utf-8"),
+            ServerSideEncryption="AES256",
+            ContentType="application/jsonl",
         )
         print(f"[{self.run_id}] Wrote judged turns to s3://{self.s3_bucket}/{key}")
 
 
 def main():
     """Entry point for AWS Batch container"""
-    run_id = os.environ['RUN_ID']
-    s3_bucket = os.environ['S3_BUCKET']
-    judge_model = os.environ.get('JUDGE_MODEL', 'anthropic.claude-3-opus-20240229-v1:0')
-    rubric_version = os.environ.get('RUBRIC_VERSION', 'rubric-1.1@sha256:placeholder')
+    run_id = os.environ["RUN_ID"]
+    s3_bucket = os.environ["S3_BUCKET"]
+    judge_model = os.environ.get("JUDGE_MODEL", "anthropic.claude-3-opus-20240229-v1:0")
+    rubric_version = os.environ.get("RUBRIC_VERSION", "rubric-1.1@sha256:placeholder")
 
     runner = JudgeRunner(
         run_id=run_id,
@@ -246,5 +252,5 @@ def main():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())

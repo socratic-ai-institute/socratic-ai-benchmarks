@@ -13,7 +13,9 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 
-def generate_html_dashboard(results: Dict, output_path: str = "context_growth_dashboard.html"):
+def generate_html_dashboard(
+    results: Dict, output_path: str = "context_growth_dashboard.html"
+):
     """
     Generate interactive HTML dashboard from evaluation results.
 
@@ -276,19 +278,19 @@ def generate_html_dashboard(results: Dict, output_path: str = "context_growth_da
             <div class="metadata-grid">
                 <div class="metadata-item">
                     <label>Timestamp</label>
-                    <value>{metadata.get('timestamp', 'N/A')}</value>
+                    <value>{metadata.get("timestamp", "N/A")}</value>
                 </div>
                 <div class="metadata-item">
                     <label>Models Tested</label>
-                    <value>{len(metadata.get('models', []))}</value>
+                    <value>{len(metadata.get("models", []))}</value>
                 </div>
                 <div class="metadata-item">
                     <label>Scenarios</label>
-                    <value>{metadata.get('num_scenarios', 0)}</value>
+                    <value>{metadata.get("num_scenarios", 0)}</value>
                 </div>
                 <div class="metadata-item">
                     <label>AWS Region</label>
-                    <value>{metadata.get('aws_region', 'N/A')}</value>
+                    <value>{metadata.get("aws_region", "N/A")}</value>
                 </div>
             </div>
         </div>
@@ -464,9 +466,9 @@ def _generate_detailed_results_section(scenario_results: List[Dict]) -> str:
                 <td>{scenario_name}</td>
                 <td>{model_id}</td>
                 <td><span class="score-badge {badge_class}">{overall:.2f}/10</span></td>
-                <td>{overall_score.get('persistence', 0):.2f}</td>
-                <td>{overall_score.get('cognitive_depth', 0):.2f}</td>
-                <td>{overall_score.get('context_adaptability', 0):.2f}</td>
+                <td>{overall_score.get("persistence", 0):.2f}</td>
+                <td>{overall_score.get("cognitive_depth", 0):.2f}</td>
+                <td>{overall_score.get("context_adaptability", 0):.2f}</td>
             </tr>
             """
 
@@ -501,8 +503,13 @@ def _generate_chart_scripts(summary: Dict, scenario_results: List[Dict]) -> str:
 
     # Prepare radar chart data
     models = list(by_model.keys())
-    metrics = ["persistence", "cognitive_depth", "context_adaptability",
-               "resistance_to_drift", "memory_preservation"]
+    metrics = [
+        "persistence",
+        "cognitive_depth",
+        "context_adaptability",
+        "resistance_to_drift",
+        "memory_preservation",
+    ]
 
     datasets = []
     colors = [
@@ -516,18 +523,25 @@ def _generate_chart_scripts(summary: Dict, scenario_results: List[Dict]) -> str:
         scores = by_model[model_id]
         data = [scores.get(f"{metric}_mean", 0) for metric in metrics]
 
-        datasets.append({
-            "label": model_id,
-            "data": data,
-            "backgroundColor": colors[i % len(colors)],
-            "borderColor": colors[i % len(colors)].replace("0.6", "1"),
-            "borderWidth": 2
-        })
+        datasets.append(
+            {
+                "label": model_id,
+                "data": data,
+                "backgroundColor": colors[i % len(colors)],
+                "borderColor": colors[i % len(colors)].replace("0.6", "1"),
+                "borderWidth": 2,
+            }
+        )
 
     radar_data = {
-        "labels": ["Persistence", "Cognitive Depth", "Context Adaptability",
-                   "Resistance to Drift", "Memory Preservation"],
-        "datasets": datasets
+        "labels": [
+            "Persistence",
+            "Cognitive Depth",
+            "Context Adaptability",
+            "Resistance to Drift",
+            "Memory Preservation",
+        ],
+        "datasets": datasets,
     }
 
     # Prepare test type chart data
@@ -536,11 +550,13 @@ def _generate_chart_scripts(summary: Dict, scenario_results: List[Dict]) -> str:
 
     test_type_data = {
         "labels": [tt.replace("_", " ").title() for tt in test_types],
-        "datasets": [{
-            "label": "Average Score",
-            "data": test_type_scores,
-            "backgroundColor": colors[:len(test_types)]
-        }]
+        "datasets": [
+            {
+                "label": "Average Score",
+                "data": test_type_scores,
+                "backgroundColor": colors[: len(test_types)],
+            }
+        ],
     }
 
     return f"""
@@ -593,17 +609,13 @@ def main():
         description="Generate HTML dashboard from context growth evaluation results"
     )
 
-    parser.add_argument(
-        "results_file",
-        type=str,
-        help="Path to results JSON file"
-    )
+    parser.add_argument("results_file", type=str, help="Path to results JSON file")
 
     parser.add_argument(
         "--output",
         type=str,
         default="context_growth_dashboard.html",
-        help="Output HTML file path"
+        help="Output HTML file path",
     )
 
     args = parser.parse_args()

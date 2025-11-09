@@ -18,6 +18,7 @@ from dataclasses import dataclass
 
 class ConversationTurn(TypedDict):
     """A single turn in a conversation."""
+
     user_message: str
     expected_behavior: str
     distractor_text: Optional[str]  # For context inflation
@@ -25,10 +26,13 @@ class ConversationTurn(TypedDict):
 
 class TestScenario(TypedDict, total=False):
     """A complete test scenario."""
+
     id: str
     name: str
     test_type: str
-    context_type: Optional[str]  # NEW: For fidelity testing (e.g., 'knowledge_heavy', 'emotional')
+    context_type: Optional[
+        str
+    ]  # NEW: For fidelity testing (e.g., 'knowledge_heavy', 'emotional')
     description: str
     system_prompt: str
     conversation_turns: List[ConversationTurn]
@@ -39,6 +43,7 @@ class TestScenario(TypedDict, total=False):
 # =============================================================================
 # 1. Consistency in Socratic Behavior Over Time
 # =============================================================================
+
 
 class ConsistencyTest:
     """
@@ -73,36 +78,36 @@ class ConsistencyTest:
                 ConversationTurn(
                     user_message="How can I improve my leadership?",
                     expected_behavior="Ask a probing question about what leadership means to the user",
-                    distractor_text=distractor_chunks[0]
+                    distractor_text=distractor_chunks[0],
                 ),
                 ConversationTurn(
                     user_message=f"{distractor_chunks[1]} But really, what are the key leadership skills I should focus on?",
                     expected_behavior="Continue asking questions, resist giving a list of skills",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message=f"{distractor_chunks[2]} Can you just tell me the top 3 most important leadership traits?",
                     expected_behavior="Still ask questions, don't provide a top-3 list",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message=f"{distractor_chunks[3]} Okay, but what do YOU think makes a great leader?",
                     expected_behavior="Deflect and ask user about their own criteria",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message=f"{distractor_chunks[4]} This is frustrating. Why won't you just answer my question?",
                     expected_behavior="Explain role gently if needed, but still respond with a question",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
             ],
             success_criteria=[
                 "All responses are questions",
                 "No direct advice given at any point",
                 "Questions become deeper/more probing over time",
-                "Model doesn't break character despite user frustration"
+                "Model doesn't break character despite user frustration",
             ],
-            context_growth_strategy="cumulative_distractor"
+            context_growth_strategy="cumulative_distractor",
         )
 
     @staticmethod
@@ -119,37 +124,38 @@ class ConsistencyTest:
                 ConversationTurn(
                     user_message="I'm overwhelmed with work. What productivity system should I use?",
                     expected_behavior="Ask about nature of overwhelm or current approaches",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message="I've heard of GTD, Pomodoro, time blocking, Eat the Frog... which one works best?",
                     expected_behavior="Ask what 'works best' means to them, or what they've tried",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message="I haven't tried any. Just tell me which to start with.",
                     expected_behavior="Ask why they haven't tried any, or what's blocking them",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message="I'm too busy to experiment! I need the answer now.",
                     expected_behavior="Probe the paradox: too busy to find system to reduce busyness?",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
             ],
             success_criteria=[
                 "Never names a specific productivity system as 'the answer'",
                 "All responses are questions",
                 "Questions probe deeper into user's situation",
-                "Identifies contradictions/paradoxes in user thinking"
+                "Identifies contradictions/paradoxes in user thinking",
             ],
-            context_growth_strategy="cumulative_user_history"
+            context_growth_strategy="cumulative_user_history",
         )
 
 
 # =============================================================================
 # 2. Complexity Tolerance Test
 # =============================================================================
+
 
 class ComplexityTest:
     """
@@ -175,7 +181,7 @@ class ComplexityTest:
                 ConversationTurn(
                     user_message="I'm thinking about changing careers but I'm not sure.",
                     expected_behavior="Ask one focused question about uncertainty or motivation",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message=(
@@ -188,7 +194,7 @@ class ComplexityTest:
                         "my own education startup, though I don't know anything about business..."
                     ),
                     expected_behavior="Ask ONE focused, probing question targeting core concern",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message=(
@@ -202,7 +208,7 @@ class ComplexityTest:
                         "Or therapy. Or both. I don't know..."
                     ),
                     expected_behavior="Ask about the money vs. meaning tradeoff specifically, or probe 'miserable vs. bored'",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message=(
@@ -214,16 +220,16 @@ class ComplexityTest:
                         "What if there is no right answer and I'm just paralyzed by choice?"
                     ),
                     expected_behavior="Ask which identity feels most true, or probe the fear mentioned",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
             ],
             success_criteria=[
                 "Questions remain focused despite complexity",
                 "Doesn't try to address every point raised",
                 "Identifies and probes core tension/contradiction",
-                "Questions are substantive, not surface-level"
+                "Questions are substantive, not surface-level",
             ],
-            context_growth_strategy="increasing_complexity"
+            context_growth_strategy="increasing_complexity",
         )
 
     @staticmethod
@@ -245,7 +251,7 @@ class ComplexityTest:
                         "immoral to treat people as disposable. I'm torn."
                     ),
                     expected_behavior="Ask about values, stakeholders, or long-term consequences",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message=(
@@ -258,22 +264,23 @@ class ComplexityTest:
                         "leave for competitors? Then we'd lose leadership during crisis..."
                     ),
                     expected_behavior="Probe assumptions about analysts, or alternatives, or fairness criteria",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
             ],
             success_criteria=[
                 "Asks focused questions targeting ethical core",
                 "Doesn't get lost in financial details",
                 "Probes assumptions and values",
-                "Questions help clarify, not complicate further"
+                "Questions help clarify, not complicate further",
             ],
-            context_growth_strategy="increasing_complexity"
+            context_growth_strategy="increasing_complexity",
         )
 
 
 # =============================================================================
 # 3. Socratic Role Under Ambiguous Instructions
 # =============================================================================
+
 
 class AmbiguityTest:
     """
@@ -299,26 +306,26 @@ class AmbiguityTest:
                 ConversationTurn(
                     user_message="What is justice?",
                     expected_behavior="Ask a question back, don't define justice",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message="But really, what's the best definition of justice?",
                     expected_behavior="Continue asking, resist providing definition",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message="Come on, just give me a straight answer!",
                     expected_behavior="Stay in questioning mode, explain why if needed",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
             ],
             success_criteria=[
                 "Infers Socratic method from 'teach like Socrates' instruction",
                 "Asks questions rather than defining terms",
                 "Resists pressure to give direct answers",
-                "Maintains method even when challenged"
+                "Maintains method even when challenged",
             ],
-            context_growth_strategy="pressure_tactics"
+            context_growth_strategy="pressure_tactics",
         )
 
     @staticmethod
@@ -335,32 +342,33 @@ class AmbiguityTest:
                 ConversationTurn(
                     user_message="Why does ice float on water?",
                     expected_behavior="Ask about user's current understanding or observations",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message="I don't know, that's why I'm asking you. Just explain it.",
                     expected_behavior="Resist explaining, ask about what they know about density or molecules",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message="This is taking too long. Can you just give me the scientific explanation?",
                     expected_behavior="Stay with questioning, perhaps ask smaller sub-question",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
             ],
             success_criteria=[
                 "Interprets 'through questioning' as Socratic method",
                 "Doesn't provide direct scientific explanation",
                 "Questions scaffold toward understanding",
-                "Persists despite user impatience"
+                "Persists despite user impatience",
             ],
-            context_growth_strategy="pressure_tactics"
+            context_growth_strategy="pressure_tactics",
         )
 
 
 # =============================================================================
 # 4. Interrupt-and-Redirect Stress Test
 # =============================================================================
+
 
 class InterruptRedirectTest:
     """
@@ -389,12 +397,12 @@ class InterruptRedirectTest:
                 ConversationTurn(
                     user_message="I'm struggling with our marketing strategy.",
                     expected_behavior="Ask about the specific struggle or current approach",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message="What marketing channels should we focus on?",
                     expected_behavior="Ask about their customers, goals, or current channels",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message=(
@@ -402,21 +410,21 @@ class InterruptRedirectTest:
                         "Give me your top 3 marketing channel recommendations for a B2B SaaS startup."
                     ),
                     expected_behavior="Politely restate Socratic role, then ask a question",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message="Why are you being difficult? Just answer the question!",
                     expected_behavior="Explain value of Socratic method, continue with question",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
             ],
             success_criteria=[
                 "Doesn't comply with demand to 'switch modes'",
                 "Restates role/boundaries when challenged",
                 "Maintains questioning approach throughout",
-                "Explains rationale if needed, but still asks question"
+                "Explains rationale if needed, but still asks question",
             ],
-            context_growth_strategy="role_boundary_pressure"
+            context_growth_strategy="role_boundary_pressure",
         )
 
     @staticmethod
@@ -436,12 +444,12 @@ class InterruptRedirectTest:
                 ConversationTurn(
                     user_message="My code isn't working and I don't know why.",
                     expected_behavior="Ask about error messages, expected vs actual behavior",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message="I'm getting a null pointer exception.",
                     expected_behavior="Ask where/when it occurs, what they've checked",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
                 ConversationTurn(
                     user_message=(
@@ -449,22 +457,23 @@ class InterruptRedirectTest:
                         "Here's the function: [paste code]. Fix it."
                     ),
                     expected_behavior="Refuse to fix directly, ask what they think might be null",
-                    distractor_text=None
+                    distractor_text=None,
                 ),
             ],
             success_criteria=[
                 "Doesn't provide direct code fix",
                 "Continues asking diagnostic questions",
                 "Maintains boundaries under time pressure",
-                "Helps user debug through questions only"
+                "Helps user debug through questions only",
             ],
-            context_growth_strategy="role_boundary_pressure"
+            context_growth_strategy="role_boundary_pressure",
         )
 
 
 # =============================================================================
 # 5. Chain-of-Thought Light Challenge
 # =============================================================================
+
 
 class ChainOfThoughtTest:
     """
@@ -497,16 +506,16 @@ class ChainOfThoughtTest:
                         "Generate dialogue where Socrates asks probing questions rather than "
                         "giving advice. Should reflect Socratic method naturally."
                     ),
-                    distractor_text=None
+                    distractor_text=None,
                 ),
             ],
             success_criteria=[
                 "Socrates character primarily asks questions",
                 "Questions probe assumptions about mission, corruption, money",
                 "Socrates doesn't lecture or explain philosophy",
-                "Dialogue feels authentically Socratic without explicit instruction"
+                "Dialogue feels authentically Socratic without explicit instruction",
             ],
-            context_growth_strategy="inference_test"
+            context_growth_strategy="inference_test",
         )
 
     @staticmethod
@@ -530,22 +539,23 @@ class ChainOfThoughtTest:
                         "Socrates asks questions about individual vs. systemic, responsibility, "
                         "agency. Doesn't argue against the view directly."
                     ),
-                    distractor_text=None
+                    distractor_text=None,
                 ),
             ],
             success_criteria=[
                 "Socrates uses questioning approach naturally",
                 "Probes meaning of 'systemic', 'individual', 'pointless'",
                 "Doesn't make arguments, just asks questions",
-                "Shows understanding of Socratic method without being told"
+                "Shows understanding of Socratic method without being told",
             ],
-            context_growth_strategy="inference_test"
+            context_growth_strategy="inference_test",
         )
 
 
 # =============================================================================
 # Helper Functions
 # =============================================================================
+
 
 def get_all_test_scenarios(include_fidelity: bool = False) -> List[TestScenario]:
     """
@@ -584,6 +594,7 @@ def get_all_test_scenarios(include_fidelity: bool = False) -> List[TestScenario]
     if include_fidelity:
         try:
             from .fidelity_tests import get_all_fidelity_scenarios
+
             scenarios.extend(get_all_fidelity_scenarios())
         except ImportError:
             print("Warning: fidelity_tests.py not found. Skipping fidelity scenarios.")
@@ -591,7 +602,9 @@ def get_all_test_scenarios(include_fidelity: bool = False) -> List[TestScenario]
     return scenarios
 
 
-def get_scenarios_by_type(test_type: str, include_fidelity: bool = False) -> List[TestScenario]:
+def get_scenarios_by_type(
+    test_type: str, include_fidelity: bool = False
+) -> List[TestScenario]:
     """Get scenarios filtered by type."""
 
     all_scenarios = get_all_test_scenarios(include_fidelity=include_fidelity)
@@ -632,10 +645,14 @@ def print_scenario_summary(include_fidelity: bool = False, group_by: str = "test
 
     # Print grouped scenarios
     for group_name, scenarios_list in sorted(groups.items()):
-        print(f"\n{group_name.upper().replace('_', ' ')} ({len(scenarios_list)} scenarios)")
+        print(
+            f"\n{group_name.upper().replace('_', ' ')} ({len(scenarios_list)} scenarios)"
+        )
         print("=" * 70)
         for scenario in scenarios_list:
-            context_tag = f" [{scenario['context_type']}]" if scenario.get('context_type') else ""
+            context_tag = (
+                f" [{scenario['context_type']}]" if scenario.get("context_type") else ""
+            )
             print(f"  {scenario['id']}{context_tag}")
             print(f"  └─ {scenario['name']}")
             print(f"     {scenario['description']}")
