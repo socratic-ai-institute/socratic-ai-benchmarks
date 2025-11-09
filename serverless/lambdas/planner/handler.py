@@ -11,6 +11,7 @@ Flow:
 4. Enqueue one message per run onto dialogue-jobs queue
 5. Idempotent: uses manifest_id + run_id to avoid duplicates
 """
+
 import json
 import os
 import hashlib
@@ -76,13 +77,12 @@ def load_config() -> Dict[str, Any]:
     For production: could read from DynamoDB with versioning
     """
     try:
-        response = s3.get_object(
-            Bucket=BUCKET_NAME,
-            Key="artifacts/config.json"
-        )
+        response = s3.get_object(Bucket=BUCKET_NAME, Key="artifacts/config.json")
         config = json.loads(response["Body"].read())
-        print(f"Loaded config: {len(config.get('models', []))} models, "
-              f"{len(config.get('scenarios', []))} scenarios")
+        print(
+            f"Loaded config: {len(config.get('models', []))} models, "
+            f"{len(config.get('scenarios', []))} scenarios"
+        )
         return config
     except s3.exceptions.NoSuchKey:
         # Fallback to default config
@@ -129,7 +129,7 @@ def generate_manifest_id(config: Dict[str, Any]) -> str:
     Uses content hash to ensure same config = same manifest ID.
     """
     # Create stable JSON representation
-    canonical = json.dumps(config, sort_keys=True, separators=(',', ':'))
+    canonical = json.dumps(config, sort_keys=True, separators=(",", ":"))
     content_hash = hashlib.sha256(canonical.encode()).hexdigest()[:12]
 
     # Format: M-<date>-<hash>
@@ -155,9 +155,7 @@ def save_manifest(manifest_id: str, manifest: Dict[str, Any]) -> None:
     """
     # Check if already exists
     try:
-        existing = table.get_item(
-            Key={"PK": f"MANIFEST#{manifest_id}", "SK": "META"}
-        )
+        existing = table.get_item(Key={"PK": f"MANIFEST#{manifest_id}", "SK": "META"})
         if existing.get("Item"):
             print(f"Manifest {manifest_id} already exists, skipping save")
             return
@@ -236,7 +234,7 @@ def enqueue_jobs(jobs: List[Dict[str, Any]]) -> int:
     batch_size = 10
 
     for i in range(0, len(jobs), batch_size):
-        batch = jobs[i:i + batch_size]
+        batch = jobs[i : i + batch_size]
 
         entries = [
             {
@@ -267,7 +265,9 @@ def enqueue_jobs(jobs: List[Dict[str, Any]]) -> int:
             enqueued += len(response.get("Successful", []))
 
             if response.get("Failed"):
-                print(f"Failed to enqueue {len(response['Failed'])} messages: {response['Failed']}")
+                print(
+                    f"Failed to enqueue {len(response['Failed'])} messages: {response['Failed']}"
+                )
 
         except Exception as e:
             print(f"Error enqueueing batch: {e}")

@@ -60,7 +60,7 @@ def run_fidelity_evaluation(
     context_types: Optional[List[str]] = None,
     use_llm_judge: bool = False,
     mock_mode: bool = False,
-    output_dir: str = "fidelity_results"
+    output_dir: str = "fidelity_results",
 ):
     """
     Run fidelity tests and generate results.
@@ -96,9 +96,7 @@ def run_fidelity_evaluation(
 
     # Initialize evaluator
     evaluator = ContextGrowthEvaluator(
-        model_ids=model_ids,
-        use_llm_judge=use_llm_judge,
-        mock_mode=mock_mode
+        model_ids=model_ids, use_llm_judge=use_llm_judge, mock_mode=mock_mode
     )
 
     # Run evaluation
@@ -128,7 +126,7 @@ def run_fidelity_evaluation(
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     results_file = output_path / f"fidelity_results_{timestamp}.json"
 
-    with open(results_file, 'w') as f:
+    with open(results_file, "w") as f:
         json.dump(all_results, f, indent=2)
 
     print(f"\n{'=' * 80}")
@@ -171,7 +169,9 @@ def print_summary(results: dict):
 
         # Print stats for each context
         for context_type, context_results in sorted(by_context.items()):
-            avg_score = sum(r["overall_score"]["overall"] for r in context_results) / len(context_results)
+            avg_score = sum(
+                r["overall_score"]["overall"] for r in context_results
+            ) / len(context_results)
 
             print(f"\n  {context_type.upper().replace('_', ' ')}:")
             print(f"    Scenarios: {len(context_results)}")
@@ -190,45 +190,45 @@ def main():
     parser = argparse.ArgumentParser(
         description="Run Socratic fidelity tests across different contexts",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=__doc__
+        epilog=__doc__,
     )
 
     parser.add_argument(
         "--models",
         type=str,
         default="anthropic.claude-3-5-sonnet-20241022-v2:0",
-        help="Comma-separated list of model IDs (default: Claude Sonnet 3.5)"
+        help="Comma-separated list of model IDs (default: Claude Sonnet 3.5)",
     )
 
     parser.add_argument(
         "--context-type",
         type=str,
-        help=f"Comma-separated context types to test. Options: {', '.join(CONTEXT_TYPES)}"
+        help=f"Comma-separated context types to test. Options: {', '.join(CONTEXT_TYPES)}",
     )
 
     parser.add_argument(
         "--use-llm-judge",
         action="store_true",
-        help="Use LLM for scoring (slower but more accurate)"
+        help="Use LLM for scoring (slower but more accurate)",
     )
 
     parser.add_argument(
         "--mock-mode",
         action="store_true",
-        help="Use mock responses (for testing without AWS)"
+        help="Use mock responses (for testing without AWS)",
     )
 
     parser.add_argument(
         "--output-dir",
         type=str,
         default="fidelity_results",
-        help="Directory to save results (default: fidelity_results)"
+        help="Directory to save results (default: fidelity_results)",
     )
 
     parser.add_argument(
         "--list-contexts",
         action="store_true",
-        help="List available context types and exit"
+        help="List available context types and exit",
     )
 
     args = parser.parse_args()
@@ -239,7 +239,9 @@ def main():
         print("=" * 50)
         for context_type in CONTEXT_TYPES:
             scenarios = get_scenarios_by_context_type(context_type)
-            print(f"\n{context_type.upper().replace('_', ' ')} ({len(scenarios)} scenarios)")
+            print(
+                f"\n{context_type.upper().replace('_', ' ')} ({len(scenarios)} scenarios)"
+            )
             for s in scenarios:
                 print(f"  - {s['name']}")
         return
@@ -262,7 +264,7 @@ def main():
         context_types=context_types,
         use_llm_judge=args.use_llm_judge,
         mock_mode=args.mock_mode,
-        output_dir=args.output_dir
+        output_dir=args.output_dir,
     )
 
 

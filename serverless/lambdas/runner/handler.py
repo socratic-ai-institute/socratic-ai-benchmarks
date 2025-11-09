@@ -14,6 +14,7 @@ Flow:
    - Enqueue judge job to SQS
 5. Mark RUN status as completed
 """
+
 import json
 import os
 from datetime import datetime, timezone

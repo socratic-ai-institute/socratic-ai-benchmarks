@@ -1,6 +1,7 @@
 """
 Prompt builders for Socratic tutor (by vector) and ASE judge rubric prompts.
 """
+
 from typing import Dict
 
 
@@ -57,4 +58,3 @@ def ase_judge_prompt(vector: str, persona: str, transcript: str) -> str:
         "Scoring: Use integers 1-5. overall is the average rounded to one decimal.\n"
         "Return ONLY JSON."
     )
-

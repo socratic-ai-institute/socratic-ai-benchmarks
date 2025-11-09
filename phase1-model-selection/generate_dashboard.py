@@ -26,38 +26,39 @@ def load_runs(files: List[str]) -> List[Dict[str, Any]]:
     runs: List[Dict[str, Any]] = []
     for path in files:
         try:
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 data = json.load(f)
-                runs.append({
-                    'path': os.path.basename(path),
-                    'data': data
-                })
+                runs.append({"path": os.path.basename(path), "data": data})
         except Exception as e:
             print(f"⚠️  Skipping {path}: {e}")
     return runs
 
 
 def autodetect_latest() -> List[str]:
-    candidates = sorted(glob.glob('comparison_results_*.json'))
+    candidates = sorted(glob.glob("comparison_results_*.json"))
     return candidates[-1:] if candidates else []
 
 
 def model_rows_from_run(run: Dict[str, Any]) -> List[Dict[str, Any]]:
-    results = run['data'].get('results', [])
+    results = run["data"].get("results", [])
     # Sort by avg_quality desc
-    results_sorted = sorted(results, key=lambda r: r.get('avg_quality', 0), reverse=True)
+    results_sorted = sorted(
+        results, key=lambda r: r.get("avg_quality", 0), reverse=True
+    )
     rows = []
     for r in results_sorted:
-        rows.append({
-            'model_id': r.get('model_id', ''),
-            'model_name': r.get('model_name', r.get('model_id', '')),
-            'avg_quality': round(float(r.get('avg_quality', 0)), 3),
-            'avg_latency_ms': round(float(r.get('avg_latency_ms', 0)), 1),
-            'success_rate': round(float(r.get('success_rate', 0)) * 100, 1),
-            'successful': r.get('successful', 0),
-            'total_scenarios': r.get('total_scenarios', 0),
-            'criteria_scores': r.get('criteria_scores', {}),
-        })
+        rows.append(
+            {
+                "model_id": r.get("model_id", ""),
+                "model_name": r.get("model_name", r.get("model_id", "")),
+                "avg_quality": round(float(r.get("avg_quality", 0)), 3),
+                "avg_latency_ms": round(float(r.get("avg_latency_ms", 0)), 1),
+                "success_rate": round(float(r.get("success_rate", 0)) * 100, 1),
+                "successful": r.get("successful", 0),
+                "total_scenarios": r.get("total_scenarios", 0),
+                "criteria_scores": r.get("criteria_scores", {}),
+            }
+        )
     return rows
 
 
@@ -66,40 +67,46 @@ def select_top_model(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def escape_html(s: str) -> str:
-    return (
-        s.replace('&', '&amp;')
-         .replace('<', '&lt;')
-         .replace('>', '&gt;')
-    )
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def build_html(runs: List[Dict[str, Any]]) -> str:
-    generated = datetime.now().isoformat(timespec='seconds')
+    generated = datetime.now().isoformat(timespec="seconds")
 
     # Prepare JS data structures for charts
     run_blocks = []
     for run in runs:
-        meta = run['data'].get('metadata', {})
+        meta = run["data"].get("metadata", {})
         rows = model_rows_from_run(run)
-        labels = [r['model_name'] for r in rows]
-        qualities = [r['avg_quality'] for r in rows]
-        latencies = [r['avg_latency_ms'] for r in rows]
-        success = [r['success_rate'] for r in rows]
-        crit = [r.get('criteria_scores', {}) for r in rows]
-        crit_keys = ['open_ended', 'probing', 'builds_on_previous', 'age_appropriate', 'content_relevant']
-        crit_series = {k: [round(float(c.get(k, 0)), 3) for c in crit] for k in crit_keys}
+        labels = [r["model_name"] for r in rows]
+        qualities = [r["avg_quality"] for r in rows]
+        latencies = [r["avg_latency_ms"] for r in rows]
+        success = [r["success_rate"] for r in rows]
+        crit = [r.get("criteria_scores", {}) for r in rows]
+        crit_keys = [
+            "open_ended",
+            "probing",
+            "builds_on_previous",
+            "age_appropriate",
+            "content_relevant",
+        ]
+        crit_series = {
+            k: [round(float(c.get(k, 0)), 3) for c in crit] for k in crit_keys
+        }
 
-        run_blocks.append({
-            'title': f"Run: {escape_html(run['path'])}",
-            'meta': meta,
-            'rows': rows,
-            'labels': labels,
-            'qualities': qualities,
-            'latencies': latencies,
-            'success': success,
-            'crit_keys': crit_keys,
-            'crit_series': crit_series,
-        })
+        run_blocks.append(
+            {
+                "title": f"Run: {escape_html(run['path'])}",
+                "meta": meta,
+                "rows": rows,
+                "labels": labels,
+                "qualities": qualities,
+                "latencies": latencies,
+                "success": success,
+                "crit_keys": crit_keys,
+                "crit_series": crit_series,
+            }
+        )
 
     html = """
 <!doctype html>
@@ -282,38 +289,51 @@ def build_html(runs: List[Dict[str, Any]]) -> str:
 </body>
 </html>
 """
-    html = html.replace('__RUNS_JSON__', json.dumps(run_blocks))
-    html = html.replace('__GENERATED__', generated)
+    html = html.replace("__RUNS_JSON__", json.dumps(run_blocks))
+    html = html.replace("__GENERATED__", generated)
     return html
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Generate static dashboard from benchmark results')
-    parser.add_argument('files', nargs='*', help='comparison_results_*.json files')
-    parser.add_argument('-o', '--output', default='dashboard.html', help='Output HTML file (default: dashboard.html in input file directory)')
+    parser = argparse.ArgumentParser(
+        description="Generate static dashboard from benchmark results"
+    )
+    parser.add_argument("files", nargs="*", help="comparison_results_*.json files")
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="dashboard.html",
+        help="Output HTML file (default: dashboard.html in input file directory)",
+    )
     args = parser.parse_args()
 
     files = args.files or autodetect_latest()
     if not files:
-        print('❌ No comparison_results_*.json found. Run benchmark.py first or pass files explicitly.')
+        print(
+            "❌ No comparison_results_*.json found. Run benchmark.py first or pass files explicitly."
+        )
         return
 
     runs = load_runs(files)
     if not runs:
-        print('❌ No valid runs loaded.')
+        print("❌ No valid runs loaded.")
         return
 
     # Determine default output location if user didn't specify a path
     output_path = args.output
-    if args.output == 'dashboard.html':
-        base_dir = os.path.dirname(os.path.abspath(files[0])) if files else os.path.dirname(os.path.abspath(__file__))
-        output_path = os.path.join(base_dir, 'dashboard.html')
+    if args.output == "dashboard.html":
+        base_dir = (
+            os.path.dirname(os.path.abspath(files[0]))
+            if files
+            else os.path.dirname(os.path.abspath(__file__))
+        )
+        output_path = os.path.join(base_dir, "dashboard.html")
 
     html = build_html(runs)
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         f.write(html)
     print(f"✅ Dashboard generated: {output_path}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -2,6 +2,7 @@
 """
 AWS CDK app for Socratic AI Benchmarks serverless infrastructure.
 """
+
 import aws_cdk as cdk
 from stack import SocraticBenchStack
 

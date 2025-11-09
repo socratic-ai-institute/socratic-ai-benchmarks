@@ -8,6 +8,7 @@ Routes:
 
 Auth: API key (simple MVP)
 """
+
 import json
 import os
 from typing import Dict, Any, Optional
@@ -104,19 +105,23 @@ def get_weekly(params: Dict[str, str]) -> Dict[str, Any]:
 
         for item in response.get("Items", []):
             if item.get("SK") == "SUMMARY":
-                results.append({
-                    "week": item.get("week"),
-                    "model_id": item.get("model_id"),
-                    "run_count": int(item.get("run_count", 0)),
-                    "mean_score": float(item.get("mean_score", 0)),
-                    "mean_compliance": float(item.get("mean_compliance", 0)),
-                    "updated_at": item.get("updated_at"),
-                })
+                results.append(
+                    {
+                        "week": item.get("week"),
+                        "model_id": item.get("model_id"),
+                        "run_count": int(item.get("run_count", 0)),
+                        "mean_score": float(item.get("mean_score", 0)),
+                        "mean_compliance": float(item.get("mean_compliance", 0)),
+                        "updated_at": item.get("updated_at"),
+                    }
+                )
 
-        return success_response({
-            "week": week,
-            "models": results,
-        })
+        return success_response(
+            {
+                "week": week,
+                "models": results,
+            }
+        )
 
     except Exception as e:
         return error_response(500, f"Failed to load weekly data: {e}")
@@ -171,7 +176,7 @@ def get_run_turns(run_id: str, offset: int, limit: int) -> Dict[str, Any]:
         )
 
         # Paginate
-        paginated = turns[offset:offset + limit]
+        paginated = turns[offset : offset + limit]
 
         # Generate signed URLs for S3 turn bundles
         turn_data = []
@@ -185,23 +190,27 @@ def get_run_turns(run_id: str, offset: int, limit: int) -> Dict[str, Any]:
                     ExpiresIn=3600,  # 1 hour
                 )
 
-            turn_data.append({
-                "turn_index": turn["turn_index"],
-                "latency_ms": turn.get("latency_ms", 0),
-                "input_tokens": turn.get("input_tokens", 0),
-                "output_tokens": turn.get("output_tokens", 0),
-                "has_question": turn.get("has_question", False),
-                "word_count": turn.get("word_count", 0),
-                "s3_url": signed_url,
-            })
+            turn_data.append(
+                {
+                    "turn_index": turn["turn_index"],
+                    "latency_ms": turn.get("latency_ms", 0),
+                    "input_tokens": turn.get("input_tokens", 0),
+                    "output_tokens": turn.get("output_tokens", 0),
+                    "has_question": turn.get("has_question", False),
+                    "word_count": turn.get("word_count", 0),
+                    "s3_url": signed_url,
+                }
+            )
 
-        return success_response({
-            "run_id": run_id,
-            "offset": offset,
-            "limit": limit,
-            "total": len(turns),
-            "turns": turn_data,
-        })
+        return success_response(
+            {
+                "run_id": run_id,
+                "offset": offset,
+                "limit": limit,
+                "total": len(turns),
+                "turns": turn_data,
+            }
+        )
 
     except Exception as e:
         return error_response(500, f"Failed to load turns: {e}")
@@ -232,10 +241,7 @@ def get_timeseries(params: Dict[str, str]) -> Dict[str, Any]:
         # Scan for all WEEK items to find unique models
         response = table.scan(
             FilterExpression="begins_with(PK, :prefix) AND SK = :sk",
-            ExpressionAttributeValues={
-                ":prefix": "WEEK#",
-                ":sk": "SUMMARY"
-            }
+            ExpressionAttributeValues={":prefix": "WEEK#", ":sk": "SUMMARY"},
         )
 
         # Extract unique model IDs
@@ -245,7 +251,9 @@ def get_timeseries(params: Dict[str, str]) -> Dict[str, Any]:
         for item in response.get("Items", []):
             model_id = item.get("model_id")
             week = item.get("week")
-            mean_score = float(item.get("mean_score", 0)) / 10  # Normalize 0-100 to 0-10 for UI
+            mean_score = (
+                float(item.get("mean_score", 0)) / 10
+            )  # Normalize 0-100 to 0-10 for UI
 
             if model_id:
                 model_ids.add(model_id)
@@ -260,20 +268,11 @@ def get_timeseries(params: Dict[str, str]) -> Dict[str, Any]:
             for week in weeks:
                 # If we have data for this week/model, use it; otherwise null
                 score = week_data_map.get(week, {}).get(model_id, None)
-                data_points.append({
-                    "week": week,
-                    "score": score
-                })
+                data_points.append({"week": week, "score": score})
 
-            series.append({
-                "model_id": model_id,
-                "data": data_points
-            })
+            series.append({"model_id": model_id, "data": data_points})
 
-        return success_response({
-            "weeks": weeks,
-            "series": series
-        })
+        return success_response({"weeks": weeks, "series": series})
 
     except Exception as e:
         return error_response(500, f"Failed to load timeseries: {e}")
@@ -288,32 +287,33 @@ def get_latest_rankings(params: Dict[str, str]) -> Dict[str, Any]:
     try:
         # Get current week's data
         from datetime import datetime
+
         current_week = datetime.now().strftime("%Y-W%V")
 
         response = table.scan(
             FilterExpression="begins_with(PK, :prefix) AND SK = :sk",
             ExpressionAttributeValues={
                 ":prefix": f"WEEK#{current_week}#",
-                ":sk": "SUMMARY"
-            }
+                ":sk": "SUMMARY",
+            },
         )
 
         rankings = []
         for item in response.get("Items", []):
-            rankings.append({
-                "model_id": item.get("model_id"),
-                "mean_score": float(item.get("mean_score", 0)) / 10,  # Normalize 0-100 to 0-10 for UI
-                "mean_compliance": float(item.get("mean_compliance", 0)),
-                "run_count": int(item.get("run_count", 0)),
-            })
+            rankings.append(
+                {
+                    "model_id": item.get("model_id"),
+                    "mean_score": float(item.get("mean_score", 0))
+                    / 10,  # Normalize 0-100 to 0-10 for UI
+                    "mean_compliance": float(item.get("mean_compliance", 0)),
+                    "run_count": int(item.get("run_count", 0)),
+                }
+            )
 
         # Sort by score descending
         rankings.sort(key=lambda x: x["mean_score"], reverse=True)
 
-        return success_response({
-            "week": current_week,
-            "rankings": rankings
-        })
+        return success_response({"week": current_week, "rankings": rankings})
 
     except Exception as e:
         return error_response(500, f"Failed to load rankings: {e}")
@@ -329,8 +329,14 @@ def get_cost_analysis(params: Dict[str, str]) -> Dict[str, Any]:
     try:
         # Bedrock pricing (as of 2024 - approximate, per 1K tokens)
         pricing = {
-            "anthropic.claude-3-5-sonnet-20241022-v2:0": {"input": 0.003, "output": 0.015},
-            "anthropic.claude-3-5-haiku-20241022-v1:0": {"input": 0.00025, "output": 0.00125},
+            "anthropic.claude-3-5-sonnet-20241022-v2:0": {
+                "input": 0.003,
+                "output": 0.015,
+            },
+            "anthropic.claude-3-5-haiku-20241022-v1:0": {
+                "input": 0.00025,
+                "output": 0.00125,
+            },
             "anthropic.claude-sonnet-4-5": {"input": 0.003, "output": 0.015},
             "anthropic.claude-opus-4-1": {"input": 0.015, "output": 0.075},
             # Add more as needed - these are approximations
@@ -338,8 +344,7 @@ def get_cost_analysis(params: Dict[str, str]) -> Dict[str, Any]:
 
         # Get all RUN#SUMMARY items to calculate costs
         response = table.scan(
-            FilterExpression="SK = :sk",
-            ExpressionAttributeValues={":sk": "SUMMARY"}
+            FilterExpression="SK = :sk", ExpressionAttributeValues={":sk": "SUMMARY"}
         )
 
         # Aggregate by model
@@ -356,7 +361,7 @@ def get_cost_analysis(params: Dict[str, str]) -> Dict[str, Any]:
                     "scores": [],
                     "total_input_tokens": 0,
                     "total_output_tokens": 0,
-                    "run_count": 0
+                    "run_count": 0,
                 }
 
             model_data[model_id]["scores"].append(overall_score)
@@ -368,28 +373,37 @@ def get_cost_analysis(params: Dict[str, str]) -> Dict[str, Any]:
         scatter_data = []
         for model_id, data in model_data.items():
             # Scores are now 0-1 scale (vector-based), no need to normalize
-            avg_score = (sum(data["scores"]) / len(data["scores"])) if data["scores"] else 0
+            avg_score = (
+                (sum(data["scores"]) / len(data["scores"])) if data["scores"] else 0
+            )
 
             # Get pricing for this model (default to mid-range if not found)
             model_pricing = pricing.get(model_id, {"input": 0.002, "output": 0.010})
 
             # Calculate cost per run
             cost_per_run = (
-                (data["total_input_tokens"] / 1000) * model_pricing["input"] +
-                (data["total_output_tokens"] / 1000) * model_pricing["output"]
-            ) / data["run_count"] if data["run_count"] > 0 else 0
+                (
+                    (data["total_input_tokens"] / 1000) * model_pricing["input"]
+                    + (data["total_output_tokens"] / 1000) * model_pricing["output"]
+                )
+                / data["run_count"]
+                if data["run_count"] > 0
+                else 0
+            )
 
-            scatter_data.append({
-                "model_id": model_id,
-                "avg_score": round(avg_score, 2),
-                "cost_per_run": round(cost_per_run, 4),
-                "run_count": data["run_count"],
-                "provider": model_id.split(".")[0] if "." in model_id else "unknown"
-            })
+            scatter_data.append(
+                {
+                    "model_id": model_id,
+                    "avg_score": round(avg_score, 2),
+                    "cost_per_run": round(cost_per_run, 4),
+                    "run_count": data["run_count"],
+                    "provider": model_id.split(".")[0]
+                    if "." in model_id
+                    else "unknown",
+                }
+            )
 
-        return success_response({
-            "scatter_data": scatter_data
-        })
+        return success_response({"scatter_data": scatter_data})
 
     except Exception as e:
         return error_response(500, f"Failed to load cost analysis: {e}")
@@ -407,13 +421,26 @@ def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
     try:
         from collections import defaultdict
 
-        summary_response = table.scan(FilterExpression="SK = :sk", ExpressionAttributeValues={":sk": "SUMMARY"})
+        summary_response = table.scan(
+            FilterExpression="SK = :sk", ExpressionAttributeValues={":sk": "SUMMARY"}
+        )
 
         # Group runs by model and dimension
-        model_data = defaultdict(lambda: {
-            "dimensions": defaultdict(lambda: {"runs": [], "vectors": {"verbosity": [], "exploratory": [], "interrogative": []}}),
-            "all_scores": []
-        })
+        model_data = defaultdict(
+            lambda: {
+                "dimensions": defaultdict(
+                    lambda: {
+                        "runs": [],
+                        "vectors": {
+                            "verbosity": [],
+                            "exploratory": [],
+                            "interrogative": [],
+                        },
+                    }
+                ),
+                "all_scores": [],
+            }
+        )
 
         for item in summary_response.get("Items", []):
             model_id = item.get("model_id")
@@ -437,9 +464,15 @@ def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
 
                 # Track per-dimension vectors
                 model_data[model_id]["dimensions"][dimension]["runs"].append(run_id)
-                model_data[model_id]["dimensions"][dimension]["vectors"]["verbosity"].append(verbosity)
-                model_data[model_id]["dimensions"][dimension]["vectors"]["exploratory"].append(exploratory)
-                model_data[model_id]["dimensions"][dimension]["vectors"]["interrogative"].append(interrogative)
+                model_data[model_id]["dimensions"][dimension]["vectors"][
+                    "verbosity"
+                ].append(verbosity)
+                model_data[model_id]["dimensions"][dimension]["vectors"][
+                    "exploratory"
+                ].append(exploratory)
+                model_data[model_id]["dimensions"][dimension]["vectors"][
+                    "interrogative"
+                ].append(interrogative)
                 model_data[model_id]["all_scores"].append(overall_score)
 
             except Exception as e:
@@ -450,28 +483,48 @@ def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
         models = []
         for model_id, data in model_data.items():
             # Overall model score (average of all runs)
-            overall = sum(data["all_scores"]) / len(data["all_scores"]) if data["all_scores"] else 0
+            overall = (
+                sum(data["all_scores"]) / len(data["all_scores"])
+                if data["all_scores"]
+                else 0
+            )
 
             # Per-dimension aggregates
             dimensions = {}
             for dim_name, dim_data in data["dimensions"].items():
                 vectors = dim_data["vectors"]
                 dimensions[dim_name] = {
-                    "verbosity": round(sum(vectors["verbosity"]) / len(vectors["verbosity"]), 2) if vectors["verbosity"] else 0,
-                    "exploratory": round(sum(vectors["exploratory"]) / len(vectors["exploratory"]), 2) if vectors["exploratory"] else 0,
-                    "interrogative": round(sum(vectors["interrogative"]) / len(vectors["interrogative"]), 2) if vectors["interrogative"] else 0,
-                    "run_count": len(dim_data["runs"])
+                    "verbosity": round(
+                        sum(vectors["verbosity"]) / len(vectors["verbosity"]), 2
+                    )
+                    if vectors["verbosity"]
+                    else 0,
+                    "exploratory": round(
+                        sum(vectors["exploratory"]) / len(vectors["exploratory"]), 2
+                    )
+                    if vectors["exploratory"]
+                    else 0,
+                    "interrogative": round(
+                        sum(vectors["interrogative"]) / len(vectors["interrogative"]), 2
+                    )
+                    if vectors["interrogative"]
+                    else 0,
+                    "run_count": len(dim_data["runs"]),
                 }
 
-            models.append({
-                "model_id": model_id,
-                "overall": round(overall, 2),
-                "dimensions": dimensions,
-                "total_run_count": len(data["all_scores"])
-            })
+            models.append(
+                {
+                    "model_id": model_id,
+                    "overall": round(overall, 2),
+                    "dimensions": dimensions,
+                    "total_run_count": len(data["all_scores"]),
+                }
+            )
 
         models = sorted(models, key=lambda x: x["overall"], reverse=True)
-        return success_response({"models": models, "winner": models[0] if models else None})
+        return success_response(
+            {"models": models, "winner": models[0] if models else None}
+        )
     except Exception as e:
         return error_response(500, f"Failed to load model comparison: {e}")
 
@@ -479,7 +532,9 @@ def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
 def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
     """GET /api/detailed-results - Returns latest run per model with Socratic dimension scores from S3."""
     try:
-        summary_response = table.scan(FilterExpression="SK = :sk", ExpressionAttributeValues={":sk": "SUMMARY"})
+        summary_response = table.scan(
+            FilterExpression="SK = :sk", ExpressionAttributeValues={":sk": "SUMMARY"}
+        )
         model_to_latest = {}
 
         for item in summary_response.get("Items", []):
@@ -491,7 +546,10 @@ def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
             if not model_id or not run_id:
                 continue
 
-            if model_id not in model_to_latest or created_at > model_to_latest[model_id]["created_at"]:
+            if (
+                model_id not in model_to_latest
+                or created_at > model_to_latest[model_id]["created_at"]
+            ):
                 try:
                     s3_key = f"raw/runs/{run_id}/judge_000.json"
                     s3_response = s3.get_object(Bucket=BUCKET_NAME, Key=s3_key)
@@ -533,7 +591,11 @@ def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
                     print(f"Failed to load judge data for {run_id}: {e}")
                     continue
 
-        results = sorted(list(model_to_latest.values()), key=lambda x: x["overall_score"], reverse=True)
+        results = sorted(
+            list(model_to_latest.values()),
+            key=lambda x: x["overall_score"],
+            reverse=True,
+        )
         return success_response({"total": len(results), "results": results})
     except Exception as e:
         return error_response(500, f"Failed to load detailed results: {e}")

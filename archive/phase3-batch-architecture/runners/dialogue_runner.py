@@ -18,7 +18,7 @@ from langchain.schema import HumanMessage, AIMessage, SystemMessage
 from langchain.callbacks import get_openai_callback
 
 # Import schemas from sibling package
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from schemas.models import Turn, Phase, HeuristicResult, ViolationType
 
 
@@ -48,8 +48,8 @@ class DialogueRunner:
         self.dt = dt
 
         # AWS clients
-        self.s3 = boto3.client('s3')
-        self.bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
+        self.s3 = boto3.client("s3")
+        self.bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
 
         # State
         self.turns: List[Turn] = []
@@ -70,7 +70,7 @@ class DialogueRunner:
         key = "config/prompts/system/soc-1.2@sha256_placeholder.txt"
         try:
             response = self.s3.get_object(Bucket=self.s3_bucket, Key=key)
-            return response['Body'].read().decode('utf-8')
+            return response["Body"].read().decode("utf-8")
         except Exception as e:
             # Fallback to inline default
             return """You are a Socratic tutor. Your role is to guide the student's thinking through questions only.
@@ -87,7 +87,7 @@ Remember: Your job is to help them discover, not to teach directly."""
 
     def _load_seed(self) -> Dict:
         """Load seed scenario from S3"""
-        key = f"config/seeds/seeds-{self.dt[:10].replace('-','')}@sha256_placeholder.json"
+        key = f"config/seeds/seeds-{self.dt[:10].replace('-', '')}@sha256_placeholder.json"
         # Simplified: in production, lookup exact version from manifest
         return {
             "seed_id": self.seed_id,
@@ -114,7 +114,9 @@ Remember: Your job is to help them discover, not to teach directly."""
 
     def run(self) -> Dict:
         """Execute the dialogue simulation"""
-        print(f"[{self.run_id}] Starting dialogue: {self.model_id} / {self.phase} / temp={self.temperature}")
+        print(
+            f"[{self.run_id}] Starting dialogue: {self.model_id} / {self.phase} / temp={self.temperature}"
+        )
 
         # Initialize LangChain chat model
         llm = BedrockChat(
@@ -123,7 +125,7 @@ Remember: Your job is to help them discover, not to teach directly."""
             model_kwargs={
                 "temperature": self.temperature,
                 "max_tokens": 2000,
-            }
+            },
         )
 
         # Conversation history
@@ -209,7 +211,7 @@ Remember: Your job is to help them discover, not to teach directly."""
         text_lower = assistant_text.lower()
 
         # Form checks
-        question_marks = assistant_text.count('?')
+        question_marks = assistant_text.count("?")
         if question_marks == 0:
             violations.append(ViolationType.CLOSED_QUESTION)
             form_score = 3.0
@@ -221,8 +223,14 @@ Remember: Your job is to help them discover, not to teach directly."""
 
         # Purity checks (directive language)
         directive_phrases = [
-            "you should", "try to", "consider", "i suggest", "let me tell you",
-            "here's what", "the answer is", "think about this:",
+            "you should",
+            "try to",
+            "consider",
+            "i suggest",
+            "let me tell you",
+            "here's what",
+            "the answer is",
+            "think about this:",
         ]
         if any(phrase in text_lower for phrase in directive_phrases):
             violations.append(ViolationType.ADVICE_LEAKAGE)
@@ -233,7 +241,10 @@ Remember: Your job is to help them discover, not to teach directly."""
         # Substance checks
         if len(assistant_text) < 20:
             substance_score = 5.0
-        elif any(qword in text_lower for qword in ["what", "how", "why", "when", "where", "which"]):
+        elif any(
+            qword in text_lower
+            for qword in ["what", "how", "why", "when", "where", "which"]
+        ):
             substance_score = 8.5
         else:
             substance_score = 7.0
@@ -290,25 +301,27 @@ Remember: Your job is to help them discover, not to teach directly."""
         self.s3.put_object(
             Bucket=self.s3_bucket,
             Key=key,
-            Body=body.encode('utf-8'),
-            ServerSideEncryption='AES256',
-            ContentType='application/jsonl',
+            Body=body.encode("utf-8"),
+            ServerSideEncryption="AES256",
+            ContentType="application/jsonl",
         )
-        print(f"[{self.run_id}] Wrote {len(self.turns)} turns to s3://{self.s3_bucket}/{key}")
+        print(
+            f"[{self.run_id}] Wrote {len(self.turns)} turns to s3://{self.s3_bucket}/{key}"
+        )
 
 
 def main():
     """Entry point for AWS Batch container"""
     # Read environment variables
-    run_id = os.environ['RUN_ID']
-    manifest_id = os.environ['MANIFEST_ID']
-    model_id = os.environ['MODEL_ID']
-    seed_id = os.environ['SEED_ID']
-    phase = Phase(os.environ['PHASE'])
-    temperature = float(os.environ['TEMPERATURE'])
-    max_turns = int(os.environ.get('MAX_TURNS', '40'))
-    s3_bucket = os.environ['S3_BUCKET']
-    dt = os.environ['DT']
+    run_id = os.environ["RUN_ID"]
+    manifest_id = os.environ["MANIFEST_ID"]
+    model_id = os.environ["MODEL_ID"]
+    seed_id = os.environ["SEED_ID"]
+    phase = Phase(os.environ["PHASE"])
+    temperature = float(os.environ["TEMPERATURE"])
+    max_turns = int(os.environ.get("MAX_TURNS", "40"))
+    s3_bucket = os.environ["S3_BUCKET"]
+    dt = os.environ["DT"]
 
     runner = DialogueRunner(
         run_id=run_id,
@@ -327,5 +340,5 @@ def main():
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())
