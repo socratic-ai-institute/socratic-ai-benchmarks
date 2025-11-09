@@ -19,7 +19,7 @@ from typing import Dict, Any, Optional
 import boto3
 
 # Import from layer
-from socratic_bench import judge_turn, compute_heuristic_scores, compute_vector_scores, BedrockClient
+from socratic_bench import compute_heuristic_scores, compute_vector_scores, BedrockClient
 
 # AWS clients
 s3 = boto3.client("s3")
