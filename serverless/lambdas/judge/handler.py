@@ -19,7 +19,7 @@ from typing import Dict, Any, Optional
 import boto3
 
 # Import from layer
-from socratic_bench import judge_turn, compute_heuristic_scores, BedrockClient
+from socratic_bench import judge_turn, compute_heuristic_scores, compute_vector_scores, BedrockClient
 
 # AWS clients
 s3 = boto3.client("s3")
@@ -74,20 +74,24 @@ def judge_turn_job(job: Dict[str, Any]) -> Dict[str, Any]:
     # 1. Load turn bundle from S3
     turn_bundle = load_turn_bundle(run_id, turn_index)
 
-    # 2. Run heuristics (fast, cheap)
+    # 2. Run heuristics (fast, cheap, backward compatibility)
     heuristics = compute_heuristic_scores(turn_bundle["ai"])
 
-    # 3. Run LLM judge
+    # 3. Compute vector scores (new system - replaces LLM judge)
     bedrock_client = BedrockClient()
 
-    judge_result = judge_turn(
-        vector=turn_bundle["vector"],
-        persona=turn_bundle["persona"],
-        turn_index=turn_index,
-        student_utterance=turn_bundle["student"],
+    # Use token count from turn bundle if available
+    token_count = turn_bundle.get("output_tokens")
+
+    judge_result = compute_vector_scores(
         ai_response=turn_bundle["ai"],
+        token_count=token_count,
+        use_llm_exploratory=False,  # Use heuristic for speed
         bedrock_client=bedrock_client,
     )
+
+    # Set turn index on result
+    judge_result.turn_index = turn_index
 
     # 4. Save judge result
     save_judge_result(run_id, turn_index, turn_bundle, heuristics, judge_result)
@@ -150,11 +154,14 @@ def save_judge_result(
 
     # Extract key scores for DynamoDB
     scores = judge_result.scores or {}
-    # Handle both old format (score as number) and new format (score as {"score": X, "evidence": "..."})
+    # New format: vector scores are on 0-1 scale
+    # Handle both old format (0-100 dict) and new format (0-1 flat values)
     overall = scores.get("overall", 0.0)
     if isinstance(overall, dict):
-        overall_score = float(overall.get("score", 0.0))
+        # Old LLM judge format: {"score": X, "evidence": "..."}
+        overall_score = float(overall.get("score", 0.0)) / 100.0  # Convert 0-100 to 0-1
     else:
+        # New vector format: already 0-1 scale
         overall_score = float(overall)
 
     # Save to DynamoDB

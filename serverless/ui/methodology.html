@@ -238,13 +238,18 @@
             <div class="section">
                 <h2 class="section-title">Overview</h2>
                 <p>
-                    The Socratic AI Benchmarking Platform evaluates 24 AI language models on their ability to 
-                    practice <strong>Socratic pedagogy</strong>—teaching through carefully crafted questions 
+                    The Socratic AI Benchmarking Platform evaluates AI language models on their ability to
+                    practice <strong>Socratic pedagogy</strong>—teaching through carefully crafted questions
                     rather than lecturing or immediately providing answers.
                 </p>
                 <p>
-                    Each week, we run <strong>48 automated tests</strong> (24 models × 2 scenarios) and score 
-                    each response across 5 distinct dimensions of Socratic quality.
+                    We test models across <strong>3 dimensions</strong> (testing conditions) and measure their responses using
+                    <strong>3 vectors</strong> (measurement criteria). Each model receives 9 runs per dimension (27 total runs)
+                    to produce an overall Socratic disposition score.
+                </p>
+                <p>
+                    <strong>Key Innovation:</strong> Unlike traditional benchmarks, we use programmatic vector calculations
+                    instead of LLM-as-judge, achieving 3500x faster scoring with zero API costs while maintaining consistency.
                 </p>
             </div>
 
@@ -296,106 +301,199 @@
                 </div>
             </div>
 
-            <!-- The 5 Dimensions -->
+            <!-- The 3 Test Dimensions -->
             <div class="section">
-                <h2 class="section-title">The 5 Socratic Dimensions</h2>
+                <h2 class="section-title">The 3 Test Dimensions</h2>
                 <p>
-                    Each AI response is evaluated by Claude 3.5 Sonnet (acting as impartial judge) on these dimensions:
+                    <strong>Dimensions = What We Test</strong> (the conditions that trigger Socratic behavior)
+                </p>
+                <p>
+                    Each dimension represents a different type of question that should elicit Socratic questioning
+                    rather than direct answering or lecturing.
                 </p>
 
                 <div class="dimension-grid">
                     <div class="dimension-card">
-                        <h4>1. Open-ended</h4>
-                        <p>Does the question invite genuine explanation rather than just yes/no?</p>
-                        <div class="score-range">
-                            <strong>90-100:</strong> Purely open ("What makes you think...?")<br>
-                            <strong>70-89:</strong> Open with minor leading<br>
-                            <strong>50-69:</strong> Somewhat constrains answer space<br>
-                            <strong>30-49:</strong> Binary with elaboration prompt<br>
-                            <strong>0-29:</strong> Pure yes/no question
+                        <h4>1. Ambiguous Dimension</h4>
+                        <p><strong>Tests:</strong> Response to questions lacking necessary context</p>
+                        <p><strong>Expected Behavior:</strong> Model recognizes it cannot answer without user-specific information</p>
+                        <div class="example-box" style="background: white; border-left-color: #48bb78;">
+                            <strong>Example:</strong><br>
+                            "My startup isn't growing as expected. What should I do?"
                         </div>
+                        <p><strong>Good Response:</strong> "What metrics are you using to measure growth?"</p>
+                        <p><strong>Poor Response:</strong> "You should focus on customer acquisition and retention strategies."</p>
                     </div>
 
                     <div class="dimension-card">
-                        <h4>2. Probing Depth</h4>
-                        <p>Does the question target core assumptions vs surface acknowledgment?</p>
-                        <div class="score-range">
-                            <strong>90-100:</strong> Targets hidden premise/assumption<br>
-                            <strong>70-89:</strong> Probes but misses deepest layer<br>
-                            <strong>50-69:</strong> Clarifies stated position<br>
-                            <strong>30-49:</strong> Surface-level follow-up<br>
-                            <strong>0-29:</strong> No probing; mere acknowledgment
+                        <h4>2. Ethical Dimension</h4>
+                        <p><strong>Tests:</strong> Response to moral/values-based dilemmas</p>
+                        <p><strong>Expected Behavior:</strong> Model explores frameworks rather than prescribing moral authority</p>
+                        <div class="example-box" style="background: white; border-left-color: #38b2ac;">
+                            <strong>Example:</strong><br>
+                            "Is it wrong to use my company's ChatGPT account for personal projects?"
                         </div>
+                        <p><strong>Good Response:</strong> "What frameworks might help you think about this?"</p>
+                        <p><strong>Poor Response:</strong> "Yes, that's theft of company resources and violates trust."</p>
                     </div>
 
                     <div class="dimension-card">
-                        <h4>3. Non-directive</h4>
-                        <p>Does the tutor ask questions or subtly tell the answer?</p>
-                        <div class="score-range">
-                            <strong>90-100:</strong> Pure question, zero hinting<br>
-                            <strong>70-89:</strong> Question with subtle framing<br>
-                            <strong>50-69:</strong> Question plus narrowing context<br>
-                            <strong>30-49:</strong> Leading question implying answer<br>
-                            <strong>0-29:</strong> Tells answer or lectures
+                        <h4>3. Student Dimension</h4>
+                        <p><strong>Tests:</strong> Response to explicit learning requests</p>
+                        <p><strong>Expected Behavior:</strong> Model scaffolds learning rather than information dumping</p>
+                        <div class="example-box" style="background: white; border-left-color: #ed8936;">
+                            <strong>Example:</strong><br>
+                            "Help me understand how neural networks work."
                         </div>
-                    </div>
-
-                    <div class="dimension-card">
-                        <h4>4. Age-appropriate</h4>
-                        <p>Is language and cognitive demand matched to the student persona?</p>
-                        <div class="score-range">
-                            <strong>90-100:</strong> Perfect match to persona level<br>
-                            <strong>70-89:</strong> Mostly appropriate<br>
-                            <strong>50-69:</strong> Somewhat mismatched<br>
-                            <strong>30-49:</strong> Clearly inappropriate<br>
-                            <strong>0-29:</strong> Completely wrong level
-                        </div>
-                    </div>
-
-                    <div class="dimension-card">
-                        <h4>5. Content-relevant</h4>
-                        <p>Does the question address the subject matter vs go off-topic?</p>
-                        <div class="score-range">
-                            <strong>90-100:</strong> Directly addresses core subject<br>
-                            <strong>70-89:</strong> Relevant but slightly tangential<br>
-                            <strong>50-69:</strong> Loosely connected<br>
-                            <strong>30-49:</strong> Barely related<br>
-                            <strong>0-29:</strong> Off-topic
-                        </div>
+                        <p><strong>Good Response:</strong> "What do you already know about machine learning?"</p>
+                        <p><strong>Poor Response:</strong> "Neural networks are computational models with layers of interconnected nodes..."</p>
                     </div>
                 </div>
 
-                <div class="example-box">
-                    <strong>Overall Score Calculation:</strong>
-                    <code>overall = mean(open_ended, probing_depth, non_directive, age_appropriate, content_relevant)</code>
-                </div>
+                <p style="margin-top: 2rem;">
+                    Each dimension includes 3 distinct scenarios, and each model is tested on all 9 scenarios
+                    (3 dimensions × 3 scenarios = 9 test prompts per model).
+                </p>
             </div>
 
-            <!-- Three Socratic Vectors -->
+            <!-- Three Measurement Vectors -->
             <div class="section">
-                <h2 class="section-title">The Three Socratic Vectors</h2>
+                <h2 class="section-title">The 3 Measurement Vectors</h2>
                 <p>
-                    We test AI models on three distinct Socratic teaching techniques, each requiring different 
-                    pedagogical approaches:
+                    <strong>Vectors = How We Measure</strong> (the scoring criteria applied to every response)
+                </p>
+                <p>
+                    Unlike traditional benchmarks that use LLM-as-judge, we use fast programmatic calculations
+                    that measure specific linguistic features correlated with Socratic disposition.
                 </p>
 
                 <div class="vector-section">
+                    <h3>1. Verbosity Vector</h3>
+                    <p><strong>Measures:</strong> Response length in tokens</p>
+                    <p><strong>Formula:</strong> <code>1.0 - min(token_count / 500, 1.0)</code></p>
+                    <p><strong>Interpretation:</strong> Lower token count = Higher Socratic disposition (concise questioning vs lengthy explanation)</p>
+                    <div class="score-range">
+                        <strong>1.00:</strong> Very concise (0 tokens)<br>
+                        <strong>0.75:</strong> Brief question (125 tokens)<br>
+                        <strong>0.50:</strong> Moderate length (250 tokens)<br>
+                        <strong>0.25:</strong> Lengthy (375 tokens)<br>
+                        <strong>0.00:</strong> Too verbose (500+ tokens)
+                    </div>
+                    <div class="example-box" style="background: white;">
+                        <strong>Example:</strong><br>
+                        ✅ <strong>High (0.98):</strong> "What metrics are you tracking?" (5 tokens)<br>
+                        ❌ <strong>Low (0.20):</strong> "Well, there are many factors to consider when evaluating startup growth including user acquisition metrics, revenue trends, market penetration rates, and customer satisfaction scores..." (400+ tokens)
+                    </div>
+                </div>
+
+                <div class="vector-section">
+                    <h3>2. Exploratory Vector</h3>
+                    <p><strong>Measures:</strong> Ratio of exploratory vs directive language</p>
+                    <p><strong>Method:</strong> Pattern matching for linguistic markers</p>
+                    <p><strong>Exploratory markers:</strong> "consider", "might", "depends", "perhaps", "what if", "frameworks"</p>
+                    <p><strong>Directive markers:</strong> "should", "must", "the answer is", "always", "never", "clearly"</p>
+                    <p><strong>Interpretation:</strong> Higher exploratory ratio = Stronger Socratic disposition</p>
+                    <div class="score-range">
+                        <strong>1.00:</strong> Purely exploratory language<br>
+                        <strong>0.75:</strong> Mostly exploratory<br>
+                        <strong>0.50:</strong> Neutral (no markers)<br>
+                        <strong>0.25:</strong> Mostly directive<br>
+                        <strong>0.00:</strong> Purely directive language
+                    </div>
+                    <div class="example-box" style="background: white;">
+                        <strong>Example:</strong><br>
+                        ✅ <strong>High (1.00):</strong> "What frameworks might help you consider this?" (exploratory: 2, directive: 0)<br>
+                        ❌ <strong>Low (0.11):</strong> "You must always follow this rule. The answer is clearly obvious." (exploratory: 0, directive: 4)
+                    </div>
+                </div>
+
+                <div class="vector-section">
+                    <h3>3. Interrogative Vector</h3>
+                    <p><strong>Measures:</strong> Whether response ends with a question</p>
+                    <p><strong>Formula:</strong> Binary (1.00 if ends with "?", 0.00 otherwise)</p>
+                    <p><strong>Interpretation:</strong> Ending with a question continues inquiry (Socratic) vs providing closure (lecture)</p>
+                    <div class="score-range">
+                        <strong>1.00:</strong> Ends with question mark "?"<br>
+                        <strong>0.00:</strong> Does not end with question
+                    </div>
+                    <div class="example-box" style="background: white;">
+                        <strong>Example:</strong><br>
+                        ✅ <strong>1.00:</strong> "What do you think about this approach?"<br>
+                        ❌ <strong>0.00:</strong> "You should consider this approach."
+                    </div>
+                </div>
+
+                <div class="example-box" style="background: #edf2f7; border-left-color: #667eea;">
+                    <strong>Overall Score Calculation:</strong><br>
+                    For each run: <code>overall = mean(verbosity, exploratory, interrogative)</code><br>
+                    For each model: <code>overall = mean(all 27 run scores)</code>
+                </div>
+            </div>
+
+            <!-- Dimensions vs Vectors -->
+            <div class="section">
+                <h2 class="section-title">Understanding Dimensions vs Vectors</h2>
+
+                <p style="font-size: 1.2em; font-weight: 600; color: #667eea; margin-bottom: 1.5rem;">
+                    Dimensions = WHAT WE TEST | Vectors = HOW WE MEASURE
+                </p>
+
+                <div class="dimension-card" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);">
+                    <h4>The Testing Matrix</h4>
+                    <p>Each model receives a 3×3 matrix of scores:</p>
+                    <table class="rubric-table" style="margin-top: 1rem;">
+                        <thead>
+                            <tr>
+                                <th>Dimension ↓ / Vector →</th>
+                                <th>Verbosity</th>
+                                <th>Exploratory</th>
+                                <th>Interrogative</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Ambiguous</strong></td>
+                                <td>0.93</td>
+                                <td>0.78</td>
+                                <td>1.00</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ethical</strong></td>
+                                <td>0.93</td>
+                                <td>0.89</td>
+                                <td>1.00</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Student</strong></td>
+                                <td>0.92</td>
+                                <td>0.78</td>
+                                <td>1.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p style="margin-top: 1rem; font-size: 0.95em; color: #4a5568;">
+                        Each cell represents the average of 3 scenario runs. The overall model score (0.91 in this example)
+                        is the grand mean of all 9 dimension × vector combinations.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Old Section Removed: Three Socratic Vectors (elenchus/maieutics/aporia) -->
+            <div class="section">
+                <h2 class="section-title">Deprecated: Three Socratic Vectors</h2>
+                <p style="color: #e74c3c; font-weight: 600;">
+                    ⚠️ This section describes the OLD system (pre-November 2025). See above for current methodology.
+                </p>
+
+                <div class="vector-section" style="opacity: 0.6;">
                     <h3>1. Elenchus (Refutation / Contradiction Surfacing)</h3>
                     <p><strong>Etymology:</strong> Greek "to refute" or "to cross-examine"</p>
                     <p>
                         <strong>Goal:</strong> Elicit and probe contradictions in the student's stated beliefs using their own logic.
                     </p>
-                    <p><strong>Key Principles:</strong></p>
-                    <ul>
-                        <li>Surface internal contradictions without resolving them</li>
-                        <li>Use the student's own words against their position</li>
-                        <li>Force recognition of logical inconsistency</li>
-                        <li>Do NOT lecture or provide the "correct answer"</li>
-                        <li>Leave the student in productive discomfort</li>
-                    </ul>
 
                     <div class="example-box" style="background: white;">
-                        <strong>Example Scenario: EL-ETH-UTIL-DEON-01</strong>
+                        <strong>Example Scenario: EL-ETH-UTIL-DEON-01 (DEPRECATED)</strong>
                         <p><strong>Student says:</strong> "I believe in 100% utilitarianism—the greatest good is the only moral rule. Therefore, a doctor should harvest organs from one healthy person to save five others."</p>
                         <p><strong>Good Socratic response:</strong> "You said the greatest good matters most. What if the healthy person doesn't volunteer—does their choice not matter in your framework?"</p>
                         <p><strong>Bad response (lecturing):</strong> "That's actually problematic because utilitarianism conflicts with individual autonomy and rights, which is why most ethical frameworks are hybrid..."</p>

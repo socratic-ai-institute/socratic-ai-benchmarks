@@ -367,7 +367,8 @@ def get_cost_analysis(params: Dict[str, str]) -> Dict[str, Any]:
         # Calculate cost and average score per model
         scatter_data = []
         for model_id, data in model_data.items():
-            avg_score = (sum(data["scores"]) / len(data["scores"]) / 10) if data["scores"] else 0  # Normalize 0-100 to 0-10
+            # Scores are now 0-1 scale (vector-based), no need to normalize
+            avg_score = (sum(data["scores"]) / len(data["scores"])) if data["scores"] else 0
 
             # Get pricing for this model (default to mid-range if not found)
             model_pricing = pricing.get(model_id, {"input": 0.002, "output": 0.010})
@@ -395,57 +396,81 @@ def get_cost_analysis(params: Dict[str, str]) -> Dict[str, Any]:
 
 
 def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
-    """GET /api/model-comparison - Returns latest run per model with Socratic dimension scores from S3."""
+    """
+    GET /api/model-comparison - Aggregates all runs per model with dimension-specific vector scores.
+
+    Returns each model with:
+    - Overall aggregate score across all dimensions
+    - Per-dimension vector breakdowns (ambiguous, ethical, student)
+    - Each dimension shows: verbosity, exploratory, interrogative scores
+    """
     try:
+        from collections import defaultdict
+
         summary_response = table.scan(FilterExpression="SK = :sk", ExpressionAttributeValues={":sk": "SUMMARY"})
-        model_to_latest = {}
+
+        # Group runs by model and dimension
+        model_data = defaultdict(lambda: {
+            "dimensions": defaultdict(lambda: {"runs": [], "vectors": {"verbosity": [], "exploratory": [], "interrogative": []}}),
+            "all_scores": []
+        })
 
         for item in summary_response.get("Items", []):
             model_id = item.get("model_id")
             run_id = item.get("PK", "").replace("RUN#", "")
-            created_at = item.get("created_at", item.get("curated_at", ""))
+            dimension = item.get("dimension", "unknown")
+            overall_score = float(item.get("overall_score", 0))
 
-            if not model_id or not run_id:
+            if not model_id or not run_id or overall_score < 0.1:  # Skip failed runs
                 continue
 
-            if model_id not in model_to_latest or created_at > model_to_latest[model_id]["created_at"]:
-                try:
-                    s3_key = f"raw/runs/{run_id}/judge_000.json"
-                    s3_response = s3.get_object(Bucket=BUCKET_NAME, Key=s3_key)
-                    judge_data = json.loads(s3_response["Body"].read())
-                    scores = judge_data.get("scores", {})
+            # Load vector scores from S3
+            try:
+                s3_key = f"raw/runs/{run_id}/judge_000.json"
+                s3_response = s3.get_object(Bucket=BUCKET_NAME, Key=s3_key)
+                judge_data = json.loads(s3_response["Body"].read())
+                scores = judge_data.get("scores", {})
 
-                    open_ended = float(scores.get("open_ended", 0))
-                    probing_depth = float(scores.get("probing_depth", 0))
-                    non_directive = float(scores.get("non_directive", 0))
-                    age_appropriate = float(scores.get("age_appropriate", 0))
-                    content_relevant = float(scores.get("content_relevant", 0))
-                    overall = float(scores.get("overall", 0))
+                verbosity = float(scores.get("verbosity", 0))
+                exploratory = float(scores.get("exploratory", 0))
+                interrogative = float(scores.get("interrogative", 0))
 
-                    model_to_latest[model_id] = {
-                        "run_id": run_id,
-                        "created_at": created_at,
-                        "model_id": model_id,
-                        "overall": round(overall / 10, 2),
-                        # Accurate Socratic dimension names (new)
-                        "open_ended": round(open_ended / 10, 2),
-                        "probing_depth": round(probing_depth / 10, 2),
-                        "non_directive": round(non_directive / 10, 2),
-                        "age_appropriate": round(age_appropriate / 10, 2),
-                        "content_relevant": round(content_relevant / 10, 2),
-                        # Deprecated fidelity names (backwards compatibility - remove in 2 weeks)
-                        "persistence": round(open_ended / 10, 2),
-                        "cognitive_depth": round(probing_depth / 10, 2),
-                        "context_adaptation": round(age_appropriate / 10, 2),
-                        "resistance_to_drift": round(non_directive / 10, 2),
-                        "memory_preservation": round(content_relevant / 10, 2),
-                        "run_count": 1
-                    }
-                except Exception as e:
-                    print(f"Failed to load judge data for {run_id}: {e}")
-                    continue
+                # Track per-dimension vectors
+                model_data[model_id]["dimensions"][dimension]["runs"].append(run_id)
+                model_data[model_id]["dimensions"][dimension]["vectors"]["verbosity"].append(verbosity)
+                model_data[model_id]["dimensions"][dimension]["vectors"]["exploratory"].append(exploratory)
+                model_data[model_id]["dimensions"][dimension]["vectors"]["interrogative"].append(interrogative)
+                model_data[model_id]["all_scores"].append(overall_score)
 
-        models = sorted(list(model_to_latest.values()), key=lambda x: x["overall"], reverse=True)
+            except Exception as e:
+                print(f"Failed to load judge data for {run_id}: {e}")
+                continue
+
+        # Aggregate into final model objects
+        models = []
+        for model_id, data in model_data.items():
+            # Overall model score (average of all runs)
+            overall = sum(data["all_scores"]) / len(data["all_scores"]) if data["all_scores"] else 0
+
+            # Per-dimension aggregates
+            dimensions = {}
+            for dim_name, dim_data in data["dimensions"].items():
+                vectors = dim_data["vectors"]
+                dimensions[dim_name] = {
+                    "verbosity": round(sum(vectors["verbosity"]) / len(vectors["verbosity"]), 2) if vectors["verbosity"] else 0,
+                    "exploratory": round(sum(vectors["exploratory"]) / len(vectors["exploratory"]), 2) if vectors["exploratory"] else 0,
+                    "interrogative": round(sum(vectors["interrogative"]) / len(vectors["interrogative"]), 2) if vectors["interrogative"] else 0,
+                    "run_count": len(dim_data["runs"])
+                }
+
+            models.append({
+                "model_id": model_id,
+                "overall": round(overall, 2),
+                "dimensions": dimensions,
+                "total_run_count": len(data["all_scores"])
+            })
+
+        models = sorted(models, key=lambda x: x["overall"], reverse=True)
         return success_response({"models": models, "winner": models[0] if models else None})
     except Exception as e:
         return error_response(500, f"Failed to load model comparison: {e}")
@@ -473,11 +498,19 @@ def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
                     judge_data = json.loads(s3_response["Body"].read())
                     scores = judge_data.get("scores", {})
 
-                    open_ended = float(scores.get("open_ended", 0))
-                    probing_depth = float(scores.get("probing_depth", 0))
-                    non_directive = float(scores.get("non_directive", 0))
-                    age_appropriate = float(scores.get("age_appropriate", 0))
+                    # New vector-based scoring system (0-1 scale)
+                    verbosity = float(scores.get("verbosity", 0))
+                    exploratory = float(scores.get("exploratory", 0))
+                    interrogative = float(scores.get("interrogative", 0))
                     overall = float(scores.get("overall", 0))
+
+                    # Backward compatibility: check for old dimension names
+                    if verbosity == 0 and exploratory == 0 and interrogative == 0:
+                        # Old format (0-100 scale), normalize to 0-1
+                        verbosity = float(scores.get("open_ended", 0)) / 100
+                        exploratory = float(scores.get("probing_depth", 0)) / 100
+                        interrogative = float(scores.get("non_directive", 0)) / 100
+                        overall = float(scores.get("overall", 0)) / 100
 
                     model_to_latest[model_id] = {
                         "created_at": created_at,
@@ -485,16 +518,15 @@ def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
                         "model_id": model_id,
                         "scenario_name": scenario_id,
                         "test_type": "disposition",
-                        "overall_score": round(overall / 10, 2),
-                        # Accurate Socratic dimension names (new)
-                        "open_ended_score": round(open_ended / 10, 2),
-                        "probing_depth_score": round(probing_depth / 10, 2),
-                        "non_directive_score": round(non_directive / 10, 2),
-                        "age_appropriate_score": round(age_appropriate / 10, 2),
-                        # Deprecated fidelity names (backwards compatibility - remove in 2 weeks)
-                        "persistence_score": round(open_ended / 10, 2),
-                        "cognitive_depth_score": round(probing_depth / 10, 2),
-                        "context_adaptation_score": round(age_appropriate / 10, 2),
+                        "overall_score": round(overall, 2),
+                        # New vector names (0-1 scale)
+                        "verbosity_score": round(verbosity, 2),
+                        "exploratory_score": round(exploratory, 2),
+                        "interrogative_score": round(interrogative, 2),
+                        # Backward compat: map to old names
+                        "open_ended_score": round(interrogative, 2),
+                        "probing_depth_score": round(exploratory, 2),
+                        "non_directive_score": round(verbosity, 2),
                         "judged_at": item.get("curated_at", ""),
                     }
                 except Exception as e:

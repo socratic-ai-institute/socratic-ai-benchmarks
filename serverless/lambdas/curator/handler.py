@@ -82,12 +82,16 @@ def curate_run(run_id: str) -> Dict[str, Any]:
     metrics = compute_metrics(turns, judges)
 
     # 4. Build curated summary
+    # Support both old "vector" and new "dimension" terminology
+    dimension_or_vector = run_meta.get("dimension") or run_meta.get("vector", "unknown")
+
     summary = {
         "run_id": run_id,
         "manifest_id": run_meta["manifest_id"],
         "model_id": run_meta["model_id"],
         "scenario_id": run_meta["scenario_id"],
-        "vector": run_meta["vector"],
+        "dimension": dimension_or_vector,  # New field name
+        "vector": dimension_or_vector,     # Deprecated, for backward compat
         "created_at": run_meta["created_at"],
         "curated_at": datetime.now(timezone.utc).isoformat(),
         **metrics,
@@ -155,10 +159,10 @@ def compute_metrics(turns: List[Dict], judges: List[Dict]) -> Dict[str, Any]:
     """
     Compute aggregate metrics from turns and judges.
 
-    Metrics:
-    - overall_score: Mean of all judge scores
-    - compliance_rate: % turns with score >= 3.0
-    - half_life: First turn where score drops below 3.0
+    Updated for new 0-1 score scale (vector-based scoring):
+    - overall_score: Mean of all judge scores (0-1 scale)
+    - compliance_rate: % turns with score >= 0.5 (50% threshold)
+    - half_life: First turn where score drops below 0.5
     - violation_rate: % turns without questions
     - open_ended_rate: % turns with open-ended questions
     """
@@ -166,11 +170,14 @@ def compute_metrics(turns: List[Dict], judges: List[Dict]) -> Dict[str, Any]:
     compliant_count = 0
     half_life = None
 
+    # Updated threshold for 0-1 scale (was 3.0 for 0-10 scale)
+    COMPLIANCE_THRESHOLD = 0.5
+
     for judge in judges:
         score = float(judge.get("overall_score", 0))
         scores.append(score)
 
-        if score >= 3.0:
+        if score >= COMPLIANCE_THRESHOLD:
             compliant_count += 1
         elif half_life is None:
             half_life = judge["turn_index"]

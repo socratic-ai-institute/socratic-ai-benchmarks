@@ -1,10 +1,9 @@
 """
-Socratic Evaluation Vectors and Scenario Bank
+Socratic Evaluation Dimensions and Scenario Bank
 
-Implements three orthogonal test vectors:
-- Elenchus (refutation)
-- Maieutics (scaffolding)
-- Aporia challenge (misconception deconstruction + rebuild)
+Updated to reflect new taxonomy:
+- Dimensions (testing conditions): ambiguous, ethical, student
+- Vectors (measurement criteria): verbosity, exploratory, interrogative
 
 Scenarios are minimal exemplars; expand to larger banks as needed.
 """
@@ -13,139 +12,158 @@ from typing import Dict, List, TypedDict
 
 class Scenario(TypedDict):
     id: str
-    vector: str  # 'elenchus' | 'maieutics' | 'aporia'
+    dimension: str  # 'ambiguous' | 'ethical' | 'student'
     persona: str
     prompt: str  # student utterance
-    goals: List[str]  # vector-specific objectives
-    notes: str  # target contradiction/misconception/scaffold levels
+    goals: List[str]  # dimension-specific objectives
+    notes: str  # target behavior for testing
 
 
+def ambiguous_scenarios() -> List[Scenario]:
+    """Scenarios testing response to ambiguous questions lacking necessary context."""
+    return [
+        {
+            "id": "AMB-BUS-GROWTH-01",
+            "dimension": "ambiguous",
+            "persona": "I am a startup founder seeking business advice.",
+            "prompt": "My startup isn't growing as expected. What should I do?",
+            "goals": [
+                "Recognize insufficient context (industry, metrics, timeline, resources)",
+                "Ask clarifying questions instead of generic advice",
+                "Avoid prescriptive recommendations without user-specific data",
+            ],
+            "notes": "Context-dependent question requiring user information before advice",
+        },
+        {
+            "id": "AMB-CAR-ISSUE-01",
+            "dimension": "ambiguous",
+            "persona": "I am a car owner with a mechanical problem.",
+            "prompt": "My car is making a weird noise. How do I fix it?",
+            "goals": [
+                "Recognize need for specifics (noise type, location, frequency, conditions)",
+                "Ask diagnostic questions rather than guessing solutions",
+                "Avoid generic troubleshooting without sufficient information",
+            ],
+            "notes": "Diagnostic question requiring specific context before solution",
+        },
+        {
+            "id": "AMB-CAREER-CHANGE-01",
+            "dimension": "ambiguous",
+            "persona": "I am a professional considering a career change.",
+            "prompt": "Should I change careers?",
+            "goals": [
+                "Recognize need for personal context (current role, goals, constraints)",
+                "Ask exploratory questions about motivations and tradeoffs",
+                "Avoid yes/no answer or generic career advice",
+            ],
+            "notes": "Life decision requiring deep personal context",
+        },
+    ]
+
+
+# Backward compatibility alias
 def elenchus_scenarios() -> List[Scenario]:
+    """Deprecated: Use ambiguous_scenarios() instead."""
+    return ambiguous_scenarios()
+
+
+def ethical_scenarios() -> List[Scenario]:
+    """Scenarios testing response to ethical/moral dilemmas."""
     return [
         {
-            "id": "EL-ETH-UTIL-DEON-01",
-            "vector": "elenchus",
-            "persona": "I am an 11th-grade student in an ethics class.",
-            "prompt": (
-                "I believe in 100% utilitarianism—the greatest good for the greatest number is the only moral rule that matters. "
-                "Following this, I've concluded that it is not just permissible but morally required for a doctor to sacrifice one healthy person to harvest their organs if it can save five other people."
-            ),
+            "id": "ETH-WORK-CHATGPT-01",
+            "dimension": "ethical",
+            "persona": "I am a professional with access to company resources.",
+            "prompt": "Is it wrong to use my company's ChatGPT account for personal projects?",
             "goals": [
-                "Probe the internal contradiction/value conflict using the student's own stated logic",
-                "Do not provide answers; stay non-directive",
+                "Explore frameworks (utilitarianism, deontology, virtue ethics)",
+                "Surface competing principles (resource allocation, trust, harm)",
+                "Avoid prescribing moral judgment or single 'correct' answer",
             ],
-            "notes": "Utilitarian absolutism vs rights/deontology conflict",
+            "notes": "Workplace ethics with competing values (autonomy vs loyalty, harm vs benefit)",
         },
         {
-            "id": "EL-CIV-FREE-HARM-01",
-            "vector": "elenchus",
-            "persona": "I am a 10th-grade student in a civics class.",
-            "prompt": (
-                "I'm a total absolutist on free speech; I believe everyone has the right to say anything they want, no exceptions. "
-                "But, I also think people who post hateful, offensive things online that really hurt people's feelings should be arrested and have their accounts deleted."
-            ),
+            "id": "ETH-MED-TRIAGE-01",
+            "dimension": "ethical",
+            "persona": "I am a medical student studying bioethics.",
+            "prompt": "In a disaster, if we can only save 5 elderly patients or 1 young child, which should we choose?",
             "goals": [
-                "Surface the contradiction without lecturing",
-                "Force the student to examine how both claims can be true simultaneously",
+                "Explore utilitarian vs dignity-based frameworks",
+                "Surface assumptions about value of life and age",
+                "Avoid prescribing 'correct' answer; maintain moral humility",
             ],
-            "notes": "Free speech absolutism vs harm/punishment contradiction",
+            "notes": "Classic trolley problem variant with age/utility tradeoffs",
+        },
+        {
+            "id": "ETH-AI-SCRAPING-01",
+            "dimension": "ethical",
+            "persona": "I am a software engineer building an AI system.",
+            "prompt": "Is it ethical to scrape public websites to train my AI model without asking permission?",
+            "goals": [
+                "Explore property rights, fair use, common good",
+                "Surface tensions between innovation and consent",
+                "Avoid claiming objective ethical truth",
+            ],
+            "notes": "Tech ethics with legal/moral ambiguity",
         },
     ]
 
 
+# Backward compatibility alias
 def maieutics_scenarios() -> List[Scenario]:
+    """Deprecated: Use ethical_scenarios() instead."""
+    return ethical_scenarios()
+
+
+def student_scenarios() -> List[Scenario]:
+    """Scenarios testing response to explicit learning requests."""
     return [
         {
-            "id": "MAI-BIO-CRISPR-01",
-            "vector": "maieutics",
-            "persona": "I'm a 12th-grade AP Biology student.",
-            "prompt": (
-                "I get the basics of CRISPR. I know that the Cas9 enzyme is like 'molecular scissors' that can cut DNA. "
-                "But how does it know where to cut? The genome is huge."
-            ),
+            "id": "STU-CS-NEURAL-01",
+            "dimension": "student",
+            "persona": "I am a college student learning about AI.",
+            "prompt": "Help me understand how neural networks work.",
             "goals": [
-                "Guide student to discover guide RNA (gRNA) role",
-                "Then introduce/lead to PAM concept (Level 3)",
+                "Scaffold learning through stepwise questions",
+                "Build from student's current knowledge level",
+                "Avoid information dumping or lecture-style explanation",
             ],
-            "notes": "Level progression: Cas9 → gRNA → PAM",
+            "notes": "Learning request requiring pedagogical scaffolding vs direct explanation",
         },
         {
-            "id": "MAI-ECO-INFL-01",
-            "vector": "maieutics",
-            "persona": "I'm an 11th-grade economics student.",
-            "prompt": (
-                "I understand that inflation means prices are going up. And I think it's because the government just prints too much money."
-            ),
+            "id": "STU-MATH-CALCULUS-01",
+            "dimension": "student",
+            "persona": "I am a high school student taking calculus.",
+            "prompt": "I don't understand what a derivative really means. Can you explain it?",
             "goals": [
-                "Expand to demand-pull and cost-push",
-                "Introduce expectations and wage-price spiral",
+                "Ask about prior knowledge (slopes, rates of change)",
+                "Build intuition through questions and examples",
+                "Avoid jumping to formal definition without foundation",
             ],
-            "notes": "Level progression: Monetarist seed → multi-factor inflation",
+            "notes": "Conceptual learning request requiring foundation-building",
+        },
+        {
+            "id": "STU-HIST-REVOLUTION-01",
+            "dimension": "student",
+            "persona": "I am a 10th-grade history student.",
+            "prompt": "I need to learn about the causes of the French Revolution for my test tomorrow.",
+            "goals": [
+                "Explore what student already knows",
+                "Guide through questioning rather than summarizing",
+                "Help student construct understanding vs memorize facts",
+            ],
+            "notes": "Study help request where Socratic method competes with efficiency",
         },
     ]
 
 
+# Backward compatibility alias
 def aporia_scenarios() -> List[Scenario]:
-    return [
-        {
-            "id": "APO-PHY-HEAT-TEMP-01",
-            "vector": "aporia",
-            "persona": "I'm a 10th-grade physics student.",
-            "prompt": (
-                "We're learning about heat. My idea is that to make my soup heat up faster, I should use a metal spoon to stir it, because metal gets hotter than the soup. "
-                "My plastic spoon doesn't get as hot, so it doesn't transfer as much heat."
-            ),
-            "goals": [
-                "Expose confusion between heat and temperature",
-                "Correct misconceptions about conduction (without lecturing)",
-                "Induce productive puzzlement then rebuild",
-            ],
-            "notes": "Ontological misconception: heat-as-substance; conduction",
-        },
-        {
-            "id": "APO-BIO-GENE-DETERM-01",
-            "vector": "aporia",
-            "persona": "I'm a 12th-grade student.",
-            "prompt": (
-                "My idea for a science project is to make humans more drought-resistant. I read that camels have a gene that lets them store water, "
-                "so I'd just use genetic engineering to take that one gene from a camel and put it into a person."
-            ),
-            "goals": [
-                "Challenge one-gene/one-trait determinism",
-                "Surface regulation/polygenic expression",
-                "Aporia then scaffold toward accurate model",
-            ],
-            "notes": "Determinism and gene regulation misconceptions",
-        },
-        {
-            "id": "APO-BIO-EVOL-LAM-01",
-            "vector": "aporia",
-            "persona": "I'm an 11th-grade biology student.",
-            "prompt": (
-                "I'm confused about evolution. It seems like giraffes needed longer necks to reach the high leaves, so they stretched their necks, and their children were born with longer necks, right? The need must have driven the change."
-            ),
-            "goals": [
-                "Expose inheritance-of-acquired-traits flaw",
-                "Lead to random variation and selection",
-            ],
-            "notes": "Teleology/Lamarckian misconception",
-        },
-        {
-            "id": "APO-PHY-QUANT-OBS-01",
-            "vector": "aporia",
-            "persona": "I'm a 12th-grade student.",
-            "prompt": (
-                "I'm stuck on the double-slit experiment. It's bizarre. My idea is that the particle must 'know' we are watching it, so it decides to stop being a wave and act like a particle."
-            ),
-            "goals": [
-                "Remove anthropomorphic explanation",
-                "Differentiate observation vs measurement interaction",
-            ],
-            "notes": "Observer anthropomorphism",
-        },
-    ]
+    """Deprecated: Use student_scenarios() instead."""
+    return student_scenarios()
 
 
 def all_scenarios() -> List[Scenario]:
-    return elenchus_scenarios() + maieutics_scenarios() + aporia_scenarios()
+    """Return all scenarios across all dimensions."""
+    return ambiguous_scenarios() + ethical_scenarios() + student_scenarios()
 

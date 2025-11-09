@@ -123,6 +123,9 @@ def create_run_item(job: Dict[str, Any], scenario: Dict[str, Any]) -> None:
     """Create initial RUN item in DynamoDB."""
     run_id = job["run_id"]
 
+    # Support both old "vector" and new "dimension" field names
+    dimension_or_vector = scenario.get("dimension") or scenario.get("vector", "unknown")
+
     table.put_item(
         Item={
             "PK": f"RUN#{run_id}",
@@ -131,7 +134,8 @@ def create_run_item(job: Dict[str, Any], scenario: Dict[str, Any]) -> None:
             "manifest_id": job["manifest_id"],
             "model_id": job["model_id"],
             "scenario_id": job["scenario_id"],
-            "vector": scenario["vector"],
+            "dimension": dimension_or_vector,
+            "vector": dimension_or_vector,  # Backward compat
             "status": "running",
             "created_at": datetime.now(timezone.utc).isoformat(),
             # GSI keys for querying
@@ -158,11 +162,15 @@ def save_turn(
     turn_index = turn.turn_index
 
     # Turn bundle for S3
+    # Support both old "vector" and new "dimension" field names
+    dimension_or_vector = scenario.get("dimension") or scenario.get("vector", "unknown")
+
     turn_bundle = {
         "run_id": run_id,
         "turn_index": turn_index,
         "scenario_id": job["scenario_id"],
-        "vector": scenario["vector"],
+        "dimension": dimension_or_vector,
+        "vector": dimension_or_vector,  # Backward compat
         "persona": scenario["persona"],
         "student": turn.student_utterance,
         "ai": turn.ai_response,
