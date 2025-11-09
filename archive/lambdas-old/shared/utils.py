@@ -5,7 +5,8 @@ Shared utilities for Socratic Benchmarks Lambda functions
 import hashlib
 import json
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
+
 from ulid import ULID
 
 

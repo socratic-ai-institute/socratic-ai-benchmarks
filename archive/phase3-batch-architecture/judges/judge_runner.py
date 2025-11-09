@@ -10,13 +10,13 @@ import json
 import os
 import sys
 from typing import Dict, List
+
 import boto3
 from langchain.chat_models import BedrockChat
 from langchain.schema import HumanMessage, SystemMessage
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from schemas.models import Turn, JudgeResult, ViolationType
-
+from schemas.models import JudgeResult, Turn, ViolationType
 
 JUDGE_PROMPT_TEMPLATE = """You are an expert evaluator of Socratic tutoring dialogues. Your task is to score a single assistant turn on three dimensions:
 

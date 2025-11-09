@@ -29,6 +29,7 @@ Migration Path:
         result = compute_vector_scores(ai_response)
         score = result.scores["overall"]  # 0-1 scale
 """
+
 from __future__ import annotations
 import json
 from typing import Any, Dict
@@ -43,7 +44,7 @@ AWS_PROFILE = "mvp"
 AWS_REGION = "us-east-1"
 
 session = boto3.Session(profile_name=AWS_PROFILE, region_name=AWS_REGION)
-bedrock_runtime = session.client('bedrock-runtime')
+bedrock_runtime = session.client("bedrock-runtime")
 
 
 def _invoke_anthropic(model_id: str, prompt: str) -> Dict[str, Any]:
@@ -76,7 +77,12 @@ def _invoke_anthropic(model_id: str, prompt: str) -> Dict[str, Any]:
     return {"text": text, "latency_ms": latency}
 
 
-def grade_transcript(vector: str, persona: str, transcript: str, judge_model: str = "anthropic.claude-3-5-sonnet-20241022-v2:0") -> Dict[str, Any]:
+def grade_transcript(
+    vector: str,
+    persona: str,
+    transcript: str,
+    judge_model: str = "anthropic.claude-3-5-sonnet-20241022-v2:0",
+) -> Dict[str, Any]:
     """
     Grade a Socratic dialogue transcript using LLM-as-judge (DEPRECATED).
 
@@ -124,7 +130,7 @@ def grade_transcript(vector: str, persona: str, transcript: str, judge_model: st
         raw = result["text"]
         # Handle optional code fencing
         if raw.startswith("```"):
-            raw = raw.strip('`')
+            raw = raw.strip("`")
             if raw.lower().startswith("json"):
                 raw = raw[4:]
         scores = json.loads(raw)
@@ -135,5 +141,9 @@ def grade_transcript(vector: str, persona: str, transcript: str, judge_model: st
             "error": None,
         }
     except Exception as e:
-        return {"scores": None, "judge_model": judge_model, "latency_ms": 0, "error": str(e)}
-
+        return {
+            "scores": None,
+            "judge_model": judge_model,
+            "latency_ms": 0,
+            "error": str(e),
+        }

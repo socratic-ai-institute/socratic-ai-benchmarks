@@ -18,11 +18,12 @@ Flow:
 import json
 import os
 from datetime import datetime, timezone
-from typing import Dict, Any
-import boto3
+from typing import Any, Dict
 
+import boto3
 # Import from layer
-from socratic_bench import run_dialogue, get_scenario, ModelConfig, BedrockClient
+from socratic_bench import (BedrockClient, ModelConfig, get_scenario,
+                            run_dialogue)
 
 # AWS clients
 s3 = boto3.client("s3")

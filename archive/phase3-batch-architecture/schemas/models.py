@@ -9,13 +9,13 @@ Defines all core entities with strict validation:
 - CSD subscores and supporting types
 """
 
+import hashlib
+import json
 from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Literal, Optional, Union
-from pydantic import BaseModel, Field, field_validator, computed_field
-import hashlib
-import json
 
+from pydantic import BaseModel, Field, computed_field, field_validator
 
 # ============================================================================
 # Enums and Constants

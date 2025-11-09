@@ -10,23 +10,19 @@ Architecture:
 - API Gateway + Read Lambda → Static UI
 """
 
-from aws_cdk import (
-    Stack,
-    Duration,
-    RemovalPolicy,
-    aws_lambda as lambda_,
-    aws_lambda_event_sources as lambda_events,
-    aws_dynamodb as dynamodb,
-    aws_s3 as s3,
-    aws_sqs as sqs,
-    aws_events as events,
-    aws_events_targets as targets,
-    aws_iam as iam,
-    aws_apigateway as apigw,
-    aws_s3_deployment as s3deploy,
-    aws_cloudfront as cloudfront,
-    aws_cloudfront_origins as origins,
-)
+from aws_cdk import Duration, RemovalPolicy, Stack
+from aws_cdk import aws_apigateway as apigw
+from aws_cdk import aws_cloudfront as cloudfront
+from aws_cdk import aws_cloudfront_origins as origins
+from aws_cdk import aws_dynamodb as dynamodb
+from aws_cdk import aws_events as events
+from aws_cdk import aws_events_targets as targets
+from aws_cdk import aws_iam as iam
+from aws_cdk import aws_lambda as lambda_
+from aws_cdk import aws_lambda_event_sources as lambda_events
+from aws_cdk import aws_s3 as s3
+from aws_cdk import aws_s3_deployment as s3deploy
+from aws_cdk import aws_sqs as sqs
 from constructs import Construct
 
 

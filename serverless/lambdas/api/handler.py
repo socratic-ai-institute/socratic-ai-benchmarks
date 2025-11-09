@@ -11,7 +11,8 @@ Auth: API key (simple MVP)
 
 import json
 import os
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 import boto3
 
 # AWS clients

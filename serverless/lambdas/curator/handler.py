@@ -19,8 +19,9 @@ Flow:
 import json
 import os
 from datetime import datetime, timezone
-from typing import Dict, Any, List
 from decimal import Decimal
+from typing import Any, Dict, List
+
 import boto3
 
 

@@ -372,13 +372,29 @@ def _generate_model_comparison_section(summary: Dict) -> str:
         ]
 
         # Add answer quality metrics if available
-        has_answer_quality = 'avg_composite_quality_mean' in scores
+        has_answer_quality = "avg_composite_quality_mean" in scores
         if has_answer_quality:
             metrics.append(("─── Answer Quality ───", None, None))  # Separator
-            metrics.append(("Composite Quality", scores.get("avg_composite_quality_mean", 0), 1.0))
-            metrics.append(("Directional Socraticism", scores.get("avg_directional_socraticism_mean", 0), 1.0))
-            metrics.append(("Socratic Endings", scores.get("pct_socratic_endings_mean", 0), 100))
-            metrics.append(("Avg Verbosity (tokens)", scores.get("avg_verbosity_tokens_mean", 0), 200))
+            metrics.append(
+                ("Composite Quality", scores.get("avg_composite_quality_mean", 0), 1.0)
+            )
+            metrics.append(
+                (
+                    "Directional Socraticism",
+                    scores.get("avg_directional_socraticism_mean", 0),
+                    1.0,
+                )
+            )
+            metrics.append(
+                ("Socratic Endings", scores.get("pct_socratic_endings_mean", 0), 100)
+            )
+            metrics.append(
+                (
+                    "Avg Verbosity (tokens)",
+                    scores.get("avg_verbosity_tokens_mean", 0),
+                    200,
+                )
+            )
 
         metrics_html = ""
         for metric_data in metrics:

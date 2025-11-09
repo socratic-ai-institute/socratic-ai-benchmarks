@@ -10,20 +10,20 @@ Responsibilities:
 6. Update run status
 """
 
-import os
 import json
-import boto3
-from typing import Dict, List, Any
-from decimal import Decimal
-from datetime import datetime
-
+import os
 # Add shared utilities
 import sys
+from datetime import datetime
+from decimal import Decimal
+from typing import Any, Dict, List
+
+import boto3
 
 sys.path.append("/opt/python")
 sys.path.append("../shared")
 
-from utils import generate_ulid, now_iso, build_pk_sk, s3_path, s3_key
+from utils import build_pk_sk, generate_ulid, now_iso, s3_key, s3_path
 
 # AWS clients
 dynamodb = boto3.resource("dynamodb")
