@@ -37,6 +37,31 @@ bedrock_runtime = session.client('bedrock-runtime')
 
 
 def call_model(model_id: str, provider: str, prompt: str) -> Dict[str, Any]:
+    """
+    Invoke a Bedrock model and return the generated text.
+
+    This is a simplified version compared to serverless/lib/socratic_bench/models.py.
+    It only supports 3 providers (anthropic, meta, mistral) and doesn't have
+    retry logic or inference profile support.
+
+    Args:
+        model_id: Full Bedrock model identifier
+        provider: Provider name (anthropic, meta, or mistral)
+        prompt: The prompt text to send
+
+    Returns:
+        Dictionary with:
+            - text: Generated response text
+            - latency_ms: API call latency in milliseconds
+
+    Raises:
+        ValueError: If provider is not supported
+        ClientError: If Bedrock API call fails
+
+    Note:
+        For production use, prefer BedrockClient from serverless/lib/socratic_bench/models.py
+        which has better error handling, retry logic, and supports more providers.
+    """
     body: Dict[str, Any]
     if provider == "anthropic":
         body = {"anthropic_version": "bedrock-2023-05-31", "max_tokens": 200, "temperature": 0.7,
@@ -64,6 +89,42 @@ def call_model(model_id: str, provider: str, prompt: str) -> Dict[str, Any]:
 
 
 def run_vector(models: List[Dict[str, str]], vector: str, scenarios: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Run all scenarios for a specific Socratic vector across multiple models.
+
+    This is the core evaluation function that:
+    1. For each model and each scenario:
+       - Generates tutor prompt
+       - Calls model to get AI response
+       - Grades response using LLM-as-judge
+    2. Aggregates scores across scenarios
+
+    Args:
+        models: List of model configs with keys: id, name, provider
+        vector: Which Socratic method to test ('elenchus', 'maieutics', or 'aporia')
+        scenarios: List of test scenarios (from vectors.py)
+
+    Returns:
+        Dictionary with:
+            - vector: Name of the vector tested
+            - results: List of per-model results with:
+                - model_id, model_name, provider
+                - scenarios: List of per-scenario results
+                - ped_stance, concept_fidelity, etc.: Averaged scores (1-5 scale)
+
+    Scoring:
+        Uses ASE (Automated Socratic Evaluation) rubric with 4 dimensions:
+        1. Pedagogical Stance (1-5): Non-directive, probing, no lecturing
+        2. Conceptual Fidelity (1-5): Targets correct underlying flaw/truth
+        3. Persona Adaptation (1-5): Age-appropriate language and scaffolding
+        4. Dialectical Progress (1-5): Achieves the vector goal
+        Overall: Average of 4 dimensions
+
+    Note:
+        This uses the old LLM-as-judge approach. The newer serverless platform
+        uses vector-based scoring (verbosity, exploratory, interrogative) which
+        is faster and doesn't require an LLM judge.
+    """
     out = {"vector": vector, "results": []}
     for m in models:
         per_model: Dict[str, Any] = {
