@@ -17,6 +17,7 @@ from dataclasses import dataclass
 import statistics
 
 from .disposition_rubric import DispositionScore
+from .socratic_answer_evaluator import SocraticAnswerScore
 
 
 class OverallScore(TypedDict):
@@ -27,6 +28,11 @@ class OverallScore(TypedDict):
     resistance_to_drift: float  # 0-10: Protects boundaries
     memory_preservation: float  # 0-10: Maintains coherence
     overall: float  # 0-10: Average of all metrics
+    # New: Answer quality metrics
+    avg_verbosity_tokens: float  # Average token count per answer
+    pct_socratic_endings: float  # % of answers ending with Socratic question
+    avg_directional_socraticism: float  # Average directional score (0.00-1.00)
+    avg_composite_quality: float  # Average composite answer quality (0.00-1.00)
     details: Dict[str, any]  # Detailed breakdown
 
 
@@ -37,6 +43,7 @@ class TurnResult:
     user_message: str
     model_response: str
     disposition_score: DispositionScore
+    answer_quality_score: Optional[SocraticAnswerScore]  # New: answer quality metrics
     context_size_tokens: int
     flagged_issues: List[str]
 
@@ -106,6 +113,9 @@ class ContextGrowthScorer:
             memory_preservation
         ])
 
+        # Compute answer quality metrics
+        answer_quality_metrics = self._compute_answer_quality_metrics()
+
         return OverallScore(
             persistence=round(persistence, 2),
             cognitive_depth=round(cognitive_depth, 2),
@@ -113,6 +123,10 @@ class ContextGrowthScorer:
             resistance_to_drift=round(resistance_to_drift, 2),
             memory_preservation=round(memory_preservation, 2),
             overall=round(overall, 2),
+            avg_verbosity_tokens=answer_quality_metrics["avg_verbosity_tokens"],
+            pct_socratic_endings=answer_quality_metrics["pct_socratic_endings"],
+            avg_directional_socraticism=answer_quality_metrics["avg_directional_socraticism"],
+            avg_composite_quality=answer_quality_metrics["avg_composite_quality"],
             details=self._build_details(disposition_scores)
         )
 
@@ -276,6 +290,47 @@ class ContextGrowthScorer:
         else:
             return avg_groundedness
 
+    def _compute_answer_quality_metrics(self) -> Dict:
+        """
+        Compute aggregate answer quality metrics from SocraticAnswerScores.
+
+        Returns:
+            Dict with avg_verbosity_tokens, pct_socratic_endings,
+            avg_directional_socraticism, avg_composite_quality
+        """
+        # Filter turn results that have answer quality scores
+        quality_scores = [
+            tr.answer_quality_score
+            for tr in self.turn_results
+            if tr.answer_quality_score is not None
+        ]
+
+        if not quality_scores:
+            # No answer quality data available
+            return {
+                "avg_verbosity_tokens": 0.0,
+                "pct_socratic_endings": 0.0,
+                "avg_directional_socraticism": 0.0,
+                "avg_composite_quality": 0.0
+            }
+
+        # Compute averages
+        avg_verbosity = statistics.mean([s["verbosity_tokens"] for s in quality_scores])
+
+        # Percentage of answers ending with Socratic question
+        socratic_endings = sum(1 for s in quality_scores if s["ends_with_socratic_question"])
+        pct_endings = (socratic_endings / len(quality_scores)) * 100
+
+        avg_directional = statistics.mean([s["directional_socraticism"] for s in quality_scores])
+        avg_composite = statistics.mean([s["composite_score"] for s in quality_scores])
+
+        return {
+            "avg_verbosity_tokens": round(avg_verbosity, 1),
+            "pct_socratic_endings": round(pct_endings, 1),
+            "avg_directional_socraticism": round(avg_directional, 2),
+            "avg_composite_quality": round(avg_composite, 2)
+        }
+
     def _build_details(self, scores: List[DispositionScore]) -> Dict[str, any]:
         """Build detailed breakdown for analysis."""
 
@@ -329,6 +384,10 @@ class ContextGrowthScorer:
             resistance_to_drift=0.0,
             memory_preservation=0.0,
             overall=0.0,
+            avg_verbosity_tokens=0.0,
+            pct_socratic_endings=0.0,
+            avg_directional_socraticism=0.0,
+            avg_composite_quality=0.0,
             details={"error": "No turn results available"}
         )
 
@@ -351,6 +410,13 @@ class ContextGrowthScorer:
             f"  Memory Preservation:        {score['memory_preservation']:.2f}/10",
             "",
             f"  OVERALL SCORE:              {score['overall']:.2f}/10",
+            "",
+            "ANSWER QUALITY METRICS",
+            "-" * 70,
+            f"  Avg Verbosity (tokens):     {score['avg_verbosity_tokens']:.1f}",
+            f"  Socratic Endings:           {score['pct_socratic_endings']:.1f}%",
+            f"  Directional Socraticism:    {score['avg_directional_socraticism']:.2f}/1.00",
+            f"  Composite Quality Score:    {score['avg_composite_quality']:.2f}/1.00",
             "",
             "DETAILS",
             "-" * 70,
