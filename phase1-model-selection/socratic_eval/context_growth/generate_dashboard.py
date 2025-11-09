@@ -361,26 +361,58 @@ def _generate_model_comparison_section(summary: Dict) -> str:
 
     for model_id, scores in by_model.items():
         metrics = [
-            ("Overall", scores.get("overall_mean", 0)),
-            ("Persistence", scores.get("persistence_mean", 0)),
-            ("Cognitive Depth", scores.get("cognitive_depth_mean", 0)),
-            ("Context Adaptability", scores.get("context_adaptability_mean", 0)),
-            ("Resistance to Drift", scores.get("resistance_to_drift_mean", 0)),
-            ("Memory Preservation", scores.get("memory_preservation_mean", 0)),
+            ("Overall", scores.get("overall_mean", 0), 10),
+            ("Persistence", scores.get("persistence_mean", 0), 10),
+            ("Cognitive Depth", scores.get("cognitive_depth_mean", 0), 10),
+            ("Context Adaptability", scores.get("context_adaptability_mean", 0), 10),
+            ("Resistance to Drift", scores.get("resistance_to_drift_mean", 0), 10),
+            ("Memory Preservation", scores.get("memory_preservation_mean", 0), 10),
         ]
 
+        # Add answer quality metrics if available
+        has_answer_quality = 'avg_composite_quality_mean' in scores
+        if has_answer_quality:
+            metrics.append(("─── Answer Quality ───", None, None))  # Separator
+            metrics.append(("Composite Quality", scores.get("avg_composite_quality_mean", 0), 1.0))
+            metrics.append(("Directional Socraticism", scores.get("avg_directional_socraticism_mean", 0), 1.0))
+            metrics.append(("Socratic Endings", scores.get("pct_socratic_endings_mean", 0), 100))
+            metrics.append(("Avg Verbosity (tokens)", scores.get("avg_verbosity_tokens_mean", 0), 200))
+
         metrics_html = ""
-        for label, value in metrics:
-            bar_width = (value / 10) * 100
-            metrics_html += f"""
-            <div class="metric-row">
-                <span class="metric-label">{label}</span>
-                <span class="metric-value">{value:.2f}</span>
-            </div>
-            <div class="metric-bar">
-                <div class="metric-bar-fill" style="width: {bar_width}%"></div>
-            </div>
-            """
+        for metric_data in metrics:
+            if len(metric_data) == 3:
+                label, value, max_value = metric_data
+
+                # Skip separator rendering as metric, render as text
+                if value is None:
+                    metrics_html += f"""
+                    <div style="margin-top: 15px; margin-bottom: 10px; font-weight: bold; color: #667eea; font-size: 0.9em;">
+                        {label}
+                    </div>
+                    """
+                    continue
+
+                bar_width = (value / max_value) * 100 if max_value > 0 else 0
+
+                # Format value based on type
+                if max_value == 100:  # Percentage
+                    value_str = f"{value:.1f}%"
+                elif max_value == 1.0:  # 0.00-1.00 scale
+                    value_str = f"{value:.2f}"
+                elif max_value == 200:  # Token count
+                    value_str = f"{value:.0f}"
+                else:  # 0-10 scale
+                    value_str = f"{value:.2f}"
+
+                metrics_html += f"""
+                <div class="metric-row">
+                    <span class="metric-label">{label}</span>
+                    <span class="metric-value">{value_str}</span>
+                </div>
+                <div class="metric-bar">
+                    <div class="metric-bar-fill" style="width: {bar_width}%"></div>
+                </div>
+                """
 
         cards_html += f"""
         <div class="model-card">

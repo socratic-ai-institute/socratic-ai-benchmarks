@@ -18,7 +18,7 @@ session = boto3.Session(profile_name=AWS_PROFILE, region_name=AWS_REGION)
 bedrock_runtime = session.client('bedrock-runtime')
 
 
-def call_bedrock_model(model_id: str, prompt: str, max_tokens: int = 500, temperature: float = 0.7) -> str:
+def call_bedrock_model(model_id: str, prompt: str, max_tokens: int = 500, temperature: float = 0.7, return_metadata: bool = False):
     """
     Call Bedrock model with a prompt and return the text response.
 
@@ -27,9 +27,11 @@ def call_bedrock_model(model_id: str, prompt: str, max_tokens: int = 500, temper
         prompt: The prompt to send
         max_tokens: Maximum tokens to generate
         temperature: Sampling temperature
+        return_metadata: If True, return dict with text and metadata (token counts)
 
     Returns:
-        str: The model's text response
+        str: The model's text response (if return_metadata=False)
+        Dict: Response dict with 'text', 'input_tokens', 'output_tokens' (if return_metadata=True)
 
     Raises:
         Exception: If the API call fails
@@ -39,25 +41,32 @@ def call_bedrock_model(model_id: str, prompt: str, max_tokens: int = 500, temper
 
     # Determine provider from model_id
     if 'anthropic' in model_id:
-        return _call_anthropic(inference_profile_id, prompt, max_tokens, temperature)
+        result = _call_anthropic(inference_profile_id, prompt, max_tokens, temperature, return_metadata)
     elif 'meta' in model_id:
-        return _call_meta(inference_profile_id, prompt, max_tokens, temperature)
+        result = _call_meta(inference_profile_id, prompt, max_tokens, temperature, return_metadata)
     elif 'mistral' in model_id:
-        return _call_mistral(inference_profile_id, prompt, max_tokens, temperature)
+        result = _call_mistral(inference_profile_id, prompt, max_tokens, temperature, return_metadata)
     elif 'amazon' in model_id or 'nova' in model_id:
-        return _call_amazon(inference_profile_id, prompt, max_tokens, temperature)
+        result = _call_amazon(inference_profile_id, prompt, max_tokens, temperature, return_metadata)
     elif 'cohere' in model_id:
-        return _call_cohere(inference_profile_id, prompt, max_tokens, temperature)
+        result = _call_cohere(inference_profile_id, prompt, max_tokens, temperature, return_metadata)
     elif 'ai21' in model_id:
-        return _call_ai21(inference_profile_id, prompt, max_tokens, temperature)
+        result = _call_ai21(inference_profile_id, prompt, max_tokens, temperature, return_metadata)
     elif 'deepseek' in model_id:
-        return _call_deepseek(inference_profile_id, prompt, max_tokens, temperature)
+        result = _call_deepseek(inference_profile_id, prompt, max_tokens, temperature, return_metadata)
     elif 'qwen' in model_id:
-        return _call_qwen(inference_profile_id, prompt, max_tokens, temperature)
+        result = _call_qwen(inference_profile_id, prompt, max_tokens, temperature, return_metadata)
     elif 'openai' in model_id:
-        return _call_openai(inference_profile_id, prompt, max_tokens, temperature)
+        result = _call_openai(inference_profile_id, prompt, max_tokens, temperature, return_metadata)
     else:
         raise ValueError(f"Unsupported model provider in: {model_id}")
+
+    # Return based on format requested
+    if return_metadata:
+        return result
+    else:
+        # Backward compatibility: return just the text
+        return result.get('text', result) if isinstance(result, dict) else result
 
 
 def _get_inference_profile_id(model_id: str) -> str:
@@ -111,7 +120,7 @@ def _get_inference_profile_id(model_id: str) -> str:
     return model_id
 
 
-def _call_anthropic(model_id: str, prompt: str, max_tokens: int, temperature: float) -> str:
+def _call_anthropic(model_id: str, prompt: str, max_tokens: int, temperature: float, return_metadata: bool = False):
     """Call Anthropic Claude models via Bedrock."""
     body = {
         "anthropic_version": "bedrock-2023-05-31",
@@ -126,10 +135,24 @@ def _call_anthropic(model_id: str, prompt: str, max_tokens: int, temperature: fl
     )
 
     result = json.loads(response['body'].read())
-    return result['content'][0]['text'].strip()
+    text = result['content'][0]['text'].strip()
+
+    if return_metadata:
+        usage = result.get('usage', {})
+        return {
+            'text': text,
+            'input_tokens': usage.get('input_tokens', 0),
+            'output_tokens': usage.get('output_tokens', 0)
+        }
+    return text
 
 
-def _call_meta(model_id: str, prompt: str, max_tokens: int, temperature: float) -> str:
+def _estimate_tokens(text: str) -> int:
+    """Estimate token count from text (rough heuristic: ~4 chars per token)."""
+    return len(text) // 4
+
+
+def _call_meta(model_id: str, prompt: str, max_tokens: int, temperature: float, return_metadata: bool = False):
     """Call Meta Llama models via Bedrock."""
     body = {
         "prompt": prompt,
@@ -144,10 +167,18 @@ def _call_meta(model_id: str, prompt: str, max_tokens: int, temperature: float) 
     )
 
     result = json.loads(response['body'].read())
-    return result['generation'].strip()
+    text = result['generation'].strip()
+
+    if return_metadata:
+        return {
+            'text': text,
+            'input_tokens': _estimate_tokens(prompt),
+            'output_tokens': _estimate_tokens(text)
+        }
+    return text
 
 
-def _call_mistral(model_id: str, prompt: str, max_tokens: int, temperature: float) -> str:
+def _call_mistral(model_id: str, prompt: str, max_tokens: int, temperature: float, return_metadata: bool = False):
     """Call Mistral models via Bedrock."""
     body = {
         "prompt": f"<s>[INST] {prompt} [/INST]",
@@ -165,12 +196,20 @@ def _call_mistral(model_id: str, prompt: str, max_tokens: int, temperature: floa
 
     # Mistral returns outputs as a list
     if isinstance(result.get('outputs'), list) and len(result['outputs']) > 0:
-        return result['outputs'][0]['text'].strip()
+        text = result['outputs'][0]['text'].strip()
     else:
-        return result.get('text', '').strip()
+        text = result.get('text', '').strip()
+
+    if return_metadata:
+        return {
+            'text': text,
+            'input_tokens': _estimate_tokens(prompt),
+            'output_tokens': _estimate_tokens(text)
+        }
+    return text
 
 
-def _call_amazon(model_id: str, prompt: str, max_tokens: int, temperature: float) -> str:
+def _call_amazon(model_id: str, prompt: str, max_tokens: int, temperature: float, return_metadata: bool = False):
     """Call Amazon Nova/Titan models via Bedrock."""
     body = {
         "messages": [{"role": "user", "content": [{"text": prompt}]}],
@@ -187,10 +226,18 @@ def _call_amazon(model_id: str, prompt: str, max_tokens: int, temperature: float
     )
 
     result = json.loads(response['body'].read())
-    return result['output']['message']['content'][0]['text'].strip()
+    text = result['output']['message']['content'][0]['text'].strip()
+
+    if return_metadata:
+        return {
+            'text': text,
+            'input_tokens': _estimate_tokens(prompt),
+            'output_tokens': _estimate_tokens(text)
+        }
+    return text
 
 
-def _call_cohere(model_id: str, prompt: str, max_tokens: int, temperature: float) -> str:
+def _call_cohere(model_id: str, prompt: str, max_tokens: int, temperature: float, return_metadata: bool = False):
     """Call Cohere Command models via Bedrock."""
     body = {
         "message": prompt,
@@ -205,10 +252,18 @@ def _call_cohere(model_id: str, prompt: str, max_tokens: int, temperature: float
     )
 
     result = json.loads(response['body'].read())
-    return result['text'].strip()
+    text = result['text'].strip()
+
+    if return_metadata:
+        return {
+            'text': text,
+            'input_tokens': _estimate_tokens(prompt),
+            'output_tokens': _estimate_tokens(text)
+        }
+    return text
 
 
-def _call_ai21(model_id: str, prompt: str, max_tokens: int, temperature: float) -> str:
+def _call_ai21(model_id: str, prompt: str, max_tokens: int, temperature: float, return_metadata: bool = False):
     """Call AI21 Jamba models via Bedrock."""
     body = {
         "messages": [{"role": "user", "content": prompt}],
@@ -223,10 +278,18 @@ def _call_ai21(model_id: str, prompt: str, max_tokens: int, temperature: float) 
     )
 
     result = json.loads(response['body'].read())
-    return result['choices'][0]['message']['content'].strip()
+    text = result['choices'][0]['message']['content'].strip()
+
+    if return_metadata:
+        return {
+            'text': text,
+            'input_tokens': _estimate_tokens(prompt),
+            'output_tokens': _estimate_tokens(text)
+        }
+    return text
 
 
-def _call_deepseek(model_id: str, prompt: str, max_tokens: int, temperature: float) -> str:
+def _call_deepseek(model_id: str, prompt: str, max_tokens: int, temperature: float, return_metadata: bool = False):
     """Call DeepSeek models via Bedrock."""
     body = {
         "messages": [{"role": "user", "content": prompt}],
@@ -240,10 +303,18 @@ def _call_deepseek(model_id: str, prompt: str, max_tokens: int, temperature: flo
     )
 
     result = json.loads(response['body'].read())
-    return result['choices'][0]['message']['content'].strip()
+    text = result['choices'][0]['message']['content'].strip()
+
+    if return_metadata:
+        return {
+            'text': text,
+            'input_tokens': _estimate_tokens(prompt),
+            'output_tokens': _estimate_tokens(text)
+        }
+    return text
 
 
-def _call_qwen(model_id: str, prompt: str, max_tokens: int, temperature: float) -> str:
+def _call_qwen(model_id: str, prompt: str, max_tokens: int, temperature: float, return_metadata: bool = False):
     """Call Qwen models via Bedrock."""
     body = {
         "messages": [{"role": "user", "content": prompt}],
@@ -258,10 +329,18 @@ def _call_qwen(model_id: str, prompt: str, max_tokens: int, temperature: float) 
     )
 
     result = json.loads(response['body'].read())
-    return result['choices'][0]['message']['content'].strip()
+    text = result['choices'][0]['message']['content'].strip()
+
+    if return_metadata:
+        return {
+            'text': text,
+            'input_tokens': _estimate_tokens(prompt),
+            'output_tokens': _estimate_tokens(text)
+        }
+    return text
 
 
-def _call_openai(model_id: str, prompt: str, max_tokens: int, temperature: float) -> str:
+def _call_openai(model_id: str, prompt: str, max_tokens: int, temperature: float, return_metadata: bool = False):
     """Call OpenAI models via Bedrock."""
     body = {
         "messages": [{"role": "user", "content": prompt}],
@@ -275,4 +354,12 @@ def _call_openai(model_id: str, prompt: str, max_tokens: int, temperature: float
     )
 
     result = json.loads(response['body'].read())
-    return result['choices'][0]['message']['content'].strip()
+    text = result['choices'][0]['message']['content'].strip()
+
+    if return_metadata:
+        return {
+            'text': text,
+            'input_tokens': _estimate_tokens(prompt),
+            'output_tokens': _estimate_tokens(text)
+        }
+    return text

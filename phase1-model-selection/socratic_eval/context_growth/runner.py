@@ -23,6 +23,7 @@ from .test_scenarios import get_all_test_scenarios, get_scenarios_by_type, TestS
 from .disposition_rubric import SocraticDispositionRubric, DispositionScore
 from .context_expander import ContextExpander
 from .scorer import ContextGrowthScorer, TurnResult, OverallScore, compare_models
+from .socratic_answer_evaluator import evaluate_socratic_answer
 
 # Import Bedrock utilities from parent module
 try:
@@ -49,17 +50,20 @@ class ContextGrowthEvaluator:
         self,
         model_ids: List[str],
         use_llm_judge: bool = False,
-        mock_mode: bool = False
+        mock_mode: bool = False,
+        enable_answer_quality: bool = True
     ):
         """
         Args:
             model_ids: List of model IDs to evaluate
             use_llm_judge: Whether to use LLM for disposition scoring
             mock_mode: If True, don't call actual models (for testing)
+            enable_answer_quality: Whether to evaluate answer quality (verbosity, endings, directional)
         """
         self.model_ids = model_ids
         self.use_llm_judge = use_llm_judge
         self.mock_mode = mock_mode
+        self.enable_answer_quality = enable_answer_quality
         self.rubric = SocraticDispositionRubric(use_llm_judge=use_llm_judge)
 
     def run_scenario(
@@ -120,10 +124,13 @@ class ContextGrowthEvaluator:
             # Call model
             if self.mock_mode:
                 model_response = self._mock_response(turn["user_message"], i)
+                output_tokens = len(model_response) // 4  # Estimate for mock
             else:
-                model_response = self._call_model(model_id, full_prompt)
+                response_data = self._call_model(model_id, full_prompt, return_metadata=True)
+                model_response = response_data['text']
+                output_tokens = response_data['output_tokens']
 
-            print(f"✓ ({len(model_response)} chars)")
+            print(f"✓ ({len(model_response)} chars, ~{output_tokens} tokens)")
 
             # Update context with response
             expander.conversation_history[-1]["assistant"] = model_response
@@ -134,6 +141,20 @@ class ContextGrowthEvaluator:
                 user_message=turn["user_message"]  # Use original message without distractors
             )
 
+            # Evaluate answer quality (if enabled)
+            answer_quality_score = None
+            if self.enable_answer_quality:
+                try:
+                    answer_quality_score = evaluate_socratic_answer(
+                        response=model_response,
+                        token_count=output_tokens
+                    )
+                    print(f"    Answer Quality: {answer_quality_score['composite_score']:.2f}/1.00", end="")
+                    print(f"  (Directional: {answer_quality_score['directional_socraticism']:.2f}, ", end="")
+                    print(f"Socratic Ending: {'✓' if answer_quality_score['ends_with_socratic_question'] else '✗'})")
+                except Exception as e:
+                    print(f"    ⚠️  Answer quality evaluation failed: {e}")
+
             # Get context stats
             context_stats = expander.get_context_stats()
 
@@ -143,6 +164,7 @@ class ContextGrowthEvaluator:
                 user_message=turn["user_message"],
                 model_response=model_response,
                 disposition_score=disposition_score,
+                answer_quality_score=answer_quality_score,
                 context_size_tokens=context_stats["estimated_tokens"],
                 flagged_issues=disposition_score["flagged_issues"]
             )
@@ -171,6 +193,13 @@ class ContextGrowthEvaluator:
         print(f"  Resistance to Drift:  {overall_score['resistance_to_drift']:.2f}/10")
         print(f"  Memory Preservation:  {overall_score['memory_preservation']:.2f}/10")
 
+        if self.enable_answer_quality:
+            print(f"\nAnswer Quality Metrics:")
+            print(f"  Avg Verbosity:        {overall_score['avg_verbosity_tokens']:.1f} tokens")
+            print(f"  Socratic Endings:     {overall_score['pct_socratic_endings']:.1f}%")
+            print(f"  Directional Score:    {overall_score['avg_directional_socraticism']:.2f}/1.00")
+            print(f"  Composite Quality:    {overall_score['avg_composite_quality']:.2f}/1.00")
+
         result = {
             "scenario_id": scenario["id"],
             "scenario_name": scenario["name"],
@@ -182,6 +211,7 @@ class ContextGrowthEvaluator:
                     "user_message": tr.user_message,
                     "model_response": tr.model_response,
                     "disposition_score": dict(tr.disposition_score),
+                    "answer_quality_score": dict(tr.answer_quality_score) if tr.answer_quality_score else None,
                     "context_size_tokens": tr.context_size_tokens
                 }
                 for tr in turn_results
@@ -196,14 +226,16 @@ class ContextGrowthEvaluator:
 
         return result
 
-    def _call_model(self, model_id: str, prompt: str) -> str:
+    def _call_model(self, model_id: str, prompt: str, return_metadata: bool = False):
         """Call Bedrock model with error handling."""
 
         try:
-            response = call_bedrock_model(model_id, prompt, max_tokens=500)
+            response = call_bedrock_model(model_id, prompt, max_tokens=500, return_metadata=return_metadata)
             return response
         except Exception as e:
             print(f"\nError calling model: {e}")
+            if return_metadata:
+                return {'text': f"[ERROR: {str(e)}]", 'input_tokens': 0, 'output_tokens': 0}
             return f"[ERROR: {str(e)}]"
 
     def _mock_response(self, user_message: str, turn_number: int) -> str:
@@ -352,6 +384,14 @@ class ContextGrowthEvaluator:
             "overall"
         ]
 
+        # Add answer quality metrics if enabled
+        answer_quality_metrics = [
+            "avg_verbosity_tokens",
+            "pct_socratic_endings",
+            "avg_directional_socraticism",
+            "avg_composite_quality"
+        ]
+
         aggregated = {}
 
         for metric in metrics:
@@ -360,6 +400,15 @@ class ContextGrowthEvaluator:
                 aggregated[f"{metric}_mean"] = round(sum(values) / len(values), 2)
                 aggregated[f"{metric}_min"] = round(min(values), 2)
                 aggregated[f"{metric}_max"] = round(max(values), 2)
+
+        # Aggregate answer quality metrics
+        if self.enable_answer_quality:
+            for metric in answer_quality_metrics:
+                values = [s[metric] for s in scores if metric in s and s[metric] != 0]
+                if values:
+                    aggregated[f"{metric}_mean"] = round(sum(values) / len(values), 2)
+                    aggregated[f"{metric}_min"] = round(min(values), 2)
+                    aggregated[f"{metric}_max"] = round(max(values), 2)
 
         aggregated["num_scenarios"] = len(scores)
 
@@ -371,7 +420,8 @@ def run_context_growth_evaluation(
     output_file: Optional[str] = None,
     test_types: Optional[List[str]] = None,
     use_llm_judge: bool = False,
-    mock_mode: bool = False
+    mock_mode: bool = False,
+    enable_answer_quality: bool = True
 ) -> Dict:
     """
     Main entry point for running context growth evaluation.
@@ -382,6 +432,7 @@ def run_context_growth_evaluation(
         test_types: Filter scenarios by type (if None, runs all)
         use_llm_judge: Whether to use LLM for disposition scoring
         mock_mode: If True, uses mock responses (for testing)
+        enable_answer_quality: Whether to evaluate answer quality
 
     Returns:
         Results dict
@@ -390,7 +441,8 @@ def run_context_growth_evaluation(
     evaluator = ContextGrowthEvaluator(
         model_ids=model_ids,
         use_llm_judge=use_llm_judge,
-        mock_mode=mock_mode
+        mock_mode=mock_mode,
+        enable_answer_quality=enable_answer_quality
     )
 
     results = evaluator.run_full_evaluation(test_types=test_types)
@@ -435,7 +487,16 @@ def print_summary(results: Dict):
             print(f"  Context Adaptability: {scores.get('context_adaptability_mean', 0):.2f}/10")
             print(f"  Resistance to Drift:  {scores.get('resistance_to_drift_mean', 0):.2f}/10")
             print(f"  Memory Preservation:  {scores.get('memory_preservation_mean', 0):.2f}/10")
-            print(f"  Scenarios:            {scores.get('num_scenarios', 0)}")
+
+            # Print answer quality metrics if available
+            if 'avg_composite_quality_mean' in scores:
+                print(f"\n  Answer Quality:")
+                print(f"    Composite Score:    {scores.get('avg_composite_quality_mean', 0):.2f}/1.00")
+                print(f"    Directional:        {scores.get('avg_directional_socraticism_mean', 0):.2f}/1.00")
+                print(f"    Socratic Endings:   {scores.get('pct_socratic_endings_mean', 0):.1f}%")
+                print(f"    Avg Verbosity:      {scores.get('avg_verbosity_tokens_mean', 0):.1f} tokens")
+
+            print(f"\n  Scenarios:            {scores.get('num_scenarios', 0)}")
 
     # Print by-test-type summary
     if "by_test_type" in summary:
@@ -490,6 +551,12 @@ def main():
         help="Use mock mode for testing (doesn't call real models)"
     )
 
+    parser.add_argument(
+        "--no-answer-quality",
+        action="store_true",
+        help="Disable answer quality evaluation (faster)"
+    )
+
     args = parser.parse_args()
 
     # Parse model IDs
@@ -506,7 +573,8 @@ def main():
         output_file=args.output,
         test_types=test_types,
         use_llm_judge=args.use_llm_judge,
-        mock_mode=args.mock
+        mock_mode=args.mock,
+        enable_answer_quality=not args.no_answer_quality
     )
 
 
