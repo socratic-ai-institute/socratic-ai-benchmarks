@@ -1,0 +1,81 @@
+# Bandit security configuration for Socratic AI Benchmarks
+
+# Tests to skip
+skips:
+  # B101: Test for use of assert - acceptable in tests and defensive programming
+  - B101
+  # B601: Shell injection via Paramiko - we don't use Paramiko
+  - B601
+
+# Exclude paths
+exclude_dirs:
+  - /tests/
+  - /venv/
+  - /.venv/
+  - /node_modules/
+  - /__pycache__/
+  - /.pytest_cache/
+  - /archive/
+
+# Severity level
+tests:
+  # High severity issues
+  - B201  # Flask debug mode
+  - B301  # Pickle usage
+  - B303  # MD5/SHA1 usage
+  - B304  # Insecure cipher usage
+  - B305  # Insecure cipher mode usage
+  - B306  # Insecure mktemp usage
+  - B307  # Eval usage
+  - B308  # Mark safe usage
+  - B309  # HTTPSConnection usage
+  - B310  # URL open usage
+  - B311  # Random usage
+  - B312  # Telnet usage
+  - B313  # XML usage
+  - B314  # XML usage
+  - B315  # XML usage
+  - B316  # XML usage
+  - B317  # XML usage
+  - B318  # XML usage
+  - B319  # XML usage
+  - B320  # XML usage
+  - B321  # FTP usage
+  - B322  # Input usage
+  - B323  # Unverified context
+  - B324  # Hashlib usage
+  - B325  # Tempfile usage
+  - B401  # Import of telnetlib
+  - B402  # Import of ftplib
+  - B403  # Import of pickle
+  - B404  # Import of subprocess
+  - B405  # Import of xml
+  - B406  # Import of xml
+  - B407  # Import of xml
+  - B408  # Import of xml
+  - B409  # Import of xml
+  - B410  # Import of lxml
+  - B411  # Import of xmlrpclib
+  - B412  # Import of httpoxy
+  - B413  # Import of pyCrypto
+  - B501  # Request with verify=False
+  - B502  # SSL with bad version
+  - B503  # SSL with bad defaults
+  - B504  # SSL with no version
+  - B505  # Weak cryptographic key
+  - B506  # Yaml load
+  - B507  # SSH with no host key verification
+  - B601  # Parameterize shell
+  - B602  # Shell injection
+  - B603  # Subprocess without shell
+  - B604  # Any call with shell=True
+  - B605  # Process with shell
+  - B606  # Process without shell
+  - B607  # Start process with partial path
+  - B608  # Hardcoded SQL
+  - B609  # Wildcard injection
+  - B610  # Django extra
+  - B611  # Django raw SQL
+  - B701  # Jinja2 autoescape
+  - B702  # Mako templates
+  - B703  # Django mark safe

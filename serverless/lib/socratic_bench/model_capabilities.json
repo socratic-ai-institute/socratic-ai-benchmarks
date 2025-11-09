@@ -1,0 +1,105 @@
+{
+  "anthropic.claude-sonnet-4-5-20250929-v1:0": {
+    "provider": "anthropic",
+    "requires_profile": false
+  },
+  "meta.llama4-maverick-17b-instruct-v1:0": {
+    "provider": "meta",
+    "requires_profile": true,
+    "profile_arn": "arn:aws:bedrock:us-east-1::foundation-model/meta.llama4-maverick-17b-instruct-v1:0"
+  },
+  "meta.llama4-scout-17b-instruct-v1:0": {
+    "provider": "meta",
+    "requires_profile": true,
+    "profile_arn": "arn:aws:bedrock:us-east-1::foundation-model/meta.llama4-scout-17b-instruct-v1:0"
+  },
+  "amazon.nova-lite-v1:0": {
+    "provider": "amazon",
+    "requires_profile": false
+  },
+  "meta.llama3-1-70b-instruct-v1:0": {
+    "provider": "meta",
+    "requires_profile": false
+  },
+  "meta.llama3-2-90b-instruct-v1:0": {
+    "provider": "meta",
+    "requires_profile": false
+  },
+  "ai21.jamba-1-5-large-v1:0": {
+    "provider": "ai21",
+    "requires_profile": false
+  },
+  "anthropic.claude-opus-4-1-20250805-v1:0": {
+    "provider": "anthropic",
+    "requires_profile": false
+  },
+  "amazon.nova-premier-v1:0": {
+    "provider": "amazon",
+    "requires_profile": false
+  },
+  "cohere.command-r-v1:0": {
+    "provider": "cohere",
+    "requires_profile": false
+  },
+  "anthropic.claude-3-7-sonnet-20250219-v1:0": {
+    "provider": "anthropic",
+    "requires_profile": false
+  },
+  "amazon.nova-pro-v1:0": {
+    "provider": "amazon",
+    "requires_profile": false
+  },
+  "anthropic.claude-3-5-haiku-20241022-v1:0": {
+    "provider": "anthropic",
+    "requires_profile": false
+  },
+  "cohere.command-r-plus-v1:0": {
+    "provider": "cohere",
+    "requires_profile": false
+  },
+  "qwen.qwen3-32b-v1:0": {
+    "provider": "qwen",
+    "requires_profile": false
+  },
+  "anthropic.claude-3-5-sonnet-20240620-v1:0": {
+    "provider": "anthropic",
+    "requires_profile": false
+  },
+  "mistral.mistral-large-2402-v1:0": {
+    "provider": "mistral",
+    "requires_profile": false
+  },
+  "meta.llama3-3-70b-instruct-v1:0": {
+    "provider": "meta",
+    "requires_profile": false
+  },
+  "mistral.mixtral-8x7b-instruct-v0:1": {
+    "provider": "mistral",
+    "requires_profile": false
+  },
+  "anthropic.claude-haiku-4-5-20251001-v1:0": {
+    "provider": "anthropic",
+    "requires_profile": false
+  },
+  "deepseek.r1-v1:0": {
+    "provider": "deepseek",
+    "requires_profile": false
+  },
+  "anthropic.claude-3-sonnet-20240229-v1:0": {
+    "provider": "anthropic",
+    "requires_profile": false
+  },
+  "openai.gpt-oss-120b-1:0": {
+    "provider": "openai",
+    "requires_profile": false
+  },
+  "meta.llama3-2-11b-instruct-v1:0": {
+    "provider": "meta",
+    "requires_profile": false
+  },
+  "anthropic.claude-3-5-sonnet-20241022-v2:0": {
+    "provider": "anthropic",
+    "requires_profile": false,
+    "comment": "Judge model"
+  }
+}
