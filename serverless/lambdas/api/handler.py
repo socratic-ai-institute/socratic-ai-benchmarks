@@ -231,12 +231,13 @@ def get_timeseries(params: Dict[str, str]) -> Dict[str, Any]:
         current_date = datetime.now()
         current_week = current_date.strftime("%Y-W%V")
 
-        # Generate 52 weeks starting from current week
+        # Generate 52 weeks going backwards from current week (historical data only)
         weeks = []
         for i in range(52):
-            week_date = current_date + timedelta(weeks=i)
+            week_date = current_date - timedelta(weeks=i)
             week_str = week_date.strftime("%Y-W%V")
             weeks.append(week_str)
+        weeks.reverse()  # Oldest to newest for chart display
 
         # Get all models that have ever run
         # Scan for all WEEK items to find unique models
