@@ -455,7 +455,7 @@
 
                 const datasets = data.series.map((series, idx) => ({
                     label: series.model_id,
-                    data: series.data.map(d => d.score * 10),
+                    data: series.data.map(d => d.score * 100),
                     borderColor: colors[idx % colors.length],
                     backgroundColor: colors[idx % colors.length].replace('rgb', 'rgba').replace(')', ', 0.1)'),
                     borderWidth: 2,
