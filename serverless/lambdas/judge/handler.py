@@ -20,8 +20,8 @@ from typing import Any, Dict, Optional
 
 import boto3
 # Import from layer
-from socratic_bench import (BedrockClient, compute_heuristic_scores,
-                            compute_vector_scores)
+from socratic_bench import BedrockClient, compute_heuristic_scores
+from socratic_bench.judge_v2 import judge_with_llm
 
 # AWS clients
 s3 = boto3.client("s3")
@@ -78,20 +78,24 @@ def judge_turn_job(job: Dict[str, Any]) -> Dict[str, Any]:
     # 1. Load turn bundle from S3
     turn_bundle = load_turn_bundle(run_id, turn_index)
 
-    # 2. Run heuristics (fast, cheap, backward compatibility)
+    # 2. Run heuristics (fast, cheap, for backward compatibility reporting)
     heuristics = compute_heuristic_scores(turn_bundle["ai"])
 
-    # 3. Compute vector scores (new system - replaces LLM judge)
+    # 3. NEW SYSTEM: LLM judge for ends_with_socratic_question and directionally_socratic
     bedrock_client = BedrockClient()
 
     # Use token count from turn bundle if available
     token_count = turn_bundle.get("output_tokens")
 
-    judge_result = compute_vector_scores(
+    # Get scenario context if available
+    scenario_context = f"Vector: {turn_bundle.get('vector', '')}, Persona: {turn_bundle.get('persona', '')}"
+
+    judge_result = judge_with_llm(
         ai_response=turn_bundle["ai"],
-        token_count=token_count,
-        use_llm_exploratory=False,  # Use heuristic for speed
         bedrock_client=bedrock_client,
+        scenario_context=scenario_context,
+        token_count=token_count,
+        judge_model_id="us.anthropic.claude-sonnet-4-5-20250929-v1:0",
     )
 
     # Set turn index on result
@@ -156,17 +160,12 @@ def save_judge_result(
         ContentType="application/json",
     )
 
-    # Extract key scores for DynamoDB
+    # Extract key scores for DynamoDB (NEW FORMAT)
     scores = judge_result.scores or {}
-    # New format: vector scores are on 0-1 scale
-    # Handle both old format (0-100 dict) and new format (0-1 flat values)
-    overall = scores.get("overall", 0.0)
-    if isinstance(overall, dict):
-        # Old LLM judge format: {"score": X, "evidence": "..."}
-        overall_score = float(overall.get("score", 0.0)) / 100.0  # Convert 0-100 to 0-1
-    else:
-        # New vector format: already 0-1 scale
-        overall_score = float(overall)
+    overall_score = float(scores.get("overall", 0.0))  # Already 0-1 scale
+    token_count = scores.get("token_count", 0)
+    ends_with_question = scores.get("ends_with_socratic_question", False)
+    directionally_socratic = scores.get("directionally_socratic", 0.0)
 
     # Save to DynamoDB
     table.put_item(
@@ -176,11 +175,15 @@ def save_judge_result(
             "run_id": run_id,
             "turn_index": turn_index,
             "s3_key": s3_key,
-            "overall_score": str(
-                overall_score
-            ),  # DynamoDB doesn't support float natively
+            # NEW METRICS
+            "overall_score": str(overall_score),  # Composite score with penalties
+            "token_count": token_count,
+            "ends_with_socratic_question": ends_with_question,
+            "directionally_socratic": str(directionally_socratic),
+            # OLD HEURISTICS (for backward compatibility)
             "has_question": heuristics["has_question"],
             "is_open_ended": heuristics["is_open_ended"],
+            # Metadata
             "judge_model": judge_result.judge_model_id,
             "error": judge_result.error,
             "judged_at": judge_json["judged_at"],

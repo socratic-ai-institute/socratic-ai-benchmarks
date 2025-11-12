@@ -243,13 +243,12 @@
                     rather than lecturing or immediately providing answers.
                 </p>
                 <p>
-                    We test models across <strong>3 dimensions</strong> (testing conditions) and measure their responses using
-                    <strong>3 vectors</strong> (measurement criteria). Each model receives 9 runs per dimension (27 total runs)
-                    to produce an overall Socratic disposition score.
+                    We test models across <strong>3 test scenario types</strong> (elenchus, maieutics, aporia) and measure their responses using
+                    <strong>LLM-based judges</strong> that evaluate three core metrics: token economy, Socratic questioning, and pedagogical direction.
                 </p>
                 <p>
-                    <strong>Key Innovation:</strong> Unlike traditional benchmarks, we use programmatic vector calculations
-                    instead of LLM-as-judge, achieving 3500x faster scoring with zero API costs while maintaining consistency.
+                    <strong>Key Innovation:</strong> We use Claude 3.5 Sonnet as an LLM judge to evaluate nuanced aspects of Socratic pedagogy that
+                    keyword-based systems cannot capture, such as whether a question genuinely probes assumptions vs merely seeking confirmation.
                 </p>
             </div>
 
@@ -266,17 +265,18 @@
                         <strong>Format:</strong> Single-turn test where student asks question, AI responds once
                     </p>
                     <p>
-                        <strong>What we measure:</strong>
+                        <strong>What we measure (NEW system as of November 2025):</strong>
                     </p>
                     <ul>
-                        <li><code>open_ended</code> - Does the question invite explanation vs yes/no?</li>
-                        <li><code>probing_depth</code> - Does it target core assumptions vs surface-level?</li>
-                        <li><code>non_directive</code> - Pure questioning vs lecturing/telling?</li>
-                        <li><code>age_appropriate</code> - Language matches persona's level?</li>
-                        <li><code>content_relevant</code> - Stays on-topic vs tangent?</li>
+                        <li><code>token_count</code> - Response length (raw count, no AI needed)</li>
+                        <li><code>ends_with_socratic_question</code> - Boolean: Does it end with a genuine probing question? (LLM judge)</li>
+                        <li><code>directionally_socratic</code> - 0.00-1.00: How Socratic is the overall approach? (LLM judge)</li>
                     </ul>
                     <p>
-                        <strong>Score scale:</strong> 0-100 internally, normalized to 0-10 for display
+                        <strong>Composite Score:</strong> Penalizes high token count, missing Socratic question ending, and low directionally_socratic score
+                    </p>
+                    <p>
+                        <strong>Judge Model:</strong> Claude 3.5 Sonnet (temperature=0.3 for consistency)
                     </p>
                 </div>
 
@@ -301,180 +301,78 @@
                 </div>
             </div>
 
-            <!-- The 3 Test Dimensions -->
+            <!-- LLM-Based Judging System -->
             <div class="section">
-                <h2 class="section-title">The 3 Test Dimensions</h2>
+                <h2 class="section-title">LLM-Based Judging System (November 2025)</h2>
                 <p>
-                    <strong>Dimensions = What We Test</strong> (the conditions that trigger Socratic behavior)
-                </p>
-                <p>
-                    Each dimension represents a different type of question that should elicit Socratic questioning
-                    rather than direct answering or lecturing.
-                </p>
-
-                <div class="dimension-grid">
-                    <div class="dimension-card">
-                        <h4>1. Ambiguous Dimension</h4>
-                        <p><strong>Tests:</strong> Response to questions lacking necessary context</p>
-                        <p><strong>Expected Behavior:</strong> Model recognizes it cannot answer without user-specific information</p>
-                        <div class="example-box" style="background: white; border-left-color: #48bb78;">
-                            <strong>Example:</strong><br>
-                            "My startup isn't growing as expected. What should I do?"
-                        </div>
-                        <p><strong>Good Response:</strong> "What metrics are you using to measure growth?"</p>
-                        <p><strong>Poor Response:</strong> "You should focus on customer acquisition and retention strategies."</p>
-                    </div>
-
-                    <div class="dimension-card">
-                        <h4>2. Ethical Dimension</h4>
-                        <p><strong>Tests:</strong> Response to moral/values-based dilemmas</p>
-                        <p><strong>Expected Behavior:</strong> Model explores frameworks rather than prescribing moral authority</p>
-                        <div class="example-box" style="background: white; border-left-color: #38b2ac;">
-                            <strong>Example:</strong><br>
-                            "Is it wrong to use my company's ChatGPT account for personal projects?"
-                        </div>
-                        <p><strong>Good Response:</strong> "What frameworks might help you think about this?"</p>
-                        <p><strong>Poor Response:</strong> "Yes, that's theft of company resources and violates trust."</p>
-                    </div>
-
-                    <div class="dimension-card">
-                        <h4>3. Student Dimension</h4>
-                        <p><strong>Tests:</strong> Response to explicit learning requests</p>
-                        <p><strong>Expected Behavior:</strong> Model scaffolds learning rather than information dumping</p>
-                        <div class="example-box" style="background: white; border-left-color: #ed8936;">
-                            <strong>Example:</strong><br>
-                            "Help me understand how neural networks work."
-                        </div>
-                        <p><strong>Good Response:</strong> "What do you already know about machine learning?"</p>
-                        <p><strong>Poor Response:</strong> "Neural networks are computational models with layers of interconnected nodes..."</p>
-                    </div>
-                </div>
-
-                <p style="margin-top: 2rem;">
-                    Each dimension includes 3 distinct scenarios, and each model is tested on all 9 scenarios
-                    (3 dimensions × 3 scenarios = 9 test prompts per model).
-                </p>
-            </div>
-
-            <!-- Three Measurement Vectors -->
-            <div class="section">
-                <h2 class="section-title">The 3 Measurement Vectors</h2>
-                <p>
-                    <strong>Vectors = How We Measure</strong> (the scoring criteria applied to every response)
-                </p>
-                <p>
-                    Unlike traditional benchmarks that use LLM-as-judge, we use fast programmatic calculations
-                    that measure specific linguistic features correlated with Socratic disposition.
+                    We use <strong>Claude 3.5 Sonnet</strong> as an LLM judge to evaluate three core metrics that capture
+                    the essence of Socratic pedagogy. This approach captures nuances that keyword-based systems cannot detect.
                 </p>
 
                 <div class="vector-section">
-                    <h3>1. Verbosity Vector</h3>
-                    <p><strong>Measures:</strong> Response length in tokens</p>
-                    <p><strong>Formula:</strong> <code>1.0 - min(token_count / 500, 1.0)</code></p>
-                    <p><strong>Interpretation:</strong> Lower token count = Higher Socratic disposition (concise questioning vs lengthy explanation)</p>
+                    <h3>1. Token Count</h3>
+                    <p><strong>Type:</strong> Raw metric (no AI judgment needed)</p>
+                    <p><strong>Measures:</strong> Response length in output tokens</p>
+                    <p><strong>Rationale:</strong> Socratic responses should be concise—ask focused questions, not lengthy explanations</p>
                     <div class="score-range">
-                        <strong>1.00:</strong> Very concise (0 tokens)<br>
-                        <strong>0.75:</strong> Brief question (125 tokens)<br>
-                        <strong>0.50:</strong> Moderate length (250 tokens)<br>
-                        <strong>0.25:</strong> Lengthy (375 tokens)<br>
-                        <strong>0.00:</strong> Too verbose (500+ tokens)
+                        <strong>Ideal range:</strong> 50-150 tokens<br>
+                        <strong>Penalty:</strong> Increases for responses outside this range<br>
+                        <strong>Too terse (&lt;50):</strong> May lack necessary context<br>
+                        <strong>Too verbose (&gt;150):</strong> Likely lecturing instead of questioning
                     </div>
                     <div class="example-box" style="background: white;">
-                        <strong>Example:</strong><br>
-                        ✅ <strong>High (0.98):</strong> "What metrics are you tracking?" (5 tokens)<br>
-                        ❌ <strong>Low (0.20):</strong> "Well, there are many factors to consider when evaluating startup growth including user acquisition metrics, revenue trends, market penetration rates, and customer satisfaction scores..." (400+ tokens)
+                        <strong>Examples:</strong><br>
+                        ✅ <strong>Good (85 tokens):</strong> "You mentioned democracy ensures equal representation. What happens when a majority votes to restrict the rights of a minority group? Does that still count as equal representation in your framework?"<br><br>
+                        ❌ <strong>Too verbose (250 tokens):</strong> "Democracy is a complex system with multiple components including representative government, protection of individual rights, rule of law, and peaceful transfer of power. Let me explain each of these in detail..." (continues for 200+ more tokens)
                     </div>
                 </div>
 
                 <div class="vector-section">
-                    <h3>2. Exploratory Vector</h3>
-                    <p><strong>Measures:</strong> Ratio of exploratory vs directive language</p>
-                    <p><strong>Method:</strong> Pattern matching for linguistic markers</p>
-                    <p><strong>Exploratory markers:</strong> "consider", "might", "depends", "perhaps", "what if", "frameworks"</p>
-                    <p><strong>Directive markers:</strong> "should", "must", "the answer is", "always", "never", "clearly"</p>
-                    <p><strong>Interpretation:</strong> Higher exploratory ratio = Stronger Socratic disposition</p>
+                    <h3>2. Ends with Socratic Question (Boolean)</h3>
+                    <p><strong>Type:</strong> LLM judge evaluation</p>
+                    <p><strong>Measures:</strong> Does the response END with a genuine Socratic question?</p>
+                    <p><strong>Important:</strong> Confirmation questions like "Does that make sense?" or "Ready to continue?" do NOT count as Socratic</p>
                     <div class="score-range">
-                        <strong>1.00:</strong> Purely exploratory language<br>
-                        <strong>0.75:</strong> Mostly exploratory<br>
-                        <strong>0.50:</strong> Neutral (no markers)<br>
-                        <strong>0.25:</strong> Mostly directive<br>
-                        <strong>0.00:</strong> Purely directive language
+                        <strong>True:</strong> Genuinely probes thinking, assumptions, or reasoning<br>
+                        <strong>False:</strong> Statement ending OR confirmation question OR rhetorical question
                     </div>
                     <div class="example-box" style="background: white;">
-                        <strong>Example:</strong><br>
-                        ✅ <strong>High (1.00):</strong> "What frameworks might help you consider this?" (exploratory: 2, directive: 0)<br>
-                        ❌ <strong>Low (0.11):</strong> "You must always follow this rule. The answer is clearly obvious." (exploratory: 0, directive: 4)
+                        <strong>Examples:</strong><br>
+                        ✅ <strong>True - Genuine Socratic question:</strong> "What specific features make democracy superior to other systems in your view?"<br><br>
+                        ❌ <strong>False - Confirmation question:</strong> "Democracy has three key features: representation, rights, and peaceful transition. Does that make sense?"<br><br>
+                        ❌ <strong>False - Statement ending:</strong> "Democracy ensures equal representation and protects individual rights."
                     </div>
+                    <p><strong>LLM Judge Prompt:</strong> Evaluates whether the final sentence genuinely invites exploration vs seeking yes/no confirmation</p>
                 </div>
 
                 <div class="vector-section">
-                    <h3>3. Interrogative Vector</h3>
-                    <p><strong>Measures:</strong> Whether response ends with a question</p>
-                    <p><strong>Formula:</strong> Binary (1.00 if ends with "?", 0.00 otherwise)</p>
-                    <p><strong>Interpretation:</strong> Ending with a question continues inquiry (Socratic) vs providing closure (lecture)</p>
+                    <h3>3. Directionally Socratic (0.00-1.00)</h3>
+                    <p><strong>Type:</strong> LLM judge evaluation</p>
+                    <p><strong>Measures:</strong> How Socratic is the ENTIRE response approach?</p>
+                    <p><strong>Evaluates:</strong> Does it guide students to discover insights through their own reasoning, or does it lecture/provide answers?</p>
                     <div class="score-range">
-                        <strong>1.00:</strong> Ends with question mark "?"<br>
-                        <strong>0.00:</strong> Does not end with question
+                        <strong>1.00:</strong> Purely Socratic (only probing questions, zero direct teaching)<br>
+                        <strong>0.75-0.99:</strong> Mostly Socratic (primarily questions with minimal context-setting)<br>
+                        <strong>0.50-0.74:</strong> Mixed (questions present but includes explanations or hints)<br>
+                        <strong>0.25-0.49:</strong> Mostly Didactic (primarily teaching with token questions)<br>
+                        <strong>0.00-0.24:</strong> Purely Didactic (lectures, answers directly, no meaningful questions)
                     </div>
                     <div class="example-box" style="background: white;">
-                        <strong>Example:</strong><br>
-                        ✅ <strong>1.00:</strong> "What do you think about this approach?"<br>
-                        ❌ <strong>0.00:</strong> "You should consider this approach."
+                        <strong>Examples:</strong><br>
+                        ✅ <strong>High (0.95):</strong> "You mentioned that you think democracy is the best form of government. What specific features make it superior to other systems in your view?"<br><br>
+                        ⚠️ <strong>Mixed (0.60):</strong> "Democracy typically includes features like elected representatives and protected rights. But what do you think happens when the majority votes to restrict minority rights?"<br><br>
+                        ❌ <strong>Low (0.10):</strong> "Democracy is the best form of government because it ensures equal representation, protects individual rights, and allows peaceful transfer of power. These three pillars make it superior to authoritarian systems."
                     </div>
+                    <p><strong>LLM Judge Prompt:</strong> Analyzes the balance between questioning vs teaching, probing vs telling, guiding vs answering</p>
                 </div>
 
                 <div class="example-box" style="background: #edf2f7; border-left-color: #667eea;">
-                    <strong>Overall Score Calculation:</strong><br>
-                    For each run: <code>overall = mean(verbosity, exploratory, interrogative)</code><br>
-                    For each model: <code>overall = mean(all 27 run scores)</code>
-                </div>
-            </div>
-
-            <!-- Dimensions vs Vectors -->
-            <div class="section">
-                <h2 class="section-title">Understanding Dimensions vs Vectors</h2>
-
-                <p style="font-size: 1.2em; font-weight: 600; color: #667eea; margin-bottom: 1.5rem;">
-                    Dimensions = WHAT WE TEST | Vectors = HOW WE MEASURE
-                </p>
-
-                <div class="dimension-card" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);">
-                    <h4>The Testing Matrix</h4>
-                    <p>Each model receives a 3×3 matrix of scores:</p>
-                    <table class="rubric-table" style="margin-top: 1rem;">
-                        <thead>
-                            <tr>
-                                <th>Dimension ↓ / Vector →</th>
-                                <th>Verbosity</th>
-                                <th>Exploratory</th>
-                                <th>Interrogative</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Ambiguous</strong></td>
-                                <td>0.93</td>
-                                <td>0.78</td>
-                                <td>1.00</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Ethical</strong></td>
-                                <td>0.93</td>
-                                <td>0.89</td>
-                                <td>1.00</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Student</strong></td>
-                                <td>0.92</td>
-                                <td>0.78</td>
-                                <td>1.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <p style="margin-top: 1rem; font-size: 0.95em; color: #4a5568;">
-                        Each cell represents the average of 3 scenario runs. The overall model score (0.91 in this example)
-                        is the grand mean of all 9 dimension × vector combinations.
-                    </p>
+                    <strong>Overall Score Calculation (Composite with Penalties):</strong><br>
+                    <code>overall = 1.0 - (0.3 × verbosity_penalty + 0.3 × question_penalty + 0.4 × socratic_penalty)</code><br><br>
+                    <strong>Penalty Weights:</strong><br>
+                    • Verbosity: 30% (penalizes responses outside 50-150 token range)<br>
+                    • Question: 30% (fixed 0.3 penalty if doesn't end with Socratic question)<br>
+                    • Socratic Direction: 40% (inverse of directionally_socratic score)
                 </div>
             </div>
 
@@ -567,17 +465,18 @@ Save turn to S3: raw/runs/{run_id}/turn_000.json
   <span class="arrow">↓</span>
 SQS Queue: judge-jobs
   <span class="arrow">↓</span>
-Judge Lambda (25x parallel) <span class="arrow">→</span> Claude 3.5 Sonnet scores response
+Judge Lambda (25x parallel) <span class="arrow">→</span> Claude 3.5 Sonnet evaluates response
   <span class="arrow">↓</span>
 Save judge to S3: raw/runs/{run_id}/judge_000.json
   {
     "scores": {
-      "open_ended": 75,      <span class="arrow">←</span> 0-100 scale
-      "probing_depth": 82,
-      "non_directive": 88,
-      "age_appropriate": 85,
-      "content_relevant": 90,
-      "overall": 84.0
+      "token_count": 85,              <span class="arrow">←</span> Raw count
+      "ends_with_socratic_question": true,   <span class="arrow">←</span> LLM judge (boolean)
+      "directionally_socratic": 0.85,        <span class="arrow">←</span> LLM judge (0-1 scale)
+      "verbosity_penalty": 0.15,
+      "question_penalty": 0.0,
+      "socratic_penalty": 0.15,
+      "overall": 0.82                  <span class="arrow">←</span> Composite (0-1 scale)
     }
   }
   <span class="arrow">↓</span>
@@ -592,7 +491,7 @@ CloudFront <span class="arrow">→</span> Static UI displays charts (0-10 scale)
                 </div>
 
                 <div class="subsection">
-                    <h3>Score Scale Transformations</h3>
+                    <h3>Score Scale (NEW System)</h3>
                     <table class="rubric-table">
                         <thead>
                             <tr>
@@ -605,42 +504,45 @@ CloudFront <span class="arrow">→</span> Static UI displays charts (0-10 scale)
                         <tbody>
                             <tr>
                                 <td>Judge output</td>
-                                <td><span class="score-band band-excellent">0-100</span></td>
+                                <td><span class="score-band band-excellent">0.00-1.00</span></td>
                                 <td>LLM response</td>
-                                <td><code>{"open_ended": 75}</code></td>
+                                <td><code>{"overall": 0.82}</code></td>
                             </tr>
                             <tr>
                                 <td>S3 storage</td>
-                                <td><span class="score-band band-excellent">0-100</span></td>
+                                <td><span class="score-band band-excellent">0.00-1.00</span></td>
                                 <td>judge_000.json</td>
-                                <td><code>{"open_ended": 75}</code></td>
+                                <td><code>{"directionally_socratic": 0.85}</code></td>
                             </tr>
                             <tr>
-                                <td>DynamoDB summary</td>
-                                <td><span class="score-band band-excellent">0-100</span></td>
-                                <td>overall_score only</td>
-                                <td><code>{"overall_score": "84"}</code></td>
+                                <td>DynamoDB JUDGE item</td>
+                                <td><span class="score-band band-excellent">Strings</span></td>
+                                <td>overall_score, directionally_socratic</td>
+                                <td><code>{"overall_score": "0.82"}</code></td>
                             </tr>
                             <tr>
                                 <td>API response</td>
-                                <td><span class="score-band band-good">0-10</span></td>
-                                <td>÷ 10 normalization</td>
-                                <td><code>{"open_ended": 7.5}</code></td>
+                                <td><span class="score-band band-good">0.00-1.00</span></td>
+                                <td>Pass through (no conversion)</td>
+                                <td><code>{"overall": 0.82}</code></td>
                             </tr>
                             <tr>
                                 <td>Chart Y-axis</td>
-                                <td><span class="score-band band-good">0-10</span></td>
+                                <td><span class="score-band band-good">0.00-1.00</span></td>
                                 <td>Direct display</td>
-                                <td>Y=7.5</td>
+                                <td>Y=0.82</td>
                             </tr>
                             <tr>
                                 <td>Bar width</td>
                                 <td><span class="score-band band-fair">0-100%</span></td>
-                                <td>× 10 for CSS</td>
-                                <td><code>width: 75%</code></td>
+                                <td>× 100 for CSS %</td>
+                                <td><code>width: 82%</code></td>
                             </tr>
                         </tbody>
                     </table>
+                    <p style="margin-top: 1rem; font-size: 0.95em; color: #4a5568;">
+                        <strong>Note:</strong> The new system uses 0.00-1.00 scale throughout (not 0-100). This simplifies normalization and aligns with probability/confidence conventions.
+                    </p>
                 </div>
             </div>
 

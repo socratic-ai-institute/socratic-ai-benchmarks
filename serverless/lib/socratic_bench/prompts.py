@@ -131,74 +131,73 @@ def ase_judge_prompt(vector: str, persona: str, transcript: str) -> str:
     )
 
 
-def turn_judge_prompt(
-    vector: str,
-    persona: str,
-    turn_index: int,
-    student_utterance: str,
-    ai_response: str,
-) -> str:
+def socratic_question_judge_prompt(ai_response: str) -> str:
     """
-    Build a single-turn judge prompt for per-turn scoring.
+    Judge if the AI response ends with a Socratic question.
 
-    Args:
-        vector: Test vector
-        persona: Student persona
-        turn_index: Turn number (0-indexed)
-        student_utterance: What the student said
-        ai_response: What the AI responded
-
-    Returns:
-        Judge prompt for this single turn
+    Returns prompt for LLM to evaluate boolean: does it end with a Socratic question?
     """
-    rubric = (
-        "Socratic Dialogue Rubric — Score 0-100. Be discriminating.\n\n"
-        "1) Open-ended (0-100):\n"
-        "   90-100 = Purely open question inviting explanation (e.g., 'What makes you think...?')\n"
-        "   70-89 = Open with minor leading phrasing\n"
-        "   50-69 = Somewhat open but constrains answer space\n"
-        "   30-49 = Binary question with elaboration prompt (e.g., 'Is X true? Why?')\n"
-        "   0-29 = Pure yes/no or closed question\n\n"
-        "2) Probing depth (0-100):\n"
-        "   90-100 = Targets core assumption or hidden premise\n"
-        "   70-89 = Probes reasoning but misses deepest layer\n"
-        "   50-69 = Asks for clarification of stated position\n"
-        "   30-49 = Surface-level follow-up\n"
-        "   0-29 = No probing; mere acknowledgment\n\n"
-        "3) Non-directive (0-100):\n"
-        "   90-100 = Pure question with zero hinting at answer\n"
-        "   70-89 = Question with subtle framing\n"
-        "   50-69 = Question plus context that narrows thinking\n"
-        "   30-49 = Leading question that implies correct answer\n"
-        "   0-29 = Tells answer directly or lectures\n\n"
-        "4) Age-appropriate (0-100):\n"
-        "   90-100 = Perfect match to persona's level and language\n"
-        "   70-89 = Mostly appropriate with minor complexity issues\n"
-        "   50-69 = Somewhat mismatched (too simple or too complex)\n"
-        "   30-49 = Clearly inappropriate for persona\n"
-        "   0-29 = Completely wrong level\n\n"
-        "5) Content-relevant (0-100):\n"
-        "   90-100 = Directly addresses core subject matter\n"
-        "   70-89 = Relevant but slightly tangential\n"
-        "   50-69 = Loosely connected\n"
-        "   30-49 = Barely related\n"
-        "   0-29 = Off-topic\n\n"
-        "IMPORTANT: Most responses should score 40-80. Reserve 90+ for truly exemplary Socratic questioning. "
-        "Use 0-30 for poor responses. Be critical and discriminating."
-    )
+    return f"""You are evaluating if an AI tutor's response ends with a Socratic question.
 
-    transcript = f"Turn {turn_index + 1}\nStudent: {student_utterance}\nAI: {ai_response}"
+AI Response:
+{ai_response}
 
-    return (
-        "You are a strict evaluator of Socratic pedagogy. Grade harshly but fairly.\n\n"
-        f"Context:\n- Vector: {vector.upper()}\n- Persona: {persona}\n\n"
-        f"{transcript}\n\n"
-        f"{rubric}\n\n"
-        "Task: For each dimension, FIRST write an 'explanation' (2-3 sentences analyzing the response quality), "
-        "THEN assign a 'score' (0-100 integer), THEN provide 'evidence' (short quote from AI response).\n\n"
-        "Return strict JSON with keys: open_ended, probing_depth, non_directive, age_appropriate, content_relevant, overall.\n"
-        "Each key should have: explanation (string), score (0-100 integer), evidence (string).\n"
-        "overall should be the average score rounded to one decimal, with explanation summarizing overall performance.\n\n"
-        "BE DISCRIMINATING. Use the full 0-100 range. Most responses should be 40-80, not 90+.\n"
-        "Return ONLY JSON."
-    )
+A Socratic question:
+- Genuinely probes the student's thinking, assumptions, or reasoning
+- Invites explanation, reflection, or exploration
+- Does NOT seek yes/no confirmation to proceed (e.g., "Does that make sense?" "Ready to continue?")
+- Does NOT provide answers disguised as questions (e.g., "Isn't it true that X?")
+
+Task: Does this response END with a Socratic question?
+
+Return ONLY a JSON object with this exact format:
+{{
+  "ends_with_socratic_question": true or false,
+  "explanation": "1-2 sentence justification"
+}}"""
+
+
+def directionally_socratic_judge_prompt(ai_response: str, scenario_context: str = "") -> str:
+    """
+    Judge how directionally Socratic the entire response is (0.00-1.00).
+
+    Returns prompt for LLM to score how well the response guides toward introspection vs lecturing.
+    """
+    context_section = f"\n\nContext: {scenario_context}\n" if scenario_context else ""
+
+    return f"""You are a STRICT evaluator of Socratic pedagogy. Be highly critical and discriminating.
+
+AI Response:
+{ai_response}{context_section}
+
+Socratic pedagogy GUIDES students to discover insights through their own reasoning.
+It does NOT lecture, provide answers, or information-dump.
+
+Scoring Scale (0.00-1.00) - BE STRICT:
+- 1.00 = Purely Socratic: ONLY probing questions, ZERO context-setting, ZERO information given
+- 0.80-0.99 = Mostly Socratic: Primarily questions with MINIMAL framing (1 brief phrase max)
+- 0.60-0.79 = Somewhat Socratic: Questions present but includes hints, explanations, or multiple context phrases
+- 0.40-0.59 = Mixed: Equal parts questioning and teaching
+- 0.20-0.39 = Mostly Didactic: Primarily teaching/explaining with token questions
+- 0.00-0.19 = Purely Didactic: Lectures, answers directly, no meaningful questions
+
+STRICT Criteria for HIGH scores (0.80+):
+- Questions that probe assumptions, reasoning, or mental models
+- Reflects student's words back to them for examination
+- Builds on student's existing knowledge
+- ZERO information, facts, or explanations provided
+- No more than ONE brief framing phrase (5 words max)
+
+AUTOMATIC penalties:
+- Any explanation or fact given: -0.20 minimum
+- Multiple context-setting phrases: -0.15
+- Rhetorical questions: -0.10
+- Leading questions that imply answers: -0.15
+
+Task: Rate how directionally Socratic this response is. BE CRITICAL AND STRICT.
+
+Return ONLY a JSON object with this exact format:
+{{
+  "directionally_socratic": 0.65,
+  "explanation": "2-3 sentences analyzing the Socratic quality and identifying any didactic elements"
+}}"""

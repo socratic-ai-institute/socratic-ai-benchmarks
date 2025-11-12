@@ -16,21 +16,26 @@ Core Capabilities:
 
 Module Organization:
     dialogue.py - Multi-turn dialogue runner with token tracking
-    judge.py - Vector-based scoring system (verbosity, exploratory, interrogative)
+    judge.py - Legacy vector-based scoring (verbosity, exploratory, interrogative)
+    judge_v2.py - NEW LLM-based judge (token_count, ends_with_socratic_question, directionally_socratic)
     scenarios.py - Test scenario definitions and management
     models.py - Bedrock client with multi-provider support
     prompts.py - Prompt templates for tutor and judge
 
 Version History:
+    0.3.0 - LLM-based judge system with penalty-based composite scoring
     0.2.0 - Unified vector-based scoring system
     0.1.0 - Initial release with heuristic scoring
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 # Core dialogue and scoring functionality
 from .dialogue import run_dialogue
 from .judge import compute_heuristic_scores, compute_vector_scores
+
+# New LLM-based judge system (v2)
+from .judge_v2 import judge_with_llm, JudgeResult, compute_overall_score
 
 # Scenario management
 from .scenarios import get_scenario, list_scenarios
@@ -45,9 +50,14 @@ __all__ = [
     # Dialogue execution
     "run_dialogue",
 
-    # Scoring functions
+    # Scoring functions (legacy)
     "compute_heuristic_scores",
     "compute_vector_scores",
+
+    # LLM-based judge system (v2)
+    "judge_with_llm",
+    "JudgeResult",
+    "compute_overall_score",
 
     # Scenario management
     "get_scenario",

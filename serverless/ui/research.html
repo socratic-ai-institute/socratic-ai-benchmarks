@@ -118,6 +118,9 @@
             font-size: 1.3em;
             margin-bottom: 20px;
             color: #667eea;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         .metric-row {
@@ -229,6 +232,9 @@
         .winner-banner h2 {
             font-size: 2em;
             margin-bottom: 10px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         .winner-banner p {
@@ -417,9 +423,9 @@
                 scales: {
                     r: {
                         min: 0,
-                        max: 1.0,
+                        max: 10.0,
                         ticks: {
-                            stepSize: 0.2
+                            stepSize: 2
                         }
                     }
                 }
@@ -661,40 +667,52 @@
                     const card = document.createElement('div');
                     card.className = 'model-card';
 
-                    // Build dimension sections
-                    let dimensionHTML = '';
-                    if (model.dimensions) {
+                    // Build compact table for vectors
+                    let vectorTableHTML = '';
+                    if (model.dimensions && Object.keys(model.dimensions).length > 0) {
+                        vectorTableHTML = `
+                            <table style="width: 100%; margin-top: 1.5rem; border-collapse: collapse; font-size: 0.9em;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid #667eea;">
+                                        <th style="text-align: left; padding: 0.75rem 0.5rem; color: #4a5568; font-weight: 600;">Vector</th>
+                                        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #4a5568; font-weight: 600;">Tokens</th>
+                                        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #4a5568; font-weight: 600;">Question</th>
+                                        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #4a5568; font-weight: 600;">Socratic</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+        `;
+
                         for (const [dimName, dimData] of Object.entries(model.dimensions)) {
-                            dimensionHTML += `
-                                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
-                                    <h4 style="font-size: 1.0em; color: #4a5568; margin-bottom: 0.75rem; text-transform: capitalize;">${dimName} Dimension</h4>
+                            const tokenColor = dimData.avg_token_count >= 40 && dimData.avg_token_count <= 100 ? '#48bb78' : '#ed8936';
+                            const questionCount = dimData.question_count || 0;
+                            const questionTotal = dimData.question_total || 1;
+                            const questionColor = questionCount === questionTotal ? '#48bb78' : '#ed8936';
+                            const socraticColor = dimData.avg_directionally_socratic >= 0.8 ? '#48bb78' : dimData.avg_directionally_socratic >= 0.6 ? '#ed8936' : '#f56565';
 
-                                    <div class="metric-row">
-                                        <span class="metric-label">Verbosity</span>
-                                        <span class="metric-value">${dimData.verbosity.toFixed(2)}</span>
-                                    </div>
-                                    <div class="metric-bar">
-                                        <div class="metric-bar-fill" style="width: ${dimData.verbosity * 100}%"></div>
-                                    </div>
-
-                                    <div class="metric-row">
-                                        <span class="metric-label">Exploratory</span>
-                                        <span class="metric-value">${dimData.exploratory.toFixed(2)}</span>
-                                    </div>
-                                    <div class="metric-bar">
-                                        <div class="metric-bar-fill" style="width: ${dimData.exploratory * 100}%"></div>
-                                    </div>
-
-                                    <div class="metric-row">
-                                        <span class="metric-label">Interrogative</span>
-                                        <span class="metric-value">${dimData.interrogative.toFixed(2)}</span>
-                                    </div>
-                                    <div class="metric-bar">
-                                        <div class="metric-bar-fill" style="width: ${dimData.interrogative * 100}%"></div>
-                                    </div>
-                                </div>
+                            vectorTableHTML += `
+                                <tr style="border-bottom: 1px solid #e2e8f0;">
+                                    <td style="padding: 0.75rem 0.5rem; font-weight: 600; text-transform: capitalize;">${dimName}</td>
+                                    <td style="text-align: center; padding: 0.75rem 0.5rem;">
+                                        <span style="color: ${tokenColor}; font-weight: 600;">${dimData.avg_token_count}</span>
+                                    </td>
+                                    <td style="text-align: center; padding: 0.75rem 0.5rem;">
+                                        <span style="color: ${questionColor}; font-weight: 600;">${questionCount}/${questionTotal}</span>
+                                    </td>
+                                    <td style="text-align: center; padding: 0.75rem 0.5rem;">
+                                        <span style="color: ${socraticColor}; font-weight: 600;">${dimData.avg_directionally_socratic.toFixed(2)}</span>
+                                        <div style="width: 100%; height: 4px; background: #e2e8f0; border-radius: 2px; margin-top: 0.25rem; overflow: hidden;">
+                                            <div style="height: 100%; width: ${dimData.avg_directionally_socratic * 100}%; background: ${socraticColor};"></div>
+                                        </div>
+                                    </td>
+                                </tr>
                             `;
                         }
+
+                        vectorTableHTML += `
+                                </tbody>
+                            </table>
+                        `;
                     }
 
                     card.innerHTML = `
@@ -708,11 +726,11 @@
                             <div class="metric-bar-fill" style="width: ${model.overall * 100}%"></div>
                         </div>
 
-                        <div style="font-size: 0.85em; color: #718096; margin-top: 0.5rem;">
-                            ${model.total_run_count} total runs across 3 dimensions
+                        <div style="font-size: 0.85em; color: #718096; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+                            ${model.total_run_count} total runs
                         </div>
 
-                        ${dimensionHTML}
+                        ${vectorTableHTML}
                     `;
 
                     container.appendChild(card);

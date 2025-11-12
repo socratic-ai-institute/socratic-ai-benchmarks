@@ -412,12 +412,12 @@ def get_cost_analysis(params: Dict[str, str]) -> Dict[str, Any]:
 
 def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
     """
-    GET /api/model-comparison - Aggregates all runs per model with dimension-specific vector scores.
+    GET /api/model-comparison - Aggregates all runs per model with NEW LLM-based metrics.
 
     Returns each model with:
     - Overall aggregate score across all dimensions
-    - Per-dimension vector breakdowns (ambiguous, ethical, student)
-    - Each dimension shows: verbosity, exploratory, interrogative scores
+    - Per-dimension metric breakdowns (ambiguous, ethical, student)
+    - Each dimension shows: avg_token_count, question_percentage, avg_directionally_socratic
     """
     try:
         from collections import defaultdict
@@ -432,10 +432,10 @@ def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
                 "dimensions": defaultdict(
                     lambda: {
                         "runs": [],
-                        "vectors": {
-                            "verbosity": [],
-                            "exploratory": [],
-                            "interrogative": [],
+                        "metrics": {
+                            "token_counts": [],
+                            "ends_with_question_count": 0,
+                            "directionally_socratic_scores": [],
                         },
                     }
                 ),
@@ -452,28 +452,29 @@ def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
             if not model_id or not run_id or overall_score < 0.1:  # Skip failed runs
                 continue
 
-            # Load vector scores from S3
+            # Load NEW LLM-based metrics from S3
             try:
                 s3_key = f"raw/runs/{run_id}/judge_000.json"
                 s3_response = s3.get_object(Bucket=BUCKET_NAME, Key=s3_key)
                 judge_data = json.loads(s3_response["Body"].read())
                 scores = judge_data.get("scores", {})
 
-                verbosity = float(scores.get("verbosity", 0))
-                exploratory = float(scores.get("exploratory", 0))
-                interrogative = float(scores.get("interrogative", 0))
+                token_count = scores.get("token_count", 0)
+                ends_with_question = scores.get("ends_with_socratic_question", False)
+                directionally_socratic = float(scores.get("directionally_socratic", 0))
 
-                # Track per-dimension vectors
+                # Track per-dimension metrics
                 model_data[model_id]["dimensions"][dimension]["runs"].append(run_id)
-                model_data[model_id]["dimensions"][dimension]["vectors"][
-                    "verbosity"
-                ].append(verbosity)
-                model_data[model_id]["dimensions"][dimension]["vectors"][
-                    "exploratory"
-                ].append(exploratory)
-                model_data[model_id]["dimensions"][dimension]["vectors"][
-                    "interrogative"
-                ].append(interrogative)
+                model_data[model_id]["dimensions"][dimension]["metrics"][
+                    "token_counts"
+                ].append(token_count)
+                if ends_with_question:
+                    model_data[model_id]["dimensions"][dimension]["metrics"][
+                        "ends_with_question_count"
+                    ] += 1
+                model_data[model_id]["dimensions"][dimension]["metrics"][
+                    "directionally_socratic_scores"
+                ].append(directionally_socratic)
                 model_data[model_id]["all_scores"].append(overall_score)
 
             except Exception as e:
@@ -490,27 +491,26 @@ def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
                 else 0
             )
 
-            # Per-dimension aggregates
+            # Per-dimension aggregates (NEW metrics)
             dimensions = {}
             for dim_name, dim_data in data["dimensions"].items():
-                vectors = dim_data["vectors"]
+                metrics = dim_data["metrics"]
+                run_count = len(dim_data["runs"])
+
                 dimensions[dim_name] = {
-                    "verbosity": round(
-                        sum(vectors["verbosity"]) / len(vectors["verbosity"]), 2
+                    "avg_token_count": round(
+                        sum(metrics["token_counts"]) / len(metrics["token_counts"])
                     )
-                    if vectors["verbosity"]
+                    if metrics["token_counts"]
                     else 0,
-                    "exploratory": round(
-                        sum(vectors["exploratory"]) / len(vectors["exploratory"]), 2
+                    "question_count": metrics["ends_with_question_count"],
+                    "question_total": run_count,
+                    "avg_directionally_socratic": round(
+                        sum(metrics["directionally_socratic_scores"]) / len(metrics["directionally_socratic_scores"]), 2
                     )
-                    if vectors["exploratory"]
+                    if metrics["directionally_socratic_scores"]
                     else 0,
-                    "interrogative": round(
-                        sum(vectors["interrogative"]) / len(vectors["interrogative"]), 2
-                    )
-                    if vectors["interrogative"]
-                    else 0,
-                    "run_count": len(dim_data["runs"]),
+                    "run_count": run_count,
                 }
 
             models.append(
@@ -557,19 +557,16 @@ def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
                     judge_data = json.loads(s3_response["Body"].read())
                     scores = judge_data.get("scores", {})
 
-                    # New vector-based scoring system (0-1 scale)
-                    verbosity = float(scores.get("verbosity", 0))
-                    exploratory = float(scores.get("exploratory", 0))
-                    interrogative = float(scores.get("interrogative", 0))
+                    # NEW LLM-based scoring system (0-1 scale)
+                    token_count = scores.get("token_count", 0)
+                    ends_with_question = scores.get("ends_with_socratic_question", False)
+                    directionally_socratic = float(scores.get("directionally_socratic", 0))
                     overall = float(scores.get("overall", 0))
 
-                    # Backward compatibility: check for old dimension names
-                    if verbosity == 0 and exploratory == 0 and interrogative == 0:
-                        # Old format (0-100 scale), normalize to 0-1
-                        verbosity = float(scores.get("open_ended", 0)) / 100
-                        exploratory = float(scores.get("probing_depth", 0)) / 100
-                        interrogative = float(scores.get("non_directive", 0)) / 100
-                        overall = float(scores.get("overall", 0)) / 100
+                    # Penalty breakdown (for transparency)
+                    verbosity_penalty = float(scores.get("verbosity_penalty", 0))
+                    question_penalty = float(scores.get("question_penalty", 0))
+                    socratic_penalty = float(scores.get("socratic_penalty", 0))
 
                     model_to_latest[model_id] = {
                         "created_at": created_at,
@@ -578,14 +575,14 @@ def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
                         "scenario_name": scenario_id,
                         "test_type": "disposition",
                         "overall_score": round(overall, 2),
-                        # New vector names (0-1 scale)
-                        "verbosity_score": round(verbosity, 2),
-                        "exploratory_score": round(exploratory, 2),
-                        "interrogative_score": round(interrogative, 2),
-                        # Backward compat: map to old names
-                        "open_ended_score": round(interrogative, 2),
-                        "probing_depth_score": round(exploratory, 2),
-                        "non_directive_score": round(verbosity, 2),
+                        # NEW metrics
+                        "token_count": token_count,
+                        "ends_with_socratic_question": ends_with_question,
+                        "directionally_socratic": round(directionally_socratic, 2),
+                        # Penalty breakdown
+                        "verbosity_penalty": round(verbosity_penalty, 2),
+                        "question_penalty": round(question_penalty, 2),
+                        "socratic_penalty": round(socratic_penalty, 2),
                         "judged_at": item.get("curated_at", ""),
                     }
                 except Exception as e:

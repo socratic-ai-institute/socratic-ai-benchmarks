@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 import boto3
-import ulid
+from ulid import ULID
 
 # AWS clients
 s3 = boto3.client("s3")
@@ -198,12 +198,20 @@ def generate_run_jobs(manifest_id: str, config: Dict[str, Any]) -> List[Dict[str
 
     for model in config["models"]:
         for scenario in config["scenarios"]:
-            # Generate deterministic run_id
-            run_id = str(ulid.new())
+            # Generate unique run_id using ULID
+            run_id = str(ULID())
 
-            # Extract provider from model_id (e.g., "anthropic.claude-..." -> "anthropic")
+            # Extract provider from model_id
+            # For inference profiles: "us.anthropic.claude-..." -> "anthropic"
+            # For direct models: "anthropic.claude-..." -> "anthropic"
             model_id = model["model_id"]
-            provider = model_id.split(".")[0] if "." in model_id else "unknown"
+            if model_id.startswith("us."):
+                # Inference profile: extract second segment
+                parts = model_id.split(".")
+                provider = parts[1] if len(parts) > 1 else "unknown"
+            else:
+                # Direct model: extract first segment
+                provider = model_id.split(".")[0] if "." in model_id else "unknown"
 
             job = {
                 "run_id": run_id,
