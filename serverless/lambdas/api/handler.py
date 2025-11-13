@@ -406,47 +406,40 @@ def get_cost_analysis(params: Dict[str, str]) -> Dict[str, Any]:
 
 def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
     """
-    GET /api/model-comparison - Aggregates all runs per model with NEW LLM-based metrics.
+    GET /api/model-comparison - V2 judge metrics ONLY (3 metrics, not 5).
 
-    Returns each model with:
-    - Overall aggregate score across all dimensions
-    - Per-dimension metric breakdowns (ambiguous, ethical, student)
-    - Each dimension shows: avg_token_count, question_percentage, avg_directionally_socratic
+    Returns each model with v2 metrics:
+    - conciseness: Inverted token count (lower tokens = higher score, 0-10 scale)
+    - ends_with_question: Percentage of runs ending with Socratic question (0-10 scale)
+    - directionally_socratic: How Socratic the approach is (0-10 scale)
+    - overall: Composite score (0-1 scale, converted to 0-10 for display)
     """
     try:
-        from collections import defaultdict
-
         summary_response = table.scan(
             FilterExpression="SK = :sk", ExpressionAttributeValues={":sk": "SUMMARY"}
         )
 
-        # Group runs by model and dimension
-        model_data = defaultdict(
-            lambda: {
-                "dimensions": defaultdict(
-                    lambda: {
-                        "runs": [],
-                        "metrics": {
-                            "token_counts": [],
-                            "ends_with_question_count": 0,
-                            "directionally_socratic_scores": [],
-                        },
-                    }
-                ),
-                "all_scores": [],
-            }
-        )
+        # Group runs by model
+        model_data = {}
 
         for item in summary_response.get("Items", []):
             model_id = item.get("model_id")
             run_id = item.get("PK", "").replace("RUN#", "")
-            dimension = item.get("dimension", "unknown")
             overall_score = float(item.get("overall_score", 0))
 
-            if not model_id or not run_id or overall_score < 0.1:  # Skip failed runs
+            if not model_id or not run_id or overall_score < 0.01:  # Skip failed runs
                 continue
 
-            # Load NEW LLM-based metrics from S3
+            if model_id not in model_data:
+                model_data[model_id] = {
+                    "token_counts": [],
+                    "ends_with_question_count": 0,
+                    "total_runs": 0,
+                    "directionally_socratic_scores": [],
+                    "overall_scores": [],
+                }
+
+            # Load v2 judge metrics from S3
             try:
                 s3_key = f"raw/runs/{run_id}/judge_000.json"
                 s3_response = s3.get_object(Bucket=BUCKET_NAME, Key=s3_key)
@@ -457,62 +450,52 @@ def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
                 ends_with_question = scores.get("ends_with_socratic_question", False)
                 directionally_socratic = float(scores.get("directionally_socratic", 0))
 
-                # Track per-dimension metrics
-                model_data[model_id]["dimensions"][dimension]["runs"].append(run_id)
-                model_data[model_id]["dimensions"][dimension]["metrics"][
-                    "token_counts"
-                ].append(token_count)
+                model_data[model_id]["token_counts"].append(token_count)
                 if ends_with_question:
-                    model_data[model_id]["dimensions"][dimension]["metrics"][
-                        "ends_with_question_count"
-                    ] += 1
-                model_data[model_id]["dimensions"][dimension]["metrics"][
-                    "directionally_socratic_scores"
-                ].append(directionally_socratic)
-                model_data[model_id]["all_scores"].append(overall_score)
+                    model_data[model_id]["ends_with_question_count"] += 1
+                model_data[model_id]["total_runs"] += 1
+                model_data[model_id]["directionally_socratic_scores"].append(directionally_socratic)
+                model_data[model_id]["overall_scores"].append(overall_score)
 
             except Exception as e:
                 print(f"Failed to load judge data for {run_id}: {e}")
                 continue
 
-        # Aggregate into final model objects
+        # Aggregate into final model objects with v2 metrics (0-10 scale)
         models = []
         for model_id, data in model_data.items():
-            # Overall model score (average of all runs)
-            overall = (
-                sum(data["all_scores"]) / len(data["all_scores"])
-                if data["all_scores"]
-                else 0
-            )
+            if data["total_runs"] == 0:
+                continue
 
-            # Per-dimension aggregates (NEW metrics)
-            dimensions = {}
-            for dim_name, dim_data in data["dimensions"].items():
-                metrics = dim_data["metrics"]
-                run_count = len(dim_data["runs"])
+            # 1. Conciseness (inverted token count: lower = better)
+            # Ideal range: 40-100 tokens. Convert to 0-10 scale.
+            avg_tokens = sum(data["token_counts"]) / len(data["token_counts"])
+            if avg_tokens < 40:
+                conciseness = 5.0  # Too terse
+            elif avg_tokens <= 100:
+                conciseness = 10.0  # Ideal
+            else:
+                # Penalty for verbosity: 100 tokens = 10, 200 tokens = 5, 300+ = 0
+                conciseness = max(0, 10.0 - ((avg_tokens - 100) / 20))
 
-                dimensions[dim_name] = {
-                    "avg_token_count": round(
-                        sum(metrics["token_counts"]) / len(metrics["token_counts"])
-                    )
-                    if metrics["token_counts"]
-                    else 0,
-                    "question_count": metrics["ends_with_question_count"],
-                    "question_total": run_count,
-                    "avg_directionally_socratic": round(
-                        sum(metrics["directionally_socratic_scores"]) / len(metrics["directionally_socratic_scores"]), 2
-                    )
-                    if metrics["directionally_socratic_scores"]
-                    else 0,
-                    "run_count": run_count,
-                }
+            # 2. Ends with Question (percentage converted to 0-10 scale)
+            question_pct = (data["ends_with_question_count"] / data["total_runs"]) * 10
+
+            # 3. Directionally Socratic (already 0-1, multiply by 10 for 0-10 scale)
+            avg_socratic = sum(data["directionally_socratic_scores"]) / len(data["directionally_socratic_scores"])
+            directionally_socratic = avg_socratic * 10
+
+            # 4. Overall (already 0-1, multiply by 10 for 0-10 scale)
+            overall = (sum(data["overall_scores"]) / len(data["overall_scores"])) * 10
 
             models.append(
                 {
                     "model_id": model_id,
                     "overall": round(overall, 2),
-                    "dimensions": dimensions,
-                    "total_run_count": len(data["all_scores"]),
+                    "conciseness": round(conciseness, 2),
+                    "ends_with_question": round(question_pct, 2),
+                    "directionally_socratic": round(directionally_socratic, 2),
+                    "run_count": data["total_runs"],
                 }
             )
 
@@ -525,7 +508,7 @@ def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
 
 
 def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
-    """GET /api/detailed-results - Returns latest run per model with Socratic dimension scores from S3."""
+    """GET /api/detailed-results - Returns latest run per model with v2 judge metrics (3 metrics, NOT 5)."""
     try:
         summary_response = table.scan(
             FilterExpression="SK = :sk", ExpressionAttributeValues={":sk": "SUMMARY"}

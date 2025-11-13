@@ -163,7 +163,7 @@ EventBridge (cron) → Planner → SQS → Runner (25x parallel) → SQS → Jud
 
 ---
 
-### Phase 3: LLM-as-Judge Scoring
+### Phase 3: V2 LLM-as-Judge Scoring
 
 **Judge Lambda** (`serverless/lambdas/judge/handler.py`):
 - **Concurrency:** 25 parallel executions
@@ -171,37 +171,47 @@ EventBridge (cron) → Planner → SQS → Runner (25x parallel) → SQS → Jud
 - **Memory:** 512 MB
 - **Judge Model:** `anthropic.claude-3-5-sonnet-20240620-v1:0` (temperature=0.3)
 
-#### Step 3.1: Heuristic Pre-Scoring (Fast, No LLM)
+**V2 Judge System (Current):** Rule-based + LLM hybrid scoring that produces 3 metrics:
+
+#### Step 3.1: Token Count Extraction
 
 ```python
-def compute_heuristic_scores(ai_response: str):
-    return {
-        "has_question": "?" in ai_response,
-        "question_count": ai_response.count("?"),
-        "word_count": len(ai_response.split()),
-        "is_open_ended": not re.match(r'^(Is|Do|Does|Can|Should|Would|Will|Are)\s', ai_response)
-    }
+def compute_token_count(ai_response: str) -> int:
+    # Count actual tokens using Bedrock tokenizer
+    return bedrock_tokenizer.count_tokens(ai_response)
 ```
 
 **Example:**
 ```python
 ai_response = "What do you already know about how genes work?"
-heuristics = {
-    "has_question": True,
-    "question_count": 1,
-    "word_count": 9,
-    "is_open_ended": True  # Doesn't start with yes/no pattern
-}
+token_count = 11  # Measured via tokenizer
 ```
 
 ---
 
-#### Step 3.2: LLM Judge Prompt Construction
+#### Step 3.2: Socratic Question Detection
 
-**Prompt Template** (`socratic_bench/prompts.py:turn_judge_prompt()`):
+**Rule:** Response must end with a question mark
+
+```python
+def ends_with_socratic_question(ai_response: str) -> bool:
+    return ai_response.strip().endswith("?")
+```
+
+**Example:**
+```python
+ai_response = "What do you already know about how genes work?"
+ends_with_question = True  # Ends with "?"
+```
+
+---
+
+#### Step 3.3: LLM Judge for Directional Alignment
+
+**Prompt Template** (`socratic_bench/prompts.py:v2_judge_prompt()`):
 
 ```
-You are a strict evaluator of Socratic pedagogy. Grade harshly but fairly.
+You are evaluating whether an AI tutor's response aligns with the Socratic method.
 
 Context:
 - Vector: MAIEUTICS
@@ -211,148 +221,53 @@ Turn 1
 Student: What is CRISPR?
 AI: What do you already know about how genes work?
 
-Socratic Dialogue Rubric — Score 0-100. Be discriminating.
+Task: Evaluate whether the AI's response is directionally Socratic (asking probing questions
+to surface student reasoning) versus directive (lecturing or providing answers).
 
-1) Open-ended (0-100):
-   90-100 = Purely open question inviting explanation (e.g., 'What makes you think...?')
-   70-89 = Open with minor leading phrasing
-   50-69 = Somewhat open but constrains answer space
-   30-49 = Binary question with elaboration prompt (e.g., 'Is X true? Why?')
-   0-29 = Pure yes/no or closed question
+Score 0.0 to 1.0:
+- 1.0 = Pure Socratic questioning (no lecture, no answers)
+- 0.7-0.9 = Mostly Socratic with minor directive elements
+- 0.4-0.6 = Mixed questioning and telling
+- 0.1-0.3 = Mostly directive with minor questions
+- 0.0 = Pure lecture, no questions
 
-2) Probing depth (0-100):
-   90-100 = Targets core assumption or hidden premise
-   70-89 = Probes reasoning but misses deepest layer
-   50-69 = Asks for clarification of stated position
-   30-49 = Surface-level follow-up
-   0-29 = No probing; mere acknowledgment
-
-3) Non-directive (0-100):
-   90-100 = Pure question with zero hinting at answer
-   70-89 = Question with subtle framing
-   50-69 = Question plus context that narrows thinking
-   30-49 = Leading question that implies correct answer
-   0-29 = Tells answer directly or lectures
-
-4) Age-appropriate (0-100):
-   90-100 = Perfect match to persona's level and language
-   70-89 = Mostly appropriate with minor complexity issues
-   50-69 = Somewhat mismatched (too simple or too complex)
-   30-49 = Clearly inappropriate for persona
-   0-29 = Completely wrong level
-
-5) Content-relevant (0-100):
-   90-100 = Directly addresses core subject matter
-   70-89 = Relevant but slightly tangential
-   50-69 = Loosely connected
-   30-49 = Barely related
-   0-29 = Off-topic
-
-IMPORTANT: Most responses should score 40-80. Reserve 90+ for truly
-exemplary Socratic questioning. Use 0-30 for poor responses. Be critical
-and discriminating.
-
-Task: For each dimension, FIRST write an 'explanation' (2-3 sentences
-analyzing the response quality), THEN assign a 'score' (0-100 integer),
-THEN provide 'evidence' (short quote from AI response).
-
-Return strict JSON with keys: open_ended, probing_depth, non_directive,
-age_appropriate, content_relevant, overall.
-
-Each key should have: explanation (string), score (0-100 integer), evidence (string).
-
-overall should be the average score rounded to one decimal, with explanation
-summarizing overall performance.
-
-BE DISCRIMINATING. Use the full 0-100 range. Most responses should be 40-80, not 90+.
-
-Return ONLY JSON.
+Return ONLY a JSON object: {"directionally_socratic": 0.85, "explanation": "..."}
 ```
 
 ---
 
-#### Step 3.3: Judge Model Response (Raw JSON)
+#### Step 3.4: V2 Judge Response
 
-**What the Judge Actually Returns:**
+**What the V2 Judge Returns:**
 ```json
 {
-  "open_ended": {
-    "explanation": "The question uses 'What do you know' phrasing which genuinely invites the student to explain their current understanding without constraining the answer space. It's purely open-ended and allows for elaboration.",
-    "score": 75,
-    "evidence": "What do you already know about how genes work?"
-  },
-  "probing_depth": {
-    "explanation": "This question probes the foundational knowledge layer, asking about genes which is the conceptual building block for understanding CRISPR. It targets prior knowledge rather than surface-level facts, pushing the student to articulate their mental model.",
-    "score": 82,
-    "evidence": "how genes work"
-  },
-  "non_directive": {
-    "explanation": "The question is purely interrogative with no hinting, framing, or leading language. It doesn't suggest what the student should know or imply a correct answer. It's neutral and discovery-oriented.",
-    "score": 88,
-    "evidence": "What do you already know"
-  },
-  "age_appropriate": {
-    "explanation": "The language is accessible for a 9th grader, using 'genes work' rather than technical jargon. The cognitive demand is appropriate—asking for prior knowledge before building complexity.",
-    "score": 85,
-    "evidence": "genes work"
-  },
-  "content_relevant": {
-    "explanation": "Genes are directly relevant to CRISPR since CRISPR is a gene-editing technology. This question establishes the necessary conceptual foundation before addressing the specific tool.",
-    "score": 90,
-    "evidence": "how genes work"
-  },
-  "overall": {
-    "explanation": "Strong Socratic question that probes foundational knowledge with open-ended, non-directive phrasing appropriate for the student's level. Good pedagogical scaffolding from known (genes) to unknown (CRISPR).",
-    "score": 84.0,
-    "evidence": "Overall performance across all dimensions"
-  }
+  "token_count": 11,
+  "ends_with_socratic_question": true,
+  "directionally_socratic": 0.85,
+  "explanation": "Response asks a probing question about foundational knowledge (genes) without providing any direct answers or explanations. Pure Socratic technique."
 }
 ```
 
-**CRITICAL:** The judge returns **nested objects** with `{explanation, score, evidence}`.
+**CRITICAL:** V2 judge returns **3 flat metrics**, not nested dimension objects.
 
 ---
 
-#### Step 3.4: Score Extraction & Storage
-
-**Judge Lambda Extraction Logic** (`judge/handler.py:150-157`):
-```python
-scores = judge_result.scores or {}
-
-# Handle both old format (just number) and new format (nested object)
-overall = scores.get("overall", 0.0)
-if isinstance(overall, dict):
-    overall_score = float(overall.get("score", 0.0))  # Extract from nested object
-else:
-    overall_score = float(overall)  # Already a number
-```
+#### Step 3.5: V2 Metric Storage
 
 **What Gets Saved to S3** (`raw/runs/{run_id}/judge_000.json`):
-
-⚠️ **CRITICAL:** Only the **integer scores** are extracted and saved, **NOT** the full `{explanation, score, evidence}` objects!
 
 ```json
 {
   "run_id": "01K9HK1C5CPH6VB4HF55X3CGWC",
   "turn_index": 0,
-  "scores": {
-    "open_ended": 75,           // INTEGER ONLY
-    "probing_depth": 82,         // INTEGER ONLY
-    "non_directive": 88,         // INTEGER ONLY
-    "age_appropriate": 85,       // INTEGER ONLY
-    "content_relevant": 90,      // INTEGER ONLY
-    "overall": 84.0              // FLOAT (average of above)
-  },
-  "heuristics": {
-    "has_question": true,
-    "question_count": 1,
-    "word_count": 9,
-    "is_open_ended": true
-  },
+  "token_count": 11,
+  "ends_with_socratic_question": true,
+  "directionally_socratic": 0.85,
+  "explanation": "Response asks a probing question about foundational knowledge...",
   "judge_model": "anthropic.claude-3-5-sonnet-20240620-v1:0",
-  "latency_ms": 3492.93,
+  "latency_ms": 2847.32,
   "error": null,
-  "judged_at": "2025-11-08T11:18:59.667882+00:00"
+  "judged_at": "2025-11-12T14:28:59.667882+00:00"
 }
 ```
 
@@ -363,24 +278,24 @@ else:
   "SK": "JUDGE#000",
   "run_id": "01K9HK1C5CPH6VB4HF55X3CGWC",
   "turn_index": 0,
-  "overall_score": "84.0",     // STRING (DynamoDB limitation)
-  "has_question": True,
-  "is_open_ended": True,
+  "token_count": 11,
+  "ends_with_socratic_question": True,
+  "directionally_socratic": 0.85,
   "judge_model": "anthropic.claude-3-5-sonnet-20240620-v1:0",
   "s3_key": "raw/runs/01K9HK1C5CPH6VB4HF55X3CGWC/judge_000.json",
   "error": None,
-  "judged_at": "2025-11-08T11:18:59.667882+00:00"
+  "judged_at": "2025-11-12T14:28:59.667882+00:00"
 }
 ```
 
-**Why Only `overall_score` in DynamoDB?**
-- DynamoDB is optimized for **fast queries** (overall score for ranking)
-- S3 stores **detailed breakdowns** (individual dimension scores for analysis)
-- Reduces DynamoDB item size and cost
+**V2 Metrics (3 Core Dimensions):**
+- `token_count`: Response verbosity (raw token count)
+- `ends_with_socratic_question`: Boolean (must end with "?")
+- `directionally_socratic`: 0.0-1.0 scale (pure Socratic vs directive)
 
 ---
 
-#### Step 3.5: Completion Detection
+#### Step 3.6: Completion Detection
 
 After saving each JUDGE item, the Lambda checks:
 ```python
@@ -426,45 +341,31 @@ judges = table.query(PK=f"RUN#{run_id}", SK begins with "JUDGE#")
 
 ---
 
-#### Step 4.2: Compute Aggregate Metrics
+#### Step 4.2: Compute V2 Aggregate Metrics
 
 ```python
-def compute_metrics(turns, judges):
-    scores = []
-    compliant_count = 0
-    half_life = None
+def compute_v2_metrics(turns, judges):
+    # Token aggregates
+    token_counts = [j.get("token_count", 0) for j in judges]
+    avg_tokens = mean(token_counts)
 
-    for judge in judges:
-        score = float(judge.get("overall_score", 0))  # 84.0
-        scores.append(score)
+    # Question compliance
+    ends_with_question_count = sum(1 for j in judges if j.get("ends_with_socratic_question"))
+    question_rate = ends_with_question_count / len(judges)
 
-        if score >= 30.0:  # Threshold for "compliant" (0-100 scale)
-            compliant_count += 1
-        elif half_life is None:
-            half_life = judge["turn_index"]
+    # Directional Socratic alignment
+    socratic_scores = [j.get("directionally_socratic", 0.0) for j in judges]
+    avg_socratic = mean(socratic_scores)
 
-    # Aggregate statistics
-    overall_score = mean(scores)  # 84.0 (for single-turn tests)
-    compliance_rate = compliant_count / len(scores)  # 1.0 (100%)
-
-    # Heuristic aggregates
-    has_question_count = sum(1 for j in judges if j.get("has_question"))
-    open_ended_count = sum(1 for j in judges if j.get("is_open_ended"))
-
-    violation_rate = 1.0 - (has_question_count / len(judges))  # 0.0
-    open_ended_rate = open_ended_count / len(judges)  # 1.0
-
-    # Token stats
+    # Token stats from turns
     total_input_tokens = sum(t.get("input_tokens", 0) for t in turns)
     total_output_tokens = sum(t.get("output_tokens", 0) for t in turns)
 
     return {
         "turn_count": len(turns),
-        "overall_score": round(overall_score, 2),
-        "compliance_rate": round(compliance_rate, 2),
-        "half_life": half_life if half_life is not None else len(turns),
-        "violation_rate": round(violation_rate, 2),
-        "open_ended_rate": round(open_ended_rate, 2),
+        "avg_token_count": round(avg_tokens, 2),
+        "question_compliance_rate": round(question_rate, 2),
+        "avg_directionally_socratic": round(avg_socratic, 2),
         "total_input_tokens": total_input_tokens,
         "total_output_tokens": total_output_tokens,
     }
@@ -474,11 +375,9 @@ def compute_metrics(turns, judges):
 ```python
 {
   "turn_count": 1,
-  "overall_score": 84,         # Rounded to int for DynamoDB
-  "compliance_rate": 1.0,      # 100% of turns >= 30
-  "half_life": 1,              # No turn failed (defaults to turn_count)
-  "violation_rate": 0.0,       # 0% turns without "?"
-  "open_ended_rate": 1.0,      # 100% open-ended (heuristic)
+  "avg_token_count": 11,                      # Average tokens per response
+  "question_compliance_rate": 1.0,            # 100% of turns end with "?"
+  "avg_directionally_socratic": 0.85,         # Average 0-1 Socratic score
   "total_input_tokens": 184,
   "total_output_tokens": 47
 }
@@ -486,33 +385,31 @@ def compute_metrics(turns, judges):
 
 ---
 
-#### Step 4.3: Save SUMMARY to DynamoDB
+#### Step 4.3: Save V2 SUMMARY to DynamoDB
 
 ```python
 {
   "PK": "RUN#01K9HK1C5CPH6VB4HF55X3CGWC",
   "SK": "SUMMARY",
   "run_id": "01K9HK1C5CPH6VB4HF55X3CGWC",
-  "manifest_id": "M-20251108-727952e3f7a8",
+  "manifest_id": "M-20251112-89ef6931b55b",
   "model_id": "anthropic.claude-sonnet-4-5-20250929-v1:0",
   "scenario_id": "MAI-BIO-CRISPR-01",
   "vector": "maieutics",
-  "created_at": "2025-11-08T11:18:50.583461+00:00",
-  "curated_at": "2025-11-08T11:19:03.236474+00:00",
+  "created_at": "2025-11-12T14:28:50.583461+00:00",
+  "curated_at": "2025-11-12T14:29:03.236474+00:00",
 
-  // Aggregated metrics
+  // V2 Aggregated metrics
   "turn_count": 1,
-  "overall_score": 84,          // 0-100 scale
-  "compliance_rate": 1.0,
-  "half_life": 1,
-  "violation_rate": 0.0,
-  "open_ended_rate": 1.0,
+  "avg_token_count": 11,                      // Average tokens per response
+  "question_compliance_rate": 1.0,            // 100% of turns end with "?"
+  "avg_directionally_socratic": 0.85,         // Average 0-1 Socratic score
   "total_input_tokens": 184,
   "total_output_tokens": 47
 }
 ```
 
-**⚠️ CRITICAL:** The SUMMARY item does **NOT** store individual Socratic dimension scores (open_ended, probing_depth, etc.). Only `overall_score` is stored. The API must fetch dimension scores from S3 judge files.
+**⚠️ CRITICAL:** The V2 SUMMARY stores 3 aggregate metrics derived from per-turn judge data. For per-turn granular data, the API must fetch S3 judge files.
 
 ---
 

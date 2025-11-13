@@ -375,9 +375,9 @@
                     <th>Scenario</th>
                     <th>Model</th>
                     <th>Overall</th>
-                    <th>Token Count</th>
-                    <th>Ends w/ Q</th>
-                    <th>Directionally Socratic</th>
+                    <th>Open-ended</th>
+                    <th>Probing Depth</th>
+                    <th>Age-appropriate</th>
                 </tr>
             </thead>
             <tbody id="detailed-results-tbody">
@@ -416,6 +416,7 @@
         
         // Radar Chart - V2 Judge Metrics (3 metrics: conciseness, ends_with_question, directionally_socratic)
         const radarCtx = document.getElementById('radarChart').getContext('2d');
+        const API_BASE = 'https://wcyf23uxxe.execute-api.us-east-1.amazonaws.com/prod';
         let radarChart;
 
         console.log('Fetching model comparison from:', `${API_BASE}/api/model-comparison`);
@@ -509,6 +510,7 @@
 
         // Load and render new charts
         const API_BASE = 'https://wcyf23uxxe.execute-api.us-east-1.amazonaws.com/prod';
+
         // Time-Series Chart
         console.log('Fetching timeseries from:', `${API_BASE}/api/timeseries`);
         fetch(`${API_BASE}/api/timeseries`)
@@ -845,9 +847,9 @@
                     <td>${result.scenario_name || 'Unknown Scenario'}</td>
                     <td>${result.model_id}</td>
                     <td><span class="score-badge ${scoreClass}">${overall.toFixed(2)}/10</span></td>
-                    <td>${result.token_count || 'N/A'}</td>
-                    <td>${result.ends_with_socratic_question ? 'Yes' : 'No'}</td>
-                    <td>${(result.directionally_socratic || 0).toFixed(2)}</td>
+                    <td>${result.open_ended_score.toFixed(2)}</td>
+                    <td>${result.probing_depth_score.toFixed(2)}</td>
+                    <td>${result.age_appropriate_score.toFixed(2)}</td>
                 `;
                 tbody.appendChild(row);
             });
