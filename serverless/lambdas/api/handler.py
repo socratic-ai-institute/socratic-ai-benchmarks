@@ -227,28 +227,17 @@ def get_timeseries(params: Dict[str, str]) -> Dict[str, Any]:
     from datetime import datetime, timedelta
 
     try:
-        # Get current week
-        current_date = datetime.now()
-        current_week = current_date.strftime("%Y-W%V")
-
-        # Generate 52 weeks going backwards from current week (historical data only)
-        weeks = []
-        for i in range(52):
-            week_date = current_date - timedelta(weeks=i)
-            week_str = week_date.strftime("%Y-W%V")
-            weeks.append(week_str)
-        weeks.reverse()  # Oldest to newest for chart display
-
         # Get all models that have ever run
-        # Scan for all WEEK items to find unique models
+        # Scan for all WEEK items to find unique models and weeks with data
         response = table.scan(
             FilterExpression="begins_with(PK, :prefix) AND SK = :sk",
             ExpressionAttributeValues={":prefix": "WEEK#", ":sk": "SUMMARY"},
         )
 
-        # Extract unique model IDs
+        # Extract unique model IDs and weeks with actual data
         model_ids = set()
         week_data_map = {}  # {week: {model_id: mean_score}}
+        weeks_with_data = set()
 
         for item in response.get("Items", []):
             model_id = item.get("model_id")
@@ -257,13 +246,17 @@ def get_timeseries(params: Dict[str, str]) -> Dict[str, Any]:
                 float(item.get("mean_score", 0)) / 10
             )  # Normalize 0-100 to 0-10 for UI
 
-            if model_id:
+            if model_id and week:
                 model_ids.add(model_id)
+                weeks_with_data.add(week)
                 if week not in week_data_map:
                     week_data_map[week] = {}
                 week_data_map[week][model_id] = mean_score
 
-        # Build time-series for each model
+        # Sort weeks chronologically (only weeks with actual data)
+        weeks = sorted(list(weeks_with_data))
+
+        # Build time-series for each model (only include weeks with data)
         series = []
         for model_id in sorted(model_ids):
             data_points = []
