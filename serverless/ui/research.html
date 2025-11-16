@@ -413,7 +413,10 @@
 
     <script>
         // Initialize charts
-        
+
+        // Define API_BASE FIRST
+        const API_BASE = 'https://wcyf23uxxe.execute-api.us-east-1.amazonaws.com/prod';
+
         // Radar Chart - V2 Judge Metrics (3 metrics: conciseness, ends_with_question, directionally_socratic)
         const radarCtx = document.getElementById('radarChart').getContext('2d');
         let radarChart;
@@ -469,46 +472,6 @@
             .catch(err => {
                 console.error('Error loading model comparison:', err);
             });
-
-                const datasets = data.models.map((model, idx) => ({
-                    label: model.model_id,
-                    data: [
-                        model.conciseness,
-                        model.ends_with_question,
-                        model.directionally_socratic
-                    ],
-                    backgroundColor: colors[idx % colors.length].replace('rgb', 'rgba').replace(')', ', 0.2)'),
-                    borderColor: colors[idx % colors.length],
-                    borderWidth: 2
-                }));
-
-                radarChart = new Chart(radarCtx, {
-                    type: 'radar',
-                    data: {
-                        labels: ['Conciseness', 'Ends with Question', 'Directionally Socratic'],
-                        datasets: datasets
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            r: {
-                                min: 0,
-                                max: 10.0,
-                                ticks: {
-                                    stepSize: 2
-                                }
-                            }
-                        }
-                    }
-                });
-            })
-            .catch(err => {
-                console.error('Error loading model comparison:', err);
-            });
-
-        // Load and render new charts
-        const API_BASE = 'https://wcyf23uxxe.execute-api.us-east-1.amazonaws.com/prod';
         // Time-Series Chart
         console.log('Fetching timeseries from:', `${API_BASE}/api/timeseries`);
         fetch(`${API_BASE}/api/timeseries`)
