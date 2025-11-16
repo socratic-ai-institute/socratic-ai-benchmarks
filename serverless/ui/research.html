@@ -704,70 +704,49 @@
                     const card = document.createElement('div');
                     card.className = 'model-card';
 
-                    // Build compact table for vectors
-                    let vectorTableHTML = '';
-                    if (model.dimensions && Object.keys(model.dimensions).length > 0) {
-                        vectorTableHTML = `
-                            <table style="width: 100%; margin-top: 1.5rem; border-collapse: collapse; font-size: 0.9em;">
-                                <thead>
-                                    <tr style="border-bottom: 2px solid #667eea;">
-                                        <th style="text-align: left; padding: 0.75rem 0.5rem; color: #4a5568; font-weight: 600;">Vector</th>
-                                        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #4a5568; font-weight: 600;">Tokens</th>
-                                        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #4a5568; font-weight: 600;">Question</th>
-                                        <th style="text-align: center; padding: 0.75rem 0.5rem; color: #4a5568; font-weight: 600;">Socratic</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-        `;
-
-                        for (const [dimName, dimData] of Object.entries(model.dimensions)) {
-                            const tokenColor = dimData.avg_token_count >= 40 && dimData.avg_token_count <= 100 ? '#48bb78' : '#ed8936';
-                            const questionCount = dimData.question_count || 0;
-                            const questionTotal = dimData.question_total || 1;
-                            const questionColor = questionCount === questionTotal ? '#48bb78' : '#ed8936';
-                            const socraticColor = dimData.avg_directionally_socratic >= 0.8 ? '#48bb78' : dimData.avg_directionally_socratic >= 0.6 ? '#ed8936' : '#f56565';
-
-                            vectorTableHTML += `
-                                <tr style="border-bottom: 1px solid #e2e8f0;">
-                                    <td style="padding: 0.75rem 0.5rem; font-weight: 600; text-transform: capitalize;">${dimName}</td>
-                                    <td style="text-align: center; padding: 0.75rem 0.5rem;">
-                                        <span style="color: ${tokenColor}; font-weight: 600;">${dimData.avg_token_count}</span>
-                                    </td>
-                                    <td style="text-align: center; padding: 0.75rem 0.5rem;">
-                                        <span style="color: ${questionColor}; font-weight: 600;">${questionCount}/${questionTotal}</span>
-                                    </td>
-                                    <td style="text-align: center; padding: 0.75rem 0.5rem;">
-                                        <span style="color: ${socraticColor}; font-weight: 600;">${dimData.avg_directionally_socratic.toFixed(2)}</span>
-                                        <div style="width: 100%; height: 4px; background: #e2e8f0; border-radius: 2px; margin-top: 0.25rem; overflow: hidden;">
-                                            <div style="height: 100%; width: ${dimData.avg_directionally_socratic * 100}%; background: ${socraticColor};"></div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            `;
-                        }
-
-                        vectorTableHTML += `
-                                </tbody>
-                            </table>
-                        `;
-                    }
 
                     card.innerHTML = `
                         <h3>${model.model_id}</h3>
 
                         <div class="metric-row">
                             <span class="metric-label">Overall Score</span>
-                            <span class="metric-value">${model.overall.toFixed(2)}</span>
+                            <span class="metric-value">${model.overall.toFixed(2)}/10</span>
                         </div>
                         <div class="metric-bar">
-                            <div class="metric-bar-fill" style="width: ${model.overall * 100}%"></div>
+                            <div class="metric-bar-fill" style="width: ${model.overall * 10}%"></div>
                         </div>
 
-                        <div style="font-size: 0.85em; color: #718096; margin-top: 0.5rem; margin-bottom: 0.5rem;">
-                            ${model.total_run_count} total runs
+                        <div style="font-size: 0.85em; color: #718096; margin-top: 1rem; margin-bottom: 0.75rem; border-top: 1px solid #e2e8f0; padding-top: 0.75rem;">
+                            <strong style="color: #2d3748;">V2 Metrics:</strong>
                         </div>
 
-                        ${vectorTableHTML}
+                        <div class="metric-row">
+                            <span class="metric-label">Conciseness</span>
+                            <span class="metric-value">${model.conciseness.toFixed(2)}</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: ${model.conciseness * 10}%"></div>
+                        </div>
+
+                        <div class="metric-row">
+                            <span class="metric-label">Ends with Question</span>
+                            <span class="metric-value">${model.ends_with_question.toFixed(2)}</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: ${model.ends_with_question * 10}%"></div>
+                        </div>
+
+                        <div class="metric-row">
+                            <span class="metric-label">Directionally Socratic</span>
+                            <span class="metric-value">${model.directionally_socratic.toFixed(2)}</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: ${model.directionally_socratic * 10}%"></div>
+                        </div>
+
+                        <div style="font-size: 0.85em; color: #718096; margin-top: 1rem;">
+                            ${model.run_count} total runs
+                        </div>
                     `;
 
                     container.appendChild(card);
