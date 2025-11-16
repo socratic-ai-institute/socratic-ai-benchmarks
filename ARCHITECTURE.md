@@ -509,7 +509,7 @@ SK = "TURN#000"  // Zero-padded 3 digits
 
 ---
 
-#### 3. Judge Data
+#### 3. V2 Judge Data
 ```python
 PK = "RUN#01K9HK1C5CPH6VB4HF55X3CGWC"
 SK = "JUDGE#000"
@@ -517,13 +517,13 @@ SK = "JUDGE#000"
 {
   "run_id": "01K9HK1C5CPH6VB4HF55X3CGWC",
   "turn_index": 0,
-  "overall_score": "84.0",  // STRING (DynamoDB limitation)
-  "has_question": True,
-  "is_open_ended": True,
+  "token_count": 11,
+  "ends_with_socratic_question": True,
+  "directionally_socratic": 0.85,
   "judge_model": "anthropic.claude-3-5-sonnet-20240620-v1:0",
   "s3_key": "raw/runs/01K9HK1C5CPH6VB4HF55X3CGWC/judge_000.json",
   "error": None,
-  "judged_at": "2025-11-08T11:18:59.667882+00:00"
+  "judged_at": "2025-11-12T14:28:59.667882+00:00"
 }
 ```
 
@@ -531,7 +531,7 @@ SK = "JUDGE#000"
 
 ---
 
-#### 4. Run Summary
+#### 4. V2 Run Summary
 ```python
 PK = "RUN#01K9HK1C5CPH6VB4HF55X3CGWC"
 SK = "SUMMARY"
@@ -540,13 +540,13 @@ SK = "SUMMARY"
   "run_id": "01K9HK1C5CPH6VB4HF55X3CGWC",
   "model_id": "anthropic.claude-sonnet-4-5-20250929-v1:0",
   "scenario_id": "MAI-BIO-CRISPR-01",
-  "overall_score": 84,       // 0-100 scale
-  "compliance_rate": 1.0,
-  "half_life": 1,
+  "avg_token_count": 11,
+  "question_compliance_rate": 1.0,
+  "avg_directionally_socratic": 0.85,
   "turn_count": 1,
   "total_input_tokens": 184,
   "total_output_tokens": 47,
-  "curated_at": "2025-11-08T11:19:03.236474+00:00"
+  "curated_at": "2025-11-12T14:29:03.236474+00:00"
 }
 ```
 
@@ -554,18 +554,19 @@ SK = "SUMMARY"
 
 ---
 
-#### 5. Weekly Aggregates
+#### 5. V2 Weekly Aggregates
 ```python
-PK = "WEEK#2025-W45#MODEL#anthropic.claude-sonnet-4-5-20250929-v1:0"
+PK = "WEEK#2025-W46#MODEL#anthropic.claude-sonnet-4-5-20250929-v1:0"
 SK = "SUMMARY"
 
 {
-  "week": "2025-W45",
+  "week": "2025-W46",
   "model_id": "anthropic.claude-sonnet-4-5-20250929-v1:0",
   "run_count": 2,
-  "mean_score": 82.5,        // Average of all runs this week
-  "mean_compliance": 0.95,
-  "updated_at": "2025-11-08T11:19:03Z"
+  "mean_token_count": 11.5,
+  "mean_question_compliance": 0.95,
+  "mean_directionally_socratic": 0.82,
+  "updated_at": "2025-11-12T14:29:03Z"
 }
 ```
 
@@ -704,7 +705,7 @@ s3://socratic-bench-data-984906149037/
 
 **Data Sources:**
 
-#### 1. Model Comparison Grid
+#### 1. V2 Model Comparison Grid
 **Endpoint:** `GET /api/model-comparison`
 
 **Response:**
@@ -713,18 +714,21 @@ s3://socratic-bench-data-984906149037/
   "models": [
     {
       "model_id": "meta.llama3-1-70b-instruct-v1:0",
-      "overall": 8.72,              // 0-10 scale
-      "persistence": 7.5,            // Mapped from open_ended
-      "cognitive_depth": 8.2,        // Mapped from probing_depth
-      "context_adaptation": 8.5,     // Mapped from age_appropriate
-      "resistance_to_drift": 8.8,    // Mapped from non_directive
-      "memory_preservation": 9.0,    // Mapped from content_relevant
+      "overall": 8.5,                       // 0-10 scale (composite score)
+      "conciseness": 7.5,                   // Inverted: lower tokens = better
+      "ends_with_question": 9.2,            // % of turns ending with "?"
+      "directionally_socratic": 8.4,        // 0-1 scale converted to 0-10
       "run_count": 1
     }
   ],
   "winner": { /* top model */ }
 }
 ```
+
+**V2 Metrics (3 Core Dimensions):**
+- `conciseness` (0-10): Response verbosity scoring (inverted: shorter = better, capped at ~100 tokens)
+- `ends_with_question` (0-10): % of turns ending with "?" (0-100% normalized to 0-10)
+- `directionally_socratic` (0-10): 0-1 Socratic alignment score × 10
 
 **UI Rendering:**
 ```javascript
@@ -734,15 +738,15 @@ models.forEach(model => {
     <h3>${model.model_id}</h3>
 
     <div class="metric-row">
-      <span class="metric-label">Overall</span>
-      <span class="metric-value">${model.overall}</span>
+      <span class="metric-label">Conciseness</span>
+      <span class="metric-value">${model.conciseness}</span>
     </div>
     <div class="metric-bar">
       <div class="metric-bar-fill"
-           style="width: ${model.overall * 10}%"></div>
+           style="width: ${model.conciseness * 10}%"></div>
     </div>
 
-    <!-- Repeat for each dimension -->
+    <!-- Repeat for ends_with_question and directionally_socratic -->
   `;
 });
 ```
@@ -806,7 +810,7 @@ models.forEach(model => {
 
 ---
 
-#### 4. Detailed Results Table
+#### 4. V2 Detailed Results Table
 **Endpoint:** `GET /api/detailed-results`
 
 **Response:**
@@ -819,12 +823,11 @@ models.forEach(model => {
       "model_id": "meta.llama3-1-70b-instruct-v1:0",
       "scenario_name": "MAI-BIO-CRISPR-01",
       "test_type": "disposition",
-      "overall_score": 8.72,               // 0-10 scale (average of dimensions)
-      "open_ended_score": 8.5,             // Question invites explanation
-      "probing_depth_score": 9.0,          // Targets core assumptions
-      "non_directive_score": 9.2,          // Pure questioning, not lecturing
-      "age_appropriate_score": 8.8,        // Matches persona level
-      "judged_at": "2025-11-08T11:18:59Z"
+      "overall_score": 8.4,                // 0-10 scale (composite)
+      "token_count": 11,                   // Average tokens per response
+      "ends_with_socratic_question": true, // Boolean
+      "directionally_socratic": 0.85,      // 0-1 scale
+      "judged_at": "2025-11-12T14:28:59Z"
     }
   ]
 }
@@ -835,7 +838,7 @@ models.forEach(model => {
 - Provider (anthropic/meta/amazon/etc.)
 - Model dropdown
 - Scenario dropdown
-- Score range (min/max)
+- Verbosity range (token count)
 - Text search
 
 ---
@@ -862,7 +865,7 @@ models.forEach(model => {
 
 ---
 
-### UI → API → Data Flow
+### UI → API → Data Flow (V2)
 
 ```
 User loads research.html
@@ -874,13 +877,13 @@ Lambda Read API handler
 DynamoDB scan(FilterExpression="SK = :sk", ExpressionAttributeValues={":sk": "SUMMARY"})
   ↓
 For each SUMMARY item:
-  - Load S3 judge file: s3://bucket/raw/runs/{run_id}/judge_000.json
-  - Extract scores: {open_ended: 75, probing_depth: 82, non_directive: 88, age_appropriate: 85, content_relevant: 90}
-  - Normalize to 0-10: {open_ended: 7.5, probing_depth: 8.2, non_directive: 8.8, age_appropriate: 8.5, content_relevant: 9.0}
+  - Load S3 judge files: s3://bucket/raw/runs/{run_id}/judge_*.json
+  - Extract V2 metrics: {token_count: 11, ends_with_socratic_question: true, directionally_socratic: 0.85}
+  - Normalize to 0-10: {conciseness: 7.5, ends_with_question: 9.2, directionally_socratic: 8.4}
   ↓
 Return JSON to UI
   ↓
-Chart.js renders data
+Chart.js renders data (3 metrics, not 5)
   - Bar widths: score * 10 (converts 0-10 to 0-100% CSS)
   - Y-axis: 0-10 scale
 ```
@@ -922,90 +925,91 @@ Chart.js renders data
 **Key Functions:**
 
 #### `get_model_comparison()`
-**Purpose:** Fetch latest run per model with individual Socratic dimension scores
+**Purpose:** Fetch latest run per model with V2 3-metric scores
 
 **Process:**
 1. Scan SUMMARY items to find latest run per model
-2. For each run, load S3 judge file: `raw/runs/{run_id}/judge_000.json`
-3. Extract Socratic dimension scores (0-100):
+2. For each run, load S3 judge files: `raw/runs/{run_id}/judge_*.json`
+3. Extract V2 metrics and aggregate:
    ```python
-   scores = {
-     "open_ended": 75,
-     "probing_depth": 82,
-     "non_directive": 88,
-     "age_appropriate": 85,
-     "content_relevant": 90,
-     "overall": 84.0
-   }
+   avg_tokens = mean([j["token_count"] for j in judges])
+   question_rate = sum(j["ends_with_socratic_question"] for j in judges) / len(judges)
+   avg_socratic = mean([j["directionally_socratic"] for j in judges])
    ```
 4. Normalize to 0-10 scale for UI display:
    ```python
    {
-     "open_ended": round(open_ended / 10, 2),           # 7.5 (Question invites explanation)
-     "probing_depth": round(probing_depth / 10, 2),     # 8.2 (Targets core assumptions)
-     "non_directive": round(non_directive / 10, 2),     # 8.8 (Pure questioning, not lecturing)
-     "age_appropriate": round(age_appropriate / 10, 2), # 8.5 (Matches persona level)
-     "content_relevant": round(content_relevant / 10, 2), # 9.0 (Stays on-topic)
-     "overall": round(overall / 10, 2)                  # 8.4 (Average of above 5)
+     "conciseness": compute_conciseness_score(avg_tokens),     # 7.5 (inverted: shorter is better)
+     "ends_with_question": round(question_rate * 10, 2),       # 9.2 (% ending with "?")
+     "directionally_socratic": round(avg_socratic * 10, 2),    # 8.4 (0-1 scaled to 0-10)
+     "overall": round((conciseness + ends_q + socratic) / 3, 2) # 8.3 (Average of 3 metrics)
    }
    ```
 
-**Field Names (Updated 2025-11-08):**
-- ✅ API and UI now use accurate Socratic disposition dimension names
-- ✅ Backwards compatible: deprecated fidelity names still returned for 2 weeks
-- We run single-turn **disposition tests** with 5 Socratic dimensions
-- Future: Add multi-turn **fidelity tests** as separate metrics (persistence, resistance_to_drift, memory_preservation)
+**V2 Metric Definitions:**
+- **Conciseness**: Inverted token count (lower tokens = higher score, capped at ~100 tokens for ideal length)
+- **Ends with Question**: % of response turns ending with "?" (0-100% → 0-10 scale)
+- **Directionally Socratic**: LLM judgment of Socratic alignment (0.0-1.0 → 0-10 scale)
 
 ---
 
 #### `get_detailed_results()`
-**Purpose:** Fetch latest run per model for detailed results table
+**Purpose:** Fetch latest run per model for detailed results table with V2 metrics
 
 **Process:**
 1. Scan SUMMARY items
 2. Filter to latest run per model
-3. Extract `overall_score` from SUMMARY (0-100 scale)
-4. Normalize to 0-10 for UI
-5. Returns actual dimension scores from S3 judge files (open_ended, probing_depth, non_directive, age_appropriate, content_relevant)
+3. Load S3 judge files to extract V2 metrics (token_count, ends_with_socratic_question, directionally_socratic)
+4. Normalize to 0-10 for UI display
+5. Return table rows with V2 metrics only (conciseness, ends_with_question, directionally_socratic)
 
 ---
 
 ## Critical Implementation Details
 
-### Score Scale Normalization
+### V2 Score Scale Normalization
 
-**Internal (Judge → Storage):** 0-100 scale
+**Judge Output (Raw):** Mixed scales
 ```python
 judge_output = {
-  "open_ended": {"score": 75},   # Judge returns 0-100
-  "overall": {"score": 84.0}
-}
-
-# Extracted and saved to S3
-s3_scores = {
-  "open_ended": 75,               # INTEGER 0-100
-  "overall": 84.0                 # FLOAT 0-100
-}
-
-# Saved to DynamoDB SUMMARY
-dynamodb_summary = {
-  "overall_score": 84              # INTEGER 0-100
+  "token_count": 11,                    # Integer (raw token count)
+  "ends_with_socratic_question": True,  # Boolean
+  "directionally_socratic": 0.85        # Float 0.0-1.0
 }
 ```
 
-**API → UI:** 0-10 scale
+**Storage (S3):** Same as above (no conversion)
+```json
+{
+  "token_count": 11,
+  "ends_with_socratic_question": true,
+  "directionally_socratic": 0.85
+}
+```
+
+**DynamoDB SUMMARY:** Aggregated V2 metrics
+```python
+{
+  "avg_token_count": 11.0,
+  "question_compliance_rate": 1.0,      # 0.0-1.0 → stored as decimal
+  "avg_directionally_socratic": 0.85    # 0.0-1.0 → stored as decimal
+}
+```
+
+**API → UI:** Normalized to 0-10 scale
 ```python
 # API normalization
 api_response = {
-  "overall": round(84.0 / 10, 2),  # 8.4 (0-10 scale)
-  "persistence": round(75 / 10, 2) # 7.5 (0-10 scale)
+  "conciseness": 7.5,                   # Inverted token score, 0-10
+  "ends_with_question": 10.0,           # question_rate * 10 (1.0 * 10 = 10.0)
+  "directionally_socratic": 8.5         # avg_socratic * 10 (0.85 * 10 = 8.5)
 }
 ```
 
 **UI Rendering:** 0-100% for CSS
 ```javascript
 // Bar width calculation
-width = model.overall * 10 + "%"  // 8.4 * 10 = 84%
+width = model.conciseness * 10 + "%"  // 7.5 * 10 = 75%
 ```
 
 **Chart Y-Axis:** 0-10 scale
@@ -1017,63 +1021,41 @@ scales: {
 
 ---
 
-### Why Dimension Scores Look Identical
+### V2 Metric Specifics
 
-**Current State:** We run **single-turn disposition tests**
-- Each run = 1 dialogue turn
-- Judge scores 5 Socratic dimensions
-- SUMMARY only stores `overall_score` (average of 5 dimensions)
-- Individual dimensions NOT stored in SUMMARY
+**Token Count Scoring:**
+- Raw metric: actual token count from model output
+- Scoring rule: Inverted (fewer tokens = higher score)
+- Ideal range: ~40-100 tokens (clear, concise Socratic questions)
+- Too terse (<40): Score reduced (incomplete explanation)
+- Too verbose (>100): Score reduced (drifts into lecturing)
 
-**API Workaround:**
-- Fetch individual dimension scores from S3 judge files
-- Normalize each dimension separately
-- Return different values: `{persistence: 7.5, cognitive_depth: 8.2, ...}`
+**Question Compliance:**
+- Rule: Response MUST end with "?" to be considered Socratic
+- Scoring: Binary (true/false) → aggregated as % compliance across turns
+- Example: 9/10 turns end with "?" = 0.9 compliance = 9.0 on 0-10 scale
 
-**Future State:** Multi-turn fidelity tests
-- Each run = 10+ dialogue turns
-- Aggregated dimension scores will diverge:
-  - `persistence_score`: How well model maintains Socratic stance over 10 turns
-  - `cognitive_depth_score`: Average depth of probing across turns
-  - `context_adaptation_score`: How well model adapts to student responses
-- Curator will compute these aggregates and store in SUMMARY
+**Directionally Socratic:**
+- LLM judgment: Is this question-based discovery or lecture?
+- Scale: 0.0-1.0 (pure Socratic to pure directive)
+- Aggregated: Mean across all turns, then converted to 0-10 scale
 
 ---
 
-### Judge Output Format Evolution
+### Judge Output Format (V2)
 
-**Current Format (Nested Objects):**
+**Current Format (Flat Metrics):**
 ```json
 {
-  "open_ended": {
-    "explanation": "The question uses 'What do you know'...",
-    "score": 75,
-    "evidence": "What do you already know..."
-  }
+  "token_count": 11,
+  "ends_with_socratic_question": true,
+  "directionally_socratic": 0.85,
+  "explanation": "Response asks a probing question without providing answers."
 }
 ```
 
-**Extracted Format (S3 Storage):**
-```json
-{
-  "open_ended": 75  // Only the score is extracted
-}
-```
-
-**Implications:**
-- Explanations and evidence are **lost** after extraction
-- S3 only stores integer scores
-- No rationale available for dimension scores in production
-- **TODO:** Store full judge output with explanations for analysis
-
----
-
-### DynamoDB String Limitation
-
-DynamoDB stores `overall_score` as **STRING** (`"84.0"`) instead of **NUMBER** because:
-1. DynamoDB doesn't support native float types
-2. Workaround: store as string, parse to float in code
-3. Alternative: store as int (multiply by 10) → `840` → divide by 10 when reading
+**Stored Format (S3 + DynamoDB):**
+All 3 metrics preserved as-is. No dimension expansion needed.
 
 ---
 
