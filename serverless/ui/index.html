@@ -303,49 +303,44 @@
         </div>
 
         <div class="section">
-            <h2>🎯 What We're Testing</h2>
+            <h2>🎯 The Three-Dimension Socratic Framework</h2>
             <p>
-                The Socratic Method, developed by the ancient Greek philosopher Socrates, involves asking questions
-                to guide someone to discover truth themselves. We test three specific techniques:
+                Our evaluation is grounded in decades of academic research on the Socratic method. We measure three core dimensions that define effective Socratic pedagogy:
             </p>
 
             <ul>
-                <li><strong>Elenchus (Refutation):</strong> Exposing contradictions in beliefs through questioning</li>
-                <li><strong>Maieutics (Midwifery):</strong> Helping someone "give birth" to knowledge they already have</li>
-                <li><strong>Aporia (Productive Puzzlement):</strong> Creating confusion that forces deeper thinking</li>
+                <li><strong>Brevity (Token Economy):</strong> Responses should be concise and focused. Long, rambling answers bury the learner's thinking process. Ideal responses are 50-150 tokens.</li>
+                <li><strong>Directional Socratic Reasoning:</strong> Questions must guide students through their own logic, probing distinctions and assumptions rather than leading them toward a predetermined answer.</li>
+                <li><strong>Terminal Socratic Question:</strong> The response must end with a genuine, open-ended question that invites exploration—not a confirmation question like "Does that make sense?"</li>
             </ul>
 
-            <p style="margin-top: 1.5rem;">
-                Each AI response is scored 0-10 across four dimensions:
+            <p style="margin-top: 1.5rem; font-size: 0.95em; color: #bdc3c7;">
+                <strong>Academic Foundation:</strong> This framework is validated by peer-reviewed research from educational psychology, clinical therapy, and computational linguistics. It directly addresses how Socratic questioning promotes independent thinking while avoiding common pitfalls like "pimping" (using questions to reinforce hierarchy rather than critical thinking).
             </p>
-
-            <ul>
-                <li><strong>Form:</strong> Does it actually ask a question?</li>
-                <li><strong>Intent:</strong> Does it probe deeper into thinking?</li>
-                <li><strong>Groundedness:</strong> Does it use the student's own words and logic?</li>
-                <li><strong>Non-Leadingness:</strong> Does it avoid pushing toward a "correct" answer?</li>
-            </ul>
         </div>
 
         <div class="section">
-            <h2>📊 Key Findings</h2>
+            <h2>📊 How We Score Responses</h2>
             <p>
-                After testing 24 state-of-the-art AI models from Anthropic, Meta, Amazon, Mistral, Cohere, and others,
-                we discovered:
+                We evaluate each AI response using three metrics calculated by Claude 3.5 Sonnet (our LLM judge):
             </p>
 
             <ul>
-                <li><strong>Even the best models only score 68%</strong> on Socratic questioning</li>
-                <li><strong>Larger models don't always perform better</strong> at this task</li>
-                <li><strong>Most AIs switch to lecturing</strong> when pushed or challenged</li>
-                <li><strong>Some models completely ignore</strong> instructions to be Socratic</li>
+                <li><strong>Token Count:</strong> Raw response length. We penalize verbose responses (&gt;150 tokens) that lecture instead of question.</li>
+                <li><strong>Ends with Socratic Question:</strong> Boolean check. Does the response genuinely end with a probing question, or just a confirmation like "Does that make sense?"</li>
+                <li><strong>Directionally Socratic (0.00-1.00):</strong> How Socratic is the overall approach? We score from purely didactic (0.0) to purely Socratic (1.0).</li>
             </ul>
 
+            <p style="margin-top: 1.5rem;">
+                <strong>Composite Score:</strong> These three metrics are combined into an overall score (0.0-1.0) displayed as 0-10 on the dashboard.
+                The weighting emphasizes Socratic direction (40%) while equally valuing brevity and the terminal question (30% each).
+            </p>
+
             <div class="example-box">
-                <strong>Top 3 Models:</strong>
-                <p>1. Claude Sonnet 4.5: 6.84/10<br>
-                2. Llama 4 Maverick: 6.63/10<br>
-                3. Llama 4 Scout: 6.37/10</p>
+                <strong>Example Scoring:</strong>
+                <p><strong>Response:</strong> "You mentioned democracy ensures equal representation. What happens when a majority votes to restrict minority rights?"<br><br>
+                <strong>Metrics:</strong> 85 tokens ✓ | Ends with question ✓ | Directionally Socratic: 0.85<br>
+                <strong>Overall Score:</strong> 0.82/1.0 (8.2/10)</p>
             </div>
         </div>
 
