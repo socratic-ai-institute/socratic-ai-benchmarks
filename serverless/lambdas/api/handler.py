@@ -551,16 +551,16 @@ def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
                     judge_data = json.loads(s3_response["Body"].read())
                     scores = judge_data.get("scores", {})
 
-                    # NEW LLM-based scoring system (0-1 scale)
+                    # NEW LLM-based scoring system (0-1 scale from judge, convert to 0-10 for API)
                     token_count = scores.get("token_count", 0)
                     ends_with_question = scores.get("ends_with_socratic_question", False)
-                    directionally_socratic = float(scores.get("directionally_socratic", 0))
-                    overall = float(scores.get("overall", 0))
+                    directionally_socratic = float(scores.get("directionally_socratic", 0)) * 10  # Convert 0-1 to 0-10
+                    overall = float(scores.get("overall", 0)) * 10  # Convert 0-1 to 0-10
 
-                    # Penalty breakdown (for transparency)
-                    verbosity_penalty = float(scores.get("verbosity_penalty", 0))
-                    question_penalty = float(scores.get("question_penalty", 0))
-                    socratic_penalty = float(scores.get("socratic_penalty", 0))
+                    # Penalty breakdown (for transparency, convert 0-1 to 0-10 scale)
+                    verbosity_penalty = float(scores.get("verbosity_penalty", 0)) * 10
+                    question_penalty = float(scores.get("question_penalty", 0)) * 10
+                    socratic_penalty = float(scores.get("socratic_penalty", 0)) * 10
 
                     model_to_latest[model_id] = {
                         "created_at": created_at,
