@@ -485,8 +485,8 @@ def get_model_comparison(params: Dict[str, str]) -> Dict[str, Any]:
             avg_socratic = sum(data["directionally_socratic_scores"]) / len(data["directionally_socratic_scores"])
             directionally_socratic = avg_socratic * 10
 
-            # 4. Overall (average of the 3 v2 metrics, already 0-10 scale)
-            overall = (conciseness + question_pct + directionally_socratic) / 3
+            # 4. Overall (already 0-1, multiply by 10 for 0-10 scale)
+            overall = (sum(data["overall_scores"]) / len(data["overall_scores"])) * 10
 
             models.append(
                 {

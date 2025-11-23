@@ -169,11 +169,11 @@
       "expected_score": 3.01
     },
     {
-      "model_id": "google.gemini-3-0-pro-v1:0",
-      "name": "Gemini 3.0 Pro",
-      "cost_per_1k_input": 0.000075,
-      "cost_per_1k_output": 0.0003,
-      "expected_score": 5.5
+      "model_id": "google.gemini-3-pro-preview",
+      "name": "Gemini 3 Pro Preview",
+      "cost_per_1k_input": 0.00015,
+      "cost_per_1k_output": 0.0006,
+      "expected_score": 6.2
     }
   ],
   "scenarios": [

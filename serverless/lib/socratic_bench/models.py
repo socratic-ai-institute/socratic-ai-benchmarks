@@ -1,11 +1,15 @@
 """
-Model Configuration and Bedrock Client Wrapper
+Model Configuration and Client Wrapper for Multiple LLM Providers
 
-This module provides a unified interface for invoking multiple LLM providers via AWS Bedrock.
+This module provides a unified interface for invoking LLM models from multiple providers:
+- AWS Bedrock (Anthropic, Meta, Amazon, Mistral, Cohere, AI21, Qwen, DeepSeek, OpenAI)
+- Google Generative AI (Gemini models via direct API)
+
 It handles provider-specific request/response formats, retry logic, error handling, and
 inference profile management.
 
 Supported Providers (as of 2025-11):
+    Bedrock:
     - Anthropic: Claude 3.5 Sonnet, Claude 3 Haiku, etc.
     - Meta: Llama 3/4 models (Scout, Maverick, etc.)
     - Amazon: Nova models (Micro, Lite, Pro)
@@ -14,7 +18,10 @@ Supported Providers (as of 2025-11):
     - AI21: Jamba models
     - Qwen: Qwen2 models
     - DeepSeek: DeepSeek models
-    - OpenAI: GPT models (via Bedrock)
+    - OpenAI: GPT models
+
+    Direct API:
+    - Google: Gemini 2.0 Flash, Gemini 1.5 Pro/Flash, etc.
 
 Key Challenges This Module Solves:
     1. Provider API Inconsistency: Each provider has different request/response formats
@@ -22,10 +29,12 @@ Key Challenges This Module Solves:
     3. Inference Profiles: Some models require special ARN-based invocation
     4. Retry Logic: Transient failures need exponential backoff
     5. Error Handling: Provider-specific error messages need normalization
+    6. Multi-backend routing: Route Google models to direct API, others to Bedrock
 
 Architecture Notes:
     - ModelConfig: Lightweight configuration dataclass
     - BedrockClient: Stateful client with boto3 runtime connection
+    - GoogleClient: Separate client for Google Generative AI API
     - Provider-specific methods: _build_request_body, _extract_text, _extract_usage
     - Capabilities file: External JSON mapping models to providers and profiles
 """
@@ -37,6 +46,13 @@ from dataclasses import dataclass
 from typing import Any, Dict, Optional
 import boto3
 from botocore.exceptions import ClientError
+
+# Import Google client for Gemini support
+try:
+    from socratic_bench.google_client import GoogleClient, GoogleModelConfig
+except ImportError:
+    GoogleClient = None
+    GoogleModelConfig = None
 
 
 # Load model capabilities (provider + profile requirements)
@@ -203,12 +219,12 @@ class BedrockClient:
         max_retries: int = 3,
     ) -> Dict[str, Any]:
         """
-        Invoke a Bedrock model with automatic retries.
+        Invoke an LLM model with automatic retries.
 
         This is the main entry point for all model invocations. It handles:
-        1. Building provider-specific request body
-        2. Determining whether to use direct model ID or inference profile ARN
-        3. Invoking the Bedrock API
+        1. Routing to appropriate backend (Bedrock or Google API)
+        2. Building provider-specific request body
+        3. Invoking the API
         4. Extracting response text and token usage
         5. Retrying with exponential backoff on failures
 
@@ -225,19 +241,36 @@ class BedrockClient:
                 - output_tokens: Number of output tokens (0 if provider doesn't report)
 
         Raises:
-            ClientError: If API call fails after all retries
-            RuntimeError: If retries exhausted without success
+            ClientError: If Bedrock API call fails after all retries
             ValueError: If provider is unknown or response format is invalid
+            RuntimeError: If retries exhausted without success
 
         Performance Notes:
             - Typical latency: 1-4 seconds depending on model and response length
             - Retries add 2s, 4s, 8s delays (exponential backoff)
             - Token extraction is fast (<1ms) - just JSON parsing
 
-        Inference Profile ARNs:
-            Some models (like Llama 4) require special ARN-based invocation instead
-            of using the model_id directly. This is configured in model_capabilities.json.
+        Routing Logic:
+            - Google provider: Routes to GoogleClient (direct API)
+            - All others: Routes to Bedrock via invoke_model
         """
+        # Route to Google API for Gemini models
+        if model_config.provider == "google":
+            if GoogleClient is None:
+                raise ImportError(
+                    "Google support requires google-generativeai package. "
+                    "Install with: pip install google-generativeai"
+                )
+
+            google_client = GoogleClient(api_key=os.environ.get("GOOGLE_API_KEY"))
+            google_config = GoogleModelConfig(
+                model_id=model_config.model_id.replace("google.", ""),  # Strip provider prefix
+                max_tokens=model_config.max_tokens,
+                temperature=model_config.temperature,
+            )
+            return google_client.invoke(google_config, prompt, max_retries=max_retries)
+
+        # Route to Bedrock for all other providers
         # Build provider-specific request body (formats vary widely)
         body = self._build_request_body(model_config, prompt)
 
@@ -389,6 +422,13 @@ class BedrockClient:
                 "max_tokens": config.max_tokens,
                 "temperature": config.temperature,
             }
+        elif config.provider == "google":
+            # Google is not invoked via Bedrock, so this shouldn't be reached
+            # But included for completeness and error clarity
+            raise ValueError(
+                "Google provider should be routed through GoogleClient, not Bedrock. "
+                "Check invoke() routing logic."
+            )
         else:
             raise ValueError(f"Unknown provider: {config.provider}")
 

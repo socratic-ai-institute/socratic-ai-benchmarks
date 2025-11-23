@@ -10,6 +10,7 @@ Architecture:
 - API Gateway + Read Lambda → Static UI
 """
 
+import os
 from aws_cdk import Duration, RemovalPolicy, Stack
 from aws_cdk import aws_apigateway as apigw
 from aws_cdk import aws_cloudfront as cloudfront
@@ -166,6 +167,13 @@ class SocraticBenchStack(Stack):
             "JUDGE_QUEUE_URL": self.judge_queue.queue_url,
             "EVENT_BUS_NAME": self.event_bus.event_bus_name,
         }
+
+        # Add Google API Key for Gemini support (optional)
+        # Set via: cdk deploy -c google_api_key=<your-key>
+        # Or via environment: export GOOGLE_API_KEY=<your-key>
+        google_api_key = self.node.try_get_context("google_api_key") or os.environ.get("GOOGLE_API_KEY", "")
+        if google_api_key:
+            common_env["GOOGLE_API_KEY"] = google_api_key
 
         # Planner Lambda
         self.planner_fn = lambda_.Function(
