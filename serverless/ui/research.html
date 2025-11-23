@@ -491,7 +491,7 @@
 
                 const datasets = data.series.map((series, idx) => ({
                     label: series.model_id,
-                    data: series.data.map(d => d.score * 100),
+                    data: series.data.map(d => d.score),
                     borderColor: colors[idx % colors.length],
                     backgroundColor: colors[idx % colors.length].replace('rgb', 'rgba').replace(')', ', 0.1)'),
                     borderWidth: 2,
@@ -558,15 +558,15 @@
                         labels: rankings.map(r => r.model_id),
                         datasets: [{
                             label: 'Mean Score',
-                            data: rankings.map(r => r.mean_score * 100),
+                            data: rankings.map(r => r.mean_score),
                             backgroundColor: rankings.map(r =>
-                                (r.mean_score * 100) >= 7 ? 'rgba(72, 187, 120, 0.6)' :
-                                (r.mean_score * 100) >= 5 ? 'rgba(237, 137, 54, 0.6)' :
+                                r.mean_score >= 7 ? 'rgba(72, 187, 120, 0.6)' :
+                                r.mean_score >= 5 ? 'rgba(237, 137, 54, 0.6)' :
                                 'rgba(237, 100, 166, 0.6)'
                             ),
                             borderColor: rankings.map(r =>
-                                (r.mean_score * 100) >= 7 ? 'rgb(72, 187, 120)' :
-                                (r.mean_score * 100) >= 5 ? 'rgb(237, 137, 54)' :
+                                r.mean_score >= 7 ? 'rgb(72, 187, 120)' :
+                                r.mean_score >= 5 ? 'rgb(237, 137, 54)' :
                                 'rgb(237, 100, 166)'
                             ),
                             borderWidth: 1
