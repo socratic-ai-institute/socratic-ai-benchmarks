@@ -167,6 +167,13 @@
       "cost_per_1k_input": 0.00016,
       "cost_per_1k_output": 0.00016,
       "expected_score": 3.01
+    },
+    {
+      "model_id": "google.gemini-3-0-pro-v1:0",
+      "name": "Gemini 3.0 Pro",
+      "cost_per_1k_input": 0.000075,
+      "cost_per_1k_output": 0.0003,
+      "expected_score": 5.5
     }
   ],
   "scenarios": [
@@ -195,9 +202,11 @@
     "timezone": "UTC"
   },
   "metadata": {
-    "config_version": "2.0",
-    "last_updated": "2025-11-05",
-    "total_models": 24,
+    "config_version": "2.1",
+    "last_updated": "2025-11-23",
+    "total_models": 25,
+    "added_models": ["google.gemini-3-0-pro-v1:0"],
+    "addition_reason": "New model expansion - Gemini 3.0 Pro added for comprehensive coverage",
     "removed_models": ["anthropic.claude-3-opus-20240229-v1:0"],
     "removal_reason": "Poor performance (2.0/10) with high cost ($2.25/week)"
   }
