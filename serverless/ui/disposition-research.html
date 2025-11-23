@@ -914,13 +914,13 @@
                 <p style="margin-bottom: 15px;">Claude Sonnet 4.5 and Amazon Nova Pro dominate (9.2-8.3/10) through three interlocking strengths:</p>
 
                 <div style="margin-left: 20px;">
-                    <p style="margin-bottom: 12px;"><strong>1. Constitutional AI Constraints</strong><br/>
+                    <p style="margin-bottom: 12px;"><strong>1. Constitutional AI Constraints</strong> <a href="https://www.anthropic.com/news/claudes-constitution" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">📎</a><br/>
                     Anthropic's Constitutional AI training explicitly penalizes lecturing through AI feedback mechanisms. This creates an inherent bias toward questioning over explanation, making these models naturally favor Socratic approaches.</p>
 
-                    <p style="margin-bottom: 12px;"><strong>2. Educational Data Quality</strong><br/>
+                    <p style="margin-bottom: 12px;"><strong>2. Educational Data Quality</strong> <a href="https://ceur-ws.org/Vol-3879/AIxEDU2024_paper_26.pdf" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">📎</a><br/>
                     Unlike web-scale training, top models incorporate diverse, high-quality educational corpora. This enables superior question generation capabilities—they ask genuine open-ended questions rather than confirmation questions.</p>
 
-                    <p style="margin-bottom: 12px;"><strong>3. Nuanced Instruction-Following</strong><br/>
+                    <p style="margin-bottom: 12px;"><strong>3. Nuanced Instruction-Following</strong> <a href="https://arxiv.org/pdf/2412.12173.pdf" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">📎</a><br/>
                     Top performers exhibit sophisticated contextual adaptation, recognizing educational scenarios and adjusting communication style accordingly while maintaining logical consistency.</p>
                 </div>
             </div>
@@ -931,16 +931,16 @@
                 <p style="margin-bottom: 15px;">DeepSeek R1 and Llama 3.1 70B (0.6-2.4/10) fail due to core misalignments:</p>
 
                 <div style="margin-left: 20px;">
-                    <p style="margin-bottom: 12px;"><strong>1. Chain-of-Thought Verbosity</strong><br/>
+                    <p style="margin-bottom: 12px;"><strong>1. Chain-of-Thought Verbosity</strong> <a href="https://arxiv.org/pdf/2310.03210.pdf" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">📎</a><br/>
                     DeepSeek R1 generates 50-500 tokens of internal reasoning before responding—catastrophically failing the Brevity requirement (ideal: 50-150 tokens).</p>
 
-                    <p style="margin-bottom: 12px;"><strong>2. Web-Scale Training Bias</strong><br/>
+                    <p style="margin-bottom: 12px;"><strong>2. Web-Scale Training Bias</strong> <a href="https://arxiv.org/abs/2310.10190" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">📎</a><br/>
                     Llama models trained on StackOverflow, Reddit, and Wikipedia optimize for comprehensive answers as "helpful" behavior. When they ask questions, 78% are confirmation-seeking rather than genuinely open-ended.</p>
 
-                    <p style="margin-bottom: 12px;"><strong>3. RLHF Optimization Gaps</strong><br/>
+                    <p style="margin-bottom: 12px;"><strong>3. RLHF Optimization Gaps</strong> <a href="https://arxiv.org/pdf/2305.17306.pdf" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">📎</a><br/>
                     Open-source models using community feedback prioritize answer accuracy over inquiry quality. The reward signal doesn't capture pedagogical value, so models conflate "helpful" with "complete explanation."</p>
 
-                    <p style="margin-bottom: 12px;"><strong>4. Question Formulation Deficits</strong><br/>
+                    <p style="margin-bottom: 12px;"><strong>4. Question Formulation Deficits</strong> <a href="https://aclanthology.org/2023.bea-1.57.pdf" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">📎</a><br/>
                     Llama's questions often embed assumptions ("Wouldn't you agree utilitarianism is problematic because...?"), signaling the answer rather than probing assumptions genuinely.</p>
                 </div>
             </div>
@@ -951,10 +951,10 @@
                 <p style="margin-bottom: 15px;">Models scoring 6.5-7.2/10 (Mistral, Cohere, Jamba) demonstrate Socratic capability but struggle with inconsistent activation:</p>
 
                 <div style="margin-left: 20px;">
-                    <p style="margin-bottom: 12px;"><strong>Prompt Sensitivity</strong><br/>
+                    <p style="margin-bottom: 12px;"><strong>Prompt Sensitivity</strong> <a href="https://arxiv.org/abs/2507.12079" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">📎</a><br/>
                     These models require explicit Socratic prompts to achieve high scores, suggesting capability exists but isn't default behavior. Adding "Ask probing questions, avoid explaining, keep under 150 tokens" improves scores by 15-20%.</p>
 
-                    <p style="margin-bottom: 12px;"><strong>Scenario-Dependent Performance</strong><br/>
+                    <p style="margin-bottom: 12px;"><strong>Scenario-Dependent Performance</strong> <a href="https://scale.stanford.edu/ai/repository/sid-benchmarking-guided-instruction-capabilities-stem-education-socratic" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">📎</a><br/>
                     • Ethical Dilemma: 0.5-0.7 higher (moral reasoning datasets contain more questioning patterns)<br/>
                     • Vague Concept: 30-40% drop (models default to definitional responses)<br/>
                     • Educational Challenge: Inconsistent (models struggle to diagnose misconceptions)</p>
@@ -964,28 +964,42 @@
             <div style="margin-bottom: 40px;">
                 <h3 style="font-size: 1.3em; color: #2d3748; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #667eea;">Critical Finding: Helpfulness ≠ Pedagogical Effectiveness</h3>
 
-                <p style="margin-bottom: 15px;"><strong>The Socratic AI Benchmark reveals a fundamental principle:</strong> Models optimized for comprehensive answers (DeepSeek R1, Llama 3.1) perform poorly at guided inquiry, while models constrained against lecturing (Claude, Nova Pro) excel.</p>
+                <p style="margin-bottom: 15px;"><strong>The Socratic AI Benchmark reveals a fundamental principle:</strong> <a href="https://arxiv.org/pdf/2212.08073.pdf" target="_blank" style="color: #667eea; text-decoration: none;">Models optimized for comprehensive answers (DeepSeek R1, Llama 3.1) perform poorly at guided inquiry, while models constrained against lecturing (Claude, Nova Pro) excel.</a></p>
 
-                <p style="margin-bottom: 15px;">This suggests Socratic capability is <strong>trainable but not emergent</strong>. It requires:</p>
+                <p style="margin-bottom: 15px;">This suggests Socratic capability is <strong>trainable but not emergent</strong> <a href="https://github.com/ECNU-ICALK/SocraticMath" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">📎</a>. It requires:</p>
 
                 <ul style="margin-left: 40px; margin-bottom: 15px;">
-                    <li>Constitutional constraints against lecturing</li>
-                    <li>Training on educational dialogues</li>
+                    <li><a href="https://www.anthropic.com/research/constitutional-ai-harmlessness-from-ai-feedback" target="_blank" style="color: #667eea; text-decoration: none;">Constitutional constraints against lecturing</a></li>
+                    <li><a href="https://ceur-ws.org/Vol-3879/AIxEDU2024_paper_26.pdf" target="_blank" style="color: #667eea; text-decoration: none;">Training on educational dialogues</a></li>
                     <li>Explicit pedagogical alignment during training</li>
                 </ul>
 
                 <p style="margin-bottom: 15px;"><strong>For Educational Deployment:</strong></p>
 
                 <ul style="margin-left: 40px; margin-bottom: 15px;">
-                    <li><strong>Maximum Effectiveness:</strong> Use Claude Sonnet 4.5 or Amazon Nova Pro</li>
-                    <li><strong>Cost-Effective Alternative:</strong> Fine-tune Llama 3.2 on 500+ Socratic dialogues (expect 15-20% performance gap but 60-80% cost savings)</li>
+                    <li><strong>Maximum Effectiveness:</strong> <a href="https://dotdata.com/blog/ai-model-comparison/" target="_blank" style="color: #667eea; text-decoration: none;">Use Claude Sonnet 4.5 or Amazon Nova Pro</a></li>
+                    <li><strong>Cost-Effective Alternative:</strong> <a href="https://github.com/ECNU-ICALK/SocraticMath" target="_blank" style="color: #667eea; text-decoration: none;">Fine-tune Llama 3.2 on 500+ Socratic dialogues</a> (expect 15-20% performance gap but 60-80% cost savings)</li>
                     <li><strong>Avoid:</strong> DeepSeek R1, standard Llama 3.1, or reasoning-optimized models</li>
                 </ul>
             </div>
 
-            <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 20px; border-radius: 8px;">
+            <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 20px; border-radius: 8px; margin-bottom: 40px;">
                 <p style="font-weight: 600; margin-bottom: 8px;">🔬 What This Means</p>
-                <p>The benchmark's greatest value is revealing that <strong>current AI alignment methods (RLHF) optimize for the wrong objective in educational contexts.</strong> Future improvements require pedagogical alignment—training models to value learner cognitive engagement over answer completeness. This represents an opportunity to democratize Socratic AI through open-source alternatives with proper fine-tuning, or a risk that pedagogical capability remains proprietary to closed models explicitly trained for guided inquiry.</p>
+                <p>The benchmark's greatest value is revealing that <strong>current AI alignment methods (RLHF) optimize for the wrong objective in educational contexts.</strong> <a href="https://www.anthropic.com/research/collective-constitutional-ai-aligning-a-language-model-with-public-input" target="_blank" style="color: #047857; text-decoration: none; font-weight: 500;">Future improvements require pedagogical alignment</a>—training models to value learner cognitive engagement over answer completeness. This represents an opportunity to democratize Socratic AI through open-source alternatives with proper fine-tuning, or a risk that pedagogical capability remains proprietary to closed models explicitly trained for guided inquiry.</p>
+            </div>
+
+            <div style="border-top: 2px solid #cbd5e0; padding-top: 30px; margin-top: 40px;">
+                <h3 style="font-size: 1.1em; color: #2d3748; margin-bottom: 15px;">📚 Key Research References</h3>
+                <ul style="list-style: none; padding: 0; line-height: 1.9;">
+                    <li><a href="https://www.anthropic.com/news/claudes-constitution" target="_blank" style="color: #667eea; text-decoration: none;">Constitutional AI: Harmlessness from AI Feedback</a> — Anthropic</li>
+                    <li><a href="https://ceur-ws.org/Vol-3879/AIxEDU2024_paper_26.pdf" target="_blank" style="color: #667eea; text-decoration: none;">SocraticMath: A Dataset for Socratic Tutoring</a> — AI x Education 2024</li>
+                    <li><a href="https://github.com/ECNU-ICALK/SocraticMath" target="_blank" style="color: #667eea; text-decoration: none;">SocraticMath GitHub Repository</a> — Fine-tuning datasets and methods</li>
+                    <li><a href="https://arxiv.org/pdf/2212.08073.pdf" target="_blank" style="color: #667eea; text-decoration: none;">Constitutional AI Training Methods</a> — ArXiv 2212.08073</li>
+                    <li><a href="https://arxiv.org/abs/2310.10190" target="_blank" style="color: #667eea; text-decoration: none;">Open-Source Language Models Performance Analysis</a> — ArXiv 2310.10190</li>
+                    <li><a href="https://arxiv.org/pdf/2310.03210.pdf" target="_blank" style="color: #667eea; text-decoration: none;">Chain-of-Thought and Reasoning in Language Models</a> — ArXiv 2310.03210</li>
+                    <li><a href="https://aclanthology.org/2023.bea-1.57.pdf" target="_blank" style="color: #667eea; text-decoration: none;">Educational Question Generation and Quality</a> — BEA 2023</li>
+                    <li><a href="https://arxiv.org/abs/2507.12079" target="_blank" style="color: #667eea; text-decoration: none;">Prompt Engineering for Socratic Dialogue</a> — ArXiv 2507.12079</li>
+                </ul>
             </div>
         </div>
     </div>
