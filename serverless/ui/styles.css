@@ -1,5 +1,7 @@
 /* Socratic AI Benchmarks - Dashboard Styles */
 
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
 :root {
     --primary: #2563eb;
     --primary-dark: #1e40af;
@@ -21,7 +23,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
     color: var(--gray-900);
     background: var(--gray-50);
     line-height: 1.6;
