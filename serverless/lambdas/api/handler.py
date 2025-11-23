@@ -260,8 +260,8 @@ def get_timeseries(params: Dict[str, str]) -> Dict[str, Any]:
             model_id = item.get("model_id")
             week = item.get("week")
             mean_score = (
-                float(item.get("mean_score", 0)) / 10
-            )  # Normalize 0-100 to 0-10 for UI
+                float(item.get("mean_score", 0)) * 10
+            )  # Convert 0-1 scale to 0-10 for UI
 
             if model_id and week:
                 model_ids.add(model_id)
@@ -316,7 +316,7 @@ def get_latest_rankings(params: Dict[str, str]) -> Dict[str, Any]:
                 {
                     "model_id": item.get("model_id"),
                     "mean_score": float(item.get("mean_score", 0))
-                    / 10,  # Normalize 0-100 to 0-10 for UI
+                    * 10,  # Convert 0-1 scale to 0-10 for UI
                     "mean_compliance": float(item.get("mean_compliance", 0)),
                     "run_count": int(item.get("run_count", 0)),
                 }
