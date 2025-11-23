@@ -25,6 +25,23 @@ BUCKET_NAME = os.environ["BUCKET_NAME"]
 table = dynamodb.Table(TABLE_NAME)
 
 
+# Scenario ID to friendly name mapping
+SCENARIO_NAMES = {
+    "EL-ETH": "Ethical Dilemma",
+    "MAI-BIO": "Vague Concept",
+    "APO-PHY": "Educational Challenge",
+}
+
+
+def get_scenario_name(scenario_id: str) -> str:
+    """Map scenario ID to friendly name. If unknown, return formatted version."""
+    if scenario_id in SCENARIO_NAMES:
+        return SCENARIO_NAMES[scenario_id]
+    # Fallback: try to extract base scenario ID (e.g., "APO-PHY" from "APO-PHY-HEAT-TEMP-01")
+    base_id = "-".join(scenario_id.split("-")[:2]) if scenario_id else ""
+    return SCENARIO_NAMES.get(base_id, scenario_id)
+
+
 def lambda_handler(event, context):
     """
     Main handler for Read API Lambda.
@@ -549,7 +566,7 @@ def get_detailed_results(params: Dict[str, str]) -> Dict[str, Any]:
                         "created_at": created_at,
                         "run_id": run_id,
                         "model_id": model_id,
-                        "scenario_name": scenario_id,
+                        "scenario_name": get_scenario_name(scenario_id),
                         "test_type": "disposition",
                         "overall_score": round(overall, 2),
                         # NEW metrics
