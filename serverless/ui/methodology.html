@@ -7,29 +7,86 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Mono', monospace;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #ecf0f1;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav a:hover {
+            color: #3498db;
+        }
+
         .methodology-hero {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 60px 40px;
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
             text-align: center;
         }
 
         .methodology-hero h1 {
-            font-size: 2.8em;
-            margin-bottom: 15px;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, #ecf0f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .methodology-hero p {
-            font-size: 1.1em;
+            font-size: 1.1rem;
+            color: #95a5a6;
             max-width: 800px;
-            margin: 0 auto;
-            opacity: 0.95;
+            margin: 0 auto 2rem;
         }
 
         .methodology-content {
             max-width: 1000px;
             margin: 0 auto;
             padding: 60px 40px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            color: #2d3748;
         }
 
         .dimension {
@@ -122,20 +179,22 @@
     </style>
 </head>
 <body>
-    <div class="methodology-hero">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <div style="flex: 1;">
-                <h1>🔍 Methodology</h1>
-                <p>How we measure Socratic AI quality using three core dimensions validated by academic research</p>
-            </div>
-            <nav style="display: flex; gap: 1.5rem;">
-                <a href="index.html" style="color: white; text-decoration: none; font-weight: 500;">← Home</a>
-                <a href="disposition-research.html" style="color: white; text-decoration: none; font-weight: 500;">Disposition Research</a>
-                <a href="fidelity-research.html" style="color: white; text-decoration: none; font-weight: 500;">Fidelity Research</a>
-                <a href="methodology.html" style="color: white; text-decoration: none; font-weight: 500;">Methodology</a>
-                <a href="https://github.com/socratic-ai-institute/socratic-ai-benchmarks" target="_blank" style="color: white; text-decoration: none; font-weight: 500;">GitHub</a>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">Socratic AI Benchmark</div>
+            <nav class="nav">
+                <a href="index.html">Home</a>
+                <a href="disposition-research.html">Disposition</a>
+                <a href="fidelity-research.html">Fidelity</a>
+                <a href="methodology.html">Methodology</a>
+                <a href="https://github.com/socratic-ai-institute/socratic-ai-benchmarks" target="_blank">GitHub</a>
             </nav>
         </div>
+    </div>
+
+    <div class="methodology-hero">
+        <h1>🔍 Methodology</h1>
+        <p>How we measure Socratic AI quality using three core dimensions validated by academic research</p>
     </div>
 
     <div class="methodology-content">
