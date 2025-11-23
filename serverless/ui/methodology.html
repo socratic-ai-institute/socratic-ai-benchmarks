@@ -123,8 +123,19 @@
 </head>
 <body>
     <div class="methodology-hero">
-        <h1>🔍 Methodology</h1>
-        <p>How we measure Socratic AI quality using three core dimensions validated by academic research</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <div style="flex: 1;">
+                <h1>🔍 Methodology</h1>
+                <p>How we measure Socratic AI quality using three core dimensions validated by academic research</p>
+            </div>
+            <nav style="display: flex; gap: 1.5rem;">
+                <a href="index.html" style="color: white; text-decoration: none; font-weight: 500;">← Home</a>
+                <a href="disposition-research.html" style="color: white; text-decoration: none; font-weight: 500;">Disposition Research</a>
+                <a href="fidelity-research.html" style="color: white; text-decoration: none; font-weight: 500;">Fidelity Research</a>
+                <a href="methodology.html" style="color: white; text-decoration: none; font-weight: 500;">Methodology</a>
+                <a href="https://github.com/socratic-ai-institute/socratic-ai-benchmarks" target="_blank" style="color: white; text-decoration: none; font-weight: 500;">GitHub</a>
+            </nav>
+        </div>
     </div>
 
     <div class="methodology-content">
@@ -244,6 +255,51 @@
                 <li><strong>Leading questions:</strong> "Don't you think X is bad?" isn't Socratic—it signals the correct answer. Directional Socratic measures genuine open-ended inquiry.</li>
                 <li><strong>"Pimping":</strong> Clinical educators use "pimping" (humiliating questions to display hierarchy) under the guise of Socratic method. Our framework prevents this by requiring genuine guidance, not gotchas.</li>
             </ul>
+        </section>
+
+        <section style="margin-top: 60px; padding-top: 30px; border-top: 2px solid #e2e8f0;">
+            <h2>📊 How We Score Responses</h2>
+            <p>
+                We evaluate each AI response using three metrics calculated by Claude 3.5 Sonnet (our LLM judge):
+            </p>
+
+            <ul style="margin-left: 20px; margin-top: 15px;">
+                <li><strong>Token Count:</strong> Raw response length. We penalize verbose responses (>150 tokens) that lecture instead of question.</li>
+                <li><strong>Ends with Socratic Question:</strong> Boolean check. Does the response genuinely end with a probing question, or just a confirmation like "Does that make sense?"</li>
+                <li><strong>Directionally Socratic (0.00-1.00):</strong> How Socratic is the overall approach? We score from purely didactic (0.0) to purely Socratic (1.0).</li>
+            </ul>
+
+            <p style="margin-top: 1.5rem;">
+                <strong>Composite Score:</strong> These three metrics are combined into an overall score (0.0-1.0) displayed as 0-10 on the dashboard.
+                The weighting emphasizes Socratic direction (40%) while equally valuing brevity and the terminal question (30% each).
+            </p>
+
+            <div class="example">
+                <strong>Example Scoring:</strong><br>
+                Response: "You mentioned democracy ensures equal representation. What happens when a majority votes to restrict minority rights?"<br><br>
+                • Metrics: 85 tokens ✓ | Ends with question ✓ | Directionally Socratic: 0.85<br><br>
+                <strong>Overall Score:</strong> (0.85 × 0.30) + (1.0 × 0.30) + (0.85 × 0.40) = <strong>0.89/1.0 = 8.9/10</strong>
+            </div>
+        </section>
+
+        <section style="margin-top: 60px; padding-top: 30px; border-top: 2px solid #e2e8f0;">
+            <h2>🏗️ How It Works</h2>
+            <p>
+                Every week, our automated system:
+            </p>
+
+            <ul style="margin-left: 20px; margin-top: 15px;">
+                <li>Tests 24+ AI models on multiple scenarios</li>
+                <li>Runs tests in parallel across distributed workers</li>
+                <li>Uses Claude 3.5 Sonnet as an impartial judge to score responses</li>
+                <li>Aggregates results and updates the live dashboard</li>
+                <li>Stores all data for historical trend analysis</li>
+            </ul>
+
+            <p style="margin-top: 1.5rem;">
+                The entire process is automated using AWS Lambda, DynamoDB, S3, and CloudFront.
+                Total cost: approximately $22 per month.
+            </p>
         </section>
 
         <section>

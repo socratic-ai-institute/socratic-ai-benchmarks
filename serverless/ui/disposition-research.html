@@ -1,0 +1,902 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disposition Research | Socratic AI Benchmarking</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'IBM Plex Mono', monospace;
+            background: #f5f7fa;
+            color: #2d3748;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .metadata {
+            background: #edf2f7;
+            padding: 20px 40px;
+            border-bottom: 2px solid #cbd5e0;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metadata-item label {
+            font-size: 0.85em;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .metadata-item value {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .model-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .model-card {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+            min-width: 0;
+        }
+
+        .model-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .model-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #667eea;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-size: 0.95em;
+            color: #4a5568;
+        }
+
+        .metric-value {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .metric-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .metric-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 800px;
+            margin-bottom: 40px;
+        }
+
+        .scenario-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .scenario-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .scenario-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .scenario-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .score-excellent { background: #48bb78; color: white; }
+        .score-good { background: #38b2ac; color: white; }
+        .score-fair { background: #ed8936; color: white; }
+        .score-poor { background: #f56565; color: white; }
+
+        .test-type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-disposition { background: #bee3f8; color: #2c5282; }
+        .badge-complexity { background: #fbd38d; color: #7c2d12; }
+        .badge-ambiguity { background: #c6f6d5; color: #22543d; }
+        .badge-interrupt_redirect { background: #fed7d7; color: #742a2a; }
+        .badge-chain_of_thought { background: #e9d8fd; color: #44337a; }
+
+        .winner-banner {
+            background: linear-gradient(135deg, #48bb78 0%, #38b2ac 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .winner-banner h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        .winner-banner p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h1>📊 Disposition Research</h1>
+                    <p>Socratic AI Benchmarking Platform</p>
+                </div>
+                <nav style="display: flex; gap: 1.5rem;">
+                    <a href="index.html" style="color: white; text-decoration: none; font-weight: 500;">← Home</a>
+                    <a href="disposition-research.html" style="color: white; text-decoration: none; font-weight: 500;">Disposition Research</a>
+                    <a href="fidelity-research.html" style="color: white; text-decoration: none; font-weight: 500;">Fidelity Research</a>
+                    <a href="methodology.html" style="color: white; text-decoration: none; font-weight: 500;">Methodology</a>
+                    <a href="https://github.com/socratic-ai-institute/socratic-ai-benchmarks" target="_blank" style="color: white; text-decoration: none; font-weight: 500;">GitHub</a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="metadata">
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <label>Timestamp</label>
+                    <value>2025-11-05T11:40:47.078737</value>
+                </div>
+                <div class="metadata-item">
+                    <label>Models Tested</label>
+                    <value>25</value>
+                </div>
+                <div class="metadata-item">
+                    <label>Scenarios</label>
+                    <value>8</value>
+                </div>
+                <div class="metadata-item">
+                    <label>AWS Region</label>
+                    <value>us-east-1</value>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            
+    <div id="winner-banner" class="winner-banner" style="display: none;">
+        <h2 id="winner-model">Loading winner...</h2>
+        <p id="winner-score"></p>
+    </div>
+
+
+
+    <div class="section">
+        <h2 class="section-title">Model Comparison</h2>
+        <div id="model-comparison" class="model-comparison">
+            <div style="text-align: center; padding: 3rem; color: #95a5a6;">
+                Loading model comparison data...
+            </div>
+        </div>
+    </div>
+    
+
+            
+    <div class="section">
+        <h2 class="section-title">Metric Comparison</h2>
+        <div class="chart-container">
+            <canvas id="radarChart"></canvas>
+        </div>
+    </div>
+    
+
+            
+
+            
+    <div class="section">
+        <h2 class="section-title">Detailed Results</h2>
+
+        <!-- Filters -->
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid #dee2e6;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div>
+                    <label style="display: block; color: #495057; font-size: 0.85rem; margin-bottom: 0.5rem; font-weight: 600;">Test Type</label>
+                    <select id="filter-test-type" style="width: 100%; padding: 0.5rem; background: white; color: #495057; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;">
+                        <option value="">All Types</option>
+                        <option value="disposition">Disposition</option>
+                        <option value="fidelity">Fidelity</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; color: #495057; font-size: 0.85rem; margin-bottom: 0.5rem; font-weight: 600;">Provider</label>
+                    <select id="filter-provider" style="width: 100%; padding: 0.5rem; background: white; color: #495057; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;">
+                        <option value="">All Providers</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; color: #495057; font-size: 0.85rem; margin-bottom: 0.5rem; font-weight: 600;">Model</label>
+                    <select id="filter-model" style="width: 100%; padding: 0.5rem; background: white; color: #495057; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;">
+                        <option value="">All Models</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; color: #495057; font-size: 0.85rem; margin-bottom: 0.5rem; font-weight: 600;">Scenario</label>
+                    <select id="filter-scenario" style="width: 100%; padding: 0.5rem; background: white; color: #495057; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;">
+                        <option value="">All Scenarios</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="display: block; color: #495057; font-size: 0.85rem; margin-bottom: 0.5rem; font-weight: 600;">Min Score</label>
+                    <input type="number" id="filter-min-score" min="0" max="1" step="0.01" placeholder="0.00" style="width: 100%; padding: 0.5rem; background: white; color: #495057; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;">
+                </div>
+
+                <div>
+                    <label style="display: block; color: #495057; font-size: 0.85rem; margin-bottom: 0.5rem; font-weight: 600;">Max Score</label>
+                    <input type="number" id="filter-max-score" min="0" max="1" step="0.01" placeholder="1.00" style="width: 100%; padding: 0.5rem; background: white; color: #495057; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;">
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="filter-search" placeholder="Search model ID or scenario..." style="flex: 1; min-width: 200px; padding: 0.5rem; background: white; color: #495057; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem;">
+                <button onclick="applyFilters()" style="padding: 0.5rem 1.5rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: background 0.2s;">Apply Filters</button>
+                <button onclick="resetFilters()" style="padding: 0.5rem 1.5rem; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: background 0.2s;">Reset</button>
+                <span id="results-count" style="color: #6c757d; font-size: 0.9rem; white-space: nowrap; font-weight: 600;"></span>
+            </div>
+        </div>
+
+        <table class="scenario-table">
+            <thead>
+                <tr>
+                    <th>Test Type</th>
+                    <th>Scenario</th>
+                    <th>Model</th>
+                    <th>Overall</th>
+                    <th>Token Count</th>
+                    <th>Ends w/ Q</th>
+                    <th>Directionally Socratic</th>
+                </tr>
+            </thead>
+            <tbody id="detailed-results-tbody">
+                <tr><td colspan="7" style="text-align:center; padding: 2rem;">Loading detailed results...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="section">
+        <h2 class="section-title">Time-Series: Model Performance Over Time</h2>
+        <div class="chart-container" style="height: 500px;">
+            <canvas id="timeseriesChart"></canvas>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Latest Model Rankings</h2>
+        <div class="chart-container">
+            <canvas id="rankingsChart"></canvas>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Cost vs Performance Analysis</h2>
+        <div class="chart-container">
+            <canvas id="costChart"></canvas>
+        </div>
+    </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts
+
+        // Define API_BASE FIRST
+        const API_BASE = 'https://wcyf23uxxe.execute-api.us-east-1.amazonaws.com/prod';
+
+        // Radar Chart - V2 Judge Metrics (3 metrics: conciseness, ends_with_question, directionally_socratic)
+        const radarCtx = document.getElementById('radarChart').getContext('2d');
+        let radarChart;
+
+        console.log('Fetching model comparison from:', `${API_BASE}/api/model-comparison`);
+        fetch(`${API_BASE}/api/model-comparison`)
+            .then(res => {
+                console.log('Model comparison response status:', res.status);
+                return res.json();
+            })
+            .then(data => {
+                console.log('Model comparison data received:', data);
+                const colors = [
+                    'rgb(102, 126, 234)', 'rgb(237, 100, 166)', 'rgb(72, 187, 120)',
+                    'rgb(237, 137, 54)', 'rgb(255, 99, 132)', 'rgb(54, 162, 235)',
+                    'rgb(255, 206, 86)', 'rgb(75, 192, 192)', 'rgb(153, 102, 255)',
+                    'rgb(255, 159, 64)'
+                ];
+
+                const datasets = data.models.map((model, idx) => ({
+                    label: model.model_id,
+                    data: [
+                        model.conciseness,
+                        model.ends_with_question,
+                        model.directionally_socratic
+                    ],
+                    backgroundColor: colors[idx % colors.length].replace('rgb', 'rgba').replace(')', ', 0.2)'),
+                    borderColor: colors[idx % colors.length],
+                    borderWidth: 2
+                }));
+
+                radarChart = new Chart(radarCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Conciseness', 'Ends with Question', 'Directionally Socratic'],
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                min: 0,
+                                max: 10.0,
+                                ticks: {
+                                    stepSize: 2
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(err => {
+                console.error('Error loading model comparison:', err);
+            });
+        // Time-Series Chart
+        console.log('Fetching timeseries from:', `${API_BASE}/api/timeseries`);
+        fetch(`${API_BASE}/api/timeseries`)
+            .then(res => {
+                console.log('Timeseries response status:', res.status);
+                return res.json();
+            })
+            .then(data => {
+                console.log('Timeseries data received:', data);
+                const colors = [
+                    'rgb(102, 126, 234)', 'rgb(237, 100, 166)', 'rgb(72, 187, 120)',
+                    'rgb(237, 137, 54)', 'rgb(255, 99, 132)', 'rgb(54, 162, 235)',
+                    'rgb(255, 206, 86)', 'rgb(75, 192, 192)', 'rgb(153, 102, 255)',
+                    'rgb(255, 159, 64)'
+                ];
+
+                const datasets = data.series.map((series, idx) => ({
+                    label: series.model_id,
+                    data: series.data.map(d => d.score),
+                    borderColor: colors[idx % colors.length],
+                    backgroundColor: colors[idx % colors.length].replace('rgb', 'rgba').replace(')', ', 0.1)'),
+                    borderWidth: 2,
+                    tension: 0.1,
+                    spanGaps: true
+                }));
+
+                new Chart(document.getElementById('timeseriesChart'), {
+                    type: 'line',
+                    data: {
+                        labels: data.weeks,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'right',
+                                labels: {
+                                    boxWidth: 12,
+                                    font: { size: 10 }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Model Performance Trends (52 Weeks)'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 10.0,
+                                title: {
+                                    display: true,
+                                    text: 'Overall Score'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Week'
+                                },
+                                ticks: {
+                                    maxRotation: 45,
+                                    minRotation: 45
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error('Failed to load timeseries:', err));
+
+        // Rankings Bar Chart
+        fetch(`${API_BASE}/api/latest-rankings`)
+            .then(res => res.json())
+            .then(data => {
+                const rankings = data.rankings;
+                new Chart(document.getElementById('rankingsChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: rankings.map(r => r.model_id),
+                        datasets: [{
+                            label: 'Mean Score',
+                            data: rankings.map(r => r.mean_score),
+                            backgroundColor: rankings.map(r =>
+                                r.mean_score >= 7 ? 'rgba(72, 187, 120, 0.6)' :
+                                r.mean_score >= 5 ? 'rgba(237, 137, 54, 0.6)' :
+                                'rgba(237, 100, 166, 0.6)'
+                            ),
+                            borderColor: rankings.map(r =>
+                                r.mean_score >= 7 ? 'rgb(72, 187, 120)' :
+                                r.mean_score >= 5 ? 'rgb(237, 137, 54)' :
+                                'rgb(237, 100, 166)'
+                            ),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: {
+                                display: true,
+                                text: `Latest Rankings (Week ${data.week})`
+                            }
+                        },
+                        scales: {
+                            x: {
+                                min: 0,
+                                max: 10.0,
+                                title: {
+                                    display: true,
+                                    text: 'Mean Score'
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error('Failed to load rankings:', err));
+
+        // Cost Analysis Scatter Chart
+        fetch(`${API_BASE}/api/cost-analysis`)
+            .then(res => res.json())
+            .then(data => {
+                const providerColors = {
+                    'anthropic': 'rgba(102, 126, 234, 0.6)',
+                    'meta': 'rgba(237, 137, 54, 0.6)',
+                    'amazon': 'rgba(237, 100, 166, 0.6)',
+                    'cohere': 'rgba(72, 187, 120, 0.6)',
+                    'mistral': 'rgba(153, 102, 255, 0.6)',
+                    'unknown': 'rgba(128, 128, 128, 0.6)'
+                };
+
+                const scatterData = data.scatter_data.map(d => ({
+                    x: d.cost_per_run,
+                    y: d.avg_score,
+                    r: Math.sqrt(d.run_count) * 3,
+                    model_id: d.model_id,
+                    provider: d.provider
+                }));
+
+                // Group by provider
+                const datasets = {};
+                scatterData.forEach(point => {
+                    if (!datasets[point.provider]) {
+                        datasets[point.provider] = {
+                            label: point.provider,
+                            data: [],
+                            backgroundColor: providerColors[point.provider] || providerColors['unknown']
+                        };
+                    }
+                    datasets[point.provider].data.push(point);
+                });
+
+                new Chart(document.getElementById('costChart'), {
+                    type: 'bubble',
+                    data: {
+                        datasets: Object.values(datasets)
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true },
+                            title: {
+                                display: true,
+                                text: 'Cost vs Performance (Bubble size = # of runs)'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const point = context.raw;
+                                        return [
+                                            `Model: ${point.model_id}`,
+                                            `Score: ${point.y.toFixed(2)}`,
+                                            `Cost: $${point.x.toFixed(4)}/run`
+                                        ];
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Cost per Run ($)'
+                                }
+                            },
+                            y: {
+                                min: 0,
+                                max: 1.0,
+                                title: {
+                                    display: true,
+                                    text: 'Average Score'
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error('Failed to load cost analysis:', err));
+
+        // Model Comparison Grid
+        fetch(`${API_BASE}/api/model-comparison`)
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('model-comparison');
+                const winnerBanner = document.getElementById('winner-banner');
+
+                if (!data.models || data.models.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #95a5a6;">No model comparison data available yet.</div>';
+                    return;
+                }
+
+                // Update winner banner
+                if (data.winner) {
+                    document.getElementById('winner-model').textContent = `🏆 Winner: ${data.winner.model_id}`;
+                    document.getElementById('winner-score').textContent = `Overall Score: ${data.winner.overall}/10`;
+                    winnerBanner.style.display = 'block';
+                }
+
+                // Render model cards
+                container.innerHTML = '';
+                data.models.forEach(model => {
+                    const card = document.createElement('div');
+                    card.className = 'model-card';
+
+
+                    card.innerHTML = `
+                        <h3>${model.model_id}</h3>
+
+                        <div class="metric-row">
+                            <span class="metric-label">Overall Score</span>
+                            <span class="metric-value">${model.overall.toFixed(2)}/10</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: ${model.overall * 10}%"></div>
+                        </div>
+
+                        <div style="font-size: 0.85em; color: #718096; margin-top: 1rem; margin-bottom: 0.75rem; border-top: 1px solid #e2e8f0; padding-top: 0.75rem;">
+                            <strong style="color: #2d3748;">V2 Metrics:</strong>
+                        </div>
+
+                        <div class="metric-row">
+                            <span class="metric-label">Conciseness</span>
+                            <span class="metric-value">${model.conciseness.toFixed(2)}</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: ${model.conciseness * 10}%"></div>
+                        </div>
+
+                        <div class="metric-row">
+                            <span class="metric-label">Ends with Question</span>
+                            <span class="metric-value">${model.ends_with_question.toFixed(2)}</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: ${model.ends_with_question * 10}%"></div>
+                        </div>
+
+                        <div class="metric-row">
+                            <span class="metric-label">Directionally Socratic</span>
+                            <span class="metric-value">${model.directionally_socratic.toFixed(2)}</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-bar-fill" style="width: ${model.directionally_socratic * 10}%"></div>
+                        </div>
+
+                        <div style="font-size: 0.85em; color: #718096; margin-top: 1rem;">
+                            ${model.run_count} total runs
+                        </div>
+                    `;
+
+                    container.appendChild(card);
+                });
+
+                console.log(`Loaded ${data.models.length} models in comparison`);
+            })
+            .catch(err => {
+                console.error('Failed to load model comparison:', err);
+                document.getElementById('model-comparison').innerHTML =
+                    '<div style="text-align: center; padding: 3rem; color: #e74c3c;">Error loading model comparison. Please refresh the page.</div>';
+            });
+
+        // Detailed Results Table with Filtering
+        let allResults = [];
+
+        function renderResults(results) {
+            const tbody = document.getElementById('detailed-results-tbody');
+            tbody.innerHTML = '';
+
+            if (!results || results.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem;">No results match your filters.</td></tr>';
+                document.getElementById('results-count').textContent = '0 results';
+                return;
+            }
+
+            results.forEach(result => {
+                const row = document.createElement('tr');
+                const testTypeBadge = result.test_type === 'fidelity' ? 'badge-fidelity' : 'badge-disposition';
+                let scoreClass = 'score-excellent';
+                const overall = result.overall_score;
+                if (overall < 4) scoreClass = 'score-poor';
+                else if (overall < 6) scoreClass = 'score-fair';
+                else if (overall < 8) scoreClass = 'score-good';
+
+                row.innerHTML = `
+                    <td><span class="test-type-badge ${testTypeBadge}">${result.test_type}</span></td>
+                    <td>${result.scenario_name || 'Unknown Scenario'}</td>
+                    <td>${result.model_id}</td>
+                    <td><span class="score-badge ${scoreClass}">${overall.toFixed(2)}/10</span></td>
+                    <td>${result.token_count || 'N/A'}</td>
+                    <td>${result.ends_with_socratic_question ? 'Yes' : 'No'}</td>
+                    <td>${(result.directionally_socratic || 0).toFixed(2)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('results-count').textContent = `${results.length} result${results.length === 1 ? '' : 's'}`;
+        }
+
+        function populateFilterOptions(results) {
+            // Get unique values
+            const providers = new Set();
+            const models = new Set();
+            const scenarios = new Set();
+
+            results.forEach(r => {
+                if (r.model_id) {
+                    const provider = r.model_id.split('.')[0];
+                    providers.add(provider);
+                    models.add(r.model_id);
+                }
+                if (r.scenario_name) scenarios.add(r.scenario_name);
+            });
+
+            // Populate dropdowns
+            const providerSelect = document.getElementById('filter-provider');
+            Array.from(providers).sort().forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p;
+                opt.textContent = p.charAt(0).toUpperCase() + p.slice(1);
+                providerSelect.appendChild(opt);
+            });
+
+            const modelSelect = document.getElementById('filter-model');
+            Array.from(models).sort().forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                modelSelect.appendChild(opt);
+            });
+
+            const scenarioSelect = document.getElementById('filter-scenario');
+            Array.from(scenarios).sort().forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                scenarioSelect.appendChild(opt);
+            });
+        }
+
+        window.applyFilters = function() {
+            const testType = document.getElementById('filter-test-type').value;
+            const provider = document.getElementById('filter-provider').value;
+            const model = document.getElementById('filter-model').value;
+            const scenario = document.getElementById('filter-scenario').value;
+            const minScore = parseFloat(document.getElementById('filter-min-score').value) || 0;
+            const maxScore = parseFloat(document.getElementById('filter-max-score').value) || 1.0;
+            const search = document.getElementById('filter-search').value.toLowerCase();
+
+            const filtered = allResults.filter(r => {
+                if (testType && r.test_type !== testType) return false;
+                if (provider && r.model_id && !r.model_id.startsWith(provider + '.')) return false;
+                if (model && r.model_id !== model) return false;
+                if (scenario && r.scenario_name !== scenario) return false;
+                if (r.overall_score < minScore || r.overall_score > maxScore) return false;
+                if (search && r.model_id && !r.model_id.toLowerCase().includes(search) &&
+                    !(r.scenario_name || '').toLowerCase().includes(search)) return false;
+                return true;
+            });
+
+            renderResults(filtered);
+        };
+
+        window.resetFilters = function() {
+            document.getElementById('filter-test-type').value = '';
+            document.getElementById('filter-provider').value = '';
+            document.getElementById('filter-model').value = '';
+            document.getElementById('filter-scenario').value = '';
+            document.getElementById('filter-min-score').value = '';
+            document.getElementById('filter-max-score').value = '';
+            document.getElementById('filter-search').value = '';
+            renderResults(allResults);
+        };
+
+        // Fetch and load data
+        fetch(`${API_BASE}/api/detailed-results`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.results || data.results.length === 0) {
+                    document.getElementById('detailed-results-tbody').innerHTML =
+                        '<tr><td colspan="7" style="text-align:center; padding: 2rem;">No results available yet. Runs are being processed...</td></tr>';
+                    return;
+                }
+
+                allResults = data.results;
+                populateFilterOptions(allResults);
+                renderResults(allResults);
+                console.log(`Loaded ${allResults.length} detailed results`);
+            })
+            .catch(err => {
+                console.error('Failed to load detailed results:', err);
+                document.getElementById('detailed-results-tbody').innerHTML =
+                    '<tr><td colspan="7" style="text-align:center; padding: 2rem; color: #e74c3c;">Error loading results. Please refresh the page.</td></tr>';
+            });
+
+    </script>
+</body>
+</html>
+    

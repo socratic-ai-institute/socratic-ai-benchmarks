@@ -243,7 +243,8 @@
             <div class="logo">Socratic AI Benchmark</div>
             <nav class="nav">
                 <a href="index.html">Home</a>
-                <a href="research.html">Research Dashboard</a>
+                <a href="disposition-research.html">Disposition Research</a>
+                <a href="fidelity-research.html">Fidelity Research</a>
                 <a href="methodology.html">Methodology</a>
                 <a href="https://github.com/socratic-ai-institute/socratic-ai-benchmarks" target="_blank">GitHub</a>
             </nav>
@@ -257,7 +258,7 @@
             We evaluate 24 AI models to see if they can act like Socrates—asking probing questions
             to guide learning, rather than immediately providing answers.
         </p>
-        <a href="research.html" class="cta-button">View Research Dashboard</a>
+        <a href="disposition-research.html" class="cta-button">View Disposition Research</a>
     </div>
 
     <div class="stats">
@@ -303,67 +304,6 @@
             </div>
         </div>
 
-        <div class="section">
-            <h2>🎯 The Three-Dimension Socratic Framework</h2>
-            <p>
-                Our evaluation is grounded in decades of academic research on the Socratic method. We measure three core dimensions that define effective Socratic pedagogy:
-            </p>
-
-            <ul>
-                <li><strong>Brevity (Token Economy):</strong> Responses should be concise and focused. Long, rambling answers bury the learner's thinking process. Ideal responses are 50-150 tokens.</li>
-                <li><strong>Directional Socratic Reasoning:</strong> Questions must guide students through their own logic, probing distinctions and assumptions rather than leading them toward a predetermined answer.</li>
-                <li><strong>Terminal Socratic Question:</strong> The response must end with a genuine, open-ended question that invites exploration—not a confirmation question like "Does that make sense?"</li>
-            </ul>
-
-            <p style="margin-top: 1.5rem; font-size: 0.95em; color: #bdc3c7;">
-                <strong>Academic Foundation:</strong> This framework is validated by peer-reviewed research from educational psychology, clinical therapy, and computational linguistics. It directly addresses how Socratic questioning promotes independent thinking while avoiding common pitfalls like "pimping" (using questions to reinforce hierarchy rather than critical thinking).
-            </p>
-        </div>
-
-        <div class="section">
-            <h2>📊 How We Score Responses</h2>
-            <p>
-                We evaluate each AI response using three metrics calculated by Claude 3.5 Sonnet (our LLM judge):
-            </p>
-
-            <ul>
-                <li><strong>Token Count:</strong> Raw response length. We penalize verbose responses (&gt;150 tokens) that lecture instead of question.</li>
-                <li><strong>Ends with Socratic Question:</strong> Boolean check. Does the response genuinely end with a probing question, or just a confirmation like "Does that make sense?"</li>
-                <li><strong>Directionally Socratic (0.00-1.00):</strong> How Socratic is the overall approach? We score from purely didactic (0.0) to purely Socratic (1.0).</li>
-            </ul>
-
-            <p style="margin-top: 1.5rem;">
-                <strong>Composite Score:</strong> These three metrics are combined into an overall score (0.0-1.0) displayed as 0-10 on the dashboard.
-                The weighting emphasizes Socratic direction (40%) while equally valuing brevity and the terminal question (30% each).
-            </p>
-
-            <div class="example-box">
-                <strong>Example Scoring:</strong>
-                <p><strong>Response:</strong> "You mentioned democracy ensures equal representation. What happens when a majority votes to restrict minority rights?"<br><br>
-                <strong>Metrics:</strong> 85 tokens ✓ | Ends with question ✓ | Directionally Socratic: 0.85<br>
-                <strong>Overall Score:</strong> 0.82/1.0 (8.2/10)</p>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>🏗️ How It Works</h2>
-            <p>
-                Every Monday at 3am UTC, our automated system:
-            </p>
-
-            <ul>
-                <li>Tests 24 AI models on 2 scenarios each (48 total conversations)</li>
-                <li>Runs tests in parallel across 25 simultaneous workers</li>
-                <li>Uses Claude 3.5 Sonnet as an impartial judge to score responses</li>
-                <li>Aggregates results and updates the live dashboard</li>
-                <li>Stores all data for historical trend analysis</li>
-            </ul>
-
-            <p style="margin-top: 1.5rem;">
-                The entire process is automated using AWS Lambda, DynamoDB, S3, and CloudFront.
-                Total cost: approximately $22 per month.
-            </p>
-        </div>
 
         <div class="section">
             <h2>💡 Why This Matters</h2>
@@ -394,7 +334,7 @@
             <p>
                 View live rankings, historical trends, detailed score breakdowns, and filter by model, scenario, or test type.
             </p>
-            <a href="research.html" class="cta-button" style="margin-top: 1rem;">Go to Research Dashboard →</a>
+            <a href="disposition-research.html" class="cta-button" style="margin-top: 1rem;">Go to Disposition Research →</a>
         </div>
     </div>
 
