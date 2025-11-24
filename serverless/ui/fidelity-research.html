@@ -226,6 +226,8 @@
                         <li><a href="#measurement">IV. Measurement Protocol</a></li>
                         <li><a href="#hypotheses">V. Hypotheses About Model Families</a></li>
                         <li><a href="#variants">VI. Experimental Variants</a></li>
+                        <li><a href="#research">VII. Deep Research Foundation & Empirical Grounding</a></li>
+                        <li><a href="#implementation">VIII. Implementation Roadmap</a></li>
                     </ul>
                 </div>
 
@@ -389,6 +391,67 @@
                     <li><strong>Conflicting Prompts Variant</strong> — Explicitly ask to ignore Socratic rules; measure IHO</li>
                     <li><strong>Long-Horizon Persistence</strong> — Extend to 20–30 turn dialogues to probe for slow persona collapse</li>
                 </ol>
+
+                <h3 id="research" style="margin-top: 60px; padding-top: 40px; border-top: 2px solid #cbd5e0;">VII. Deep Research Foundation & Empirical Grounding</h3>
+
+                <p style="margin-bottom: 20px; color: #4a5568; font-style: italic;">This section synthesizes empirical support from extensive research in AI safety, jailbreak evaluation, persona modeling, and educational AI to validate the Fidelity benchmark's theoretical foundations and design choices.</p>
+
+                <h4>Dimension 1: IRSC Empirical Support</h4>
+                <p>The In-Role Socratic Compliance dimension provides continuity with the Disposition benchmark, enabling direct comparison. Research on <a href="https://aclanthology.org/2025.acl-long.106/" target="_blank">Educational AI Evaluation Framework</a> validates the three-component scoring approach (brevity, terminal question, directional Socratic scoring).</p>
+
+                <h4>Dimension 2: RPF & Persona Collapse Research</h4>
+                <p>Role-Preservation Fidelity operationalizes a critical finding: <a href="https://huggingface.co/blog/unmodeled-tyler/persona-collapse-in-llms" target="_blank">all tested models demonstrate persona collapse</a> under sustained pressure. The mechanisms identified include <a href="https://arxiv.org/html/2511.15573v1" target="_blank">epistemic drift, compliance override, and identity fragmentation</a>. Time-to-Collapse (TTC) metrics provide temporal granularity absent from binary evaluations, enabling detection of <a href="https://aclanthology.org/2025.findings-acl.1349.pdf" target="_blank">partial collapse vs. complete failure states</a>.</p>
+
+                <h4>Dimension 3: IHO & Instruction Hierarchy Robustness</h4>
+                <p><a href="https://arxiv.org/html/2404.13208v1" target="_blank">OpenAI's Instruction Hierarchy research</a> demonstrates that system instructions should override user messages, yet <a href="https://embracethered.com/blog/posts/2024/chatgpt-gpt-4o-mini-instruction-hierarchie-bypasses/" target="_blank">adversaries consistently bypass this hierarchy</a>. Most concerning: <a href="https://hiddenlayer.com/innovation-hub/novel-universal-bypass-for-all-major-llms/" target="_blank">universal bypass techniques enable attacks across all major LLMs</a>. Our Justified Refusal Rate (JRR) metric aligns with research showing <a href="https://arxiv.org/html/2511.06890v1" target="_blank">"Educational Transformations" where top models convert harmful requests into teachable moments</a>.</p>
+
+                <h4>Dimension 4: AR-Ped & Adversarial Robustness Research</h4>
+                <p>Attack Success Rate (ASR) metrics operationalize <a href="https://unit42.paloaltonetworks.com/multi-turn-technique-jailbreaks-llms/" target="_blank">multi-turn jailbreak techniques that yield 75+ percentage point ASR increases</a>. Concerning finding: <a href="https://arxiv.org/abs/2410.11272" target="_blank">Claude models achieve 99.99% jailbreak success under cognitive overload attacks</a> despite Constitutional AI training. Refusal quality matters: <a href="https://arxiv.org/pdf/2502.00580.pdf" target="_blank">how models refuse determines re-attack success—soft refusals enable follow-ups while hard principled refusals deter persistence</a>.</p>
+
+                <h4>Constitutional AI Training & Robustness Advantages</h4>
+                <p><a href="https://www.anthropic.com/news/claude-sonnet-4-5" target="_blank">Constitutional AI</a> training provides measurable robustness benefits through explicit <a href="https://arxiv.org/pdf/2212.08073.pdf" target="_blank">instruction hierarchy training</a>. However, our hypothesis testing identifies important trade-offs: <a href="https://arxiv.org/html/2506.19352v1" target="_blank">models with strong persona-conditioning capabilities paradoxically suffer higher attack success rates</a> in specialized persona attacks.</p>
+
+                <h4>Reasoning Models & Pedagogical Conflicts</h4>
+                <p><a href="https://arxiv.org/html/2511.15573v1" target="_blank">Research shows reasoning models exhibit context collapse where deeper reasoning leads to abandoning personas entirely</a>. Mechanism: <a href="https://arxiv.org/abs/2507.02799" target="_blank">chain-of-thought optimization creates fundamental tension with Socratic withholding</a>. This explains the hypothesized "Reasoning Model Paradox" where DeepSeek R1 and o1-style models achieve low Disposition scores and will likely show rapid Fidelity collapse.</p>
+
+                <h4>Mid-Range Model Vulnerability: The Scaling Paradox</h4>
+                <p><a href="https://arxiv.org/html/2511.06890v1" target="_blank">EduGuardBench research reveals counter-intuitive scaling: mid-sized models (7-70B parameters) are the most vulnerable, with Attack Success Rates >70% vs. smaller models (55-65%) and larger models (30-45%)</a>. Mechanism: "vulnerable competence"—sufficient capability to role-play but insufficient robustness to resist manipulation.</p>
+
+                <h4>Experimental Design Validation</h4>
+                <p>The Cooperative Baseline variant isolates IRSC without adversarial confounds. The <a href="https://openai.com/index/the-instruction-hierarchy/">Conflicting Prompts variant</a> provides surgical testing of instruction hierarchy obedience, enabling direct comparability with <a href="https://arxiv.org/html/2404.13208v1" target="_blank">OpenAI's instruction hierarchy research</a>. <a href="https://arxiv.org/pdf/2501.17399.pdf" target="_blank">Long-horizon persistence testing (20-30 turns) captures degradation effects documented in multi-turn dialogue research</a>.</p>
+
+                <h4>Ecological Validity of Scenarios</h4>
+                <p>The three adversarial learner types directly map to <a href="https://arxiv.org/abs/2406.17626" target="_blank">documented learner resistance patterns in educational psychology</a>. Impatience under time pressure, cognitive overload rejection, and authority negotiation have all been observed in <a href="https://marsal.umich.edu/grants-awards/building-teacher-ai-collaborative-system-personalized-instruction-and-assessment" target="_blank">teacher-student interaction studies</a>.</p>
+
+                <h3 id="implementation" style="margin-top: 50px; padding-top: 30px; border-top: 2px solid #cbd5e0;">VIII. Implementation Roadmap</h3>
+
+                <h4>Phase 1: Pilot Study (Months 1-3)</h4>
+                <ul>
+                    <li><strong>Objectives:</strong> Validate annotation protocol (target: Cohen's κ > 0.80) on 50 conversations across 5 models</li>
+                    <li><strong>Deliverables:</strong> Annotation manual with decision trees, inter-rater reliability report, refined metric definitions</li>
+                    <li><strong>Key Reference:</strong> <a href="https://arxiv.org/abs/2405.16433" target="_blank">Cohen's kappa guidelines for inter-rater reliability</a></li>
+                </ul>
+
+                <h4>Phase 2: Full Benchmark Deployment (Months 4-6)</h4>
+                <ul>
+                    <li><strong>Objectives:</strong> Collect 1,350+ conversations (3 scenarios × 6 attacks × 15 models × 5 replications)</li>
+                    <li><strong>Cost Model:</strong> ~$600-800/month for API calls, LLM judging, and cloud infrastructure</li>
+                    <li><strong>Deliverables:</strong> Public leaderboard with SFS scores, confidence intervals, detailed methodology report</li>
+                </ul>
+
+                <h4>Phase 3: Domain Extension & Red-Teaming</h4>
+                <ul>
+                    <li><strong>Objectives:</strong> Crowdsource novel attack strategies, test STEM and creative writing domains</li>
+                    <li><strong>Reference:</strong> <a href="https://unit42.paloaltonetworks.com/jailbreaking-generative-ai-web-products/" target="_blank">Red-teaming methodologies from Palo Alto Unit 42</a></li>
+                    <li><strong>Deliverables:</strong> Expanded attack taxonomy v2.0, domain-specific SFS subscores</li>
+                </ul>
+
+                <h4>Phase 4: Mitigation & Developer Guidelines</h4>
+                <ul>
+                    <li><strong>Objectives:</strong> Test adversarial training, instruction hierarchy fine-tuning, refusal pattern optimization</li>
+                    <li><strong>Deliverables:</strong> "Fidelity Hardening" best practices guide, fine-tuning datasets for open-source community</li>
+                    <li><strong>Reference:</strong> <a href="https://news.sophos.com/en-us/2025/10/24/locking-it-down-a-new-technique-to-prevent-llm-jailbreaks/" target="_blank">Latest LLM jailbreak prevention techniques</a></li>
+                </ul>
 
                 <h3 style="margin-top: 50px; padding-top: 30px; border-top: 2px solid #cbd5e0;">📚 Key Research References</h3>
 
