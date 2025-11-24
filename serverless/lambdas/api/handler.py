@@ -295,6 +295,7 @@ def get_latest_rankings(params: Dict[str, str]) -> Dict[str, Any]:
     GET /api/latest-rankings
 
     Returns latest model rankings sorted by overall_score.
+    Falls back to most recent week with data if current week is empty.
     """
     try:
         # Get current week's data
@@ -322,10 +323,50 @@ def get_latest_rankings(params: Dict[str, str]) -> Dict[str, Any]:
                 }
             )
 
+        # If current week is empty, fall back to most recent week with data
+        week_to_return = current_week
+        if not rankings:
+            # Scan for all weeks and get the most recent one with data
+            all_weeks_response = table.scan(
+                FilterExpression="SK = :sk",
+                ExpressionAttributeValues={":sk": "SUMMARY"},
+            )
+
+            weeks_with_data = set()
+            for item in all_weeks_response.get("Items", []):
+                week = item.get("week")
+                if week:
+                    weeks_with_data.add(week)
+
+            if weeks_with_data:
+                # Sort weeks and get the latest one
+                latest_week = sorted(weeks_with_data, reverse=True)[0]
+                week_to_return = latest_week
+
+                # Query for the latest week's data
+                response = table.scan(
+                    FilterExpression="begins_with(PK, :prefix) AND SK = :sk",
+                    ExpressionAttributeValues={
+                        ":prefix": f"WEEK#{latest_week}#",
+                        ":sk": "SUMMARY",
+                    },
+                )
+
+                rankings = []
+                for item in response.get("Items", []):
+                    rankings.append(
+                        {
+                            "model_id": item.get("model_id"),
+                            "mean_score": float(item.get("mean_score", 0)) * 10,
+                            "mean_compliance": float(item.get("mean_compliance", 0)),
+                            "run_count": int(item.get("run_count", 0)),
+                        }
+                    )
+
         # Sort by score descending
         rankings.sort(key=lambda x: x["mean_score"], reverse=True)
 
-        return success_response({"week": current_week, "rankings": rankings})
+        return success_response({"week": week_to_return, "rankings": rankings})
 
     except Exception as e:
         return error_response(500, f"Failed to load rankings: {e}")
