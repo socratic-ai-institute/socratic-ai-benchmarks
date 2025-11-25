@@ -50,6 +50,13 @@
       "expected_score": 5.83
     },
     {
+      "model_id": "anthropic.claude-opus-4-5-20250929-v1:0",
+      "name": "Claude Opus 4.5",
+      "cost_per_1k_input": 0.018,
+      "cost_per_1k_output": 0.09,
+      "expected_score": 6.95
+    },
+    {
       "model_id": "anthropic.claude-opus-4-1-20250805-v1:0",
       "name": "Claude Opus 4.1",
       "cost_per_1k_input": 0.015,
@@ -202,11 +209,11 @@
     "timezone": "UTC"
   },
   "metadata": {
-    "config_version": "2.1",
-    "last_updated": "2025-11-23",
-    "total_models": 25,
-    "added_models": ["google.gemini-3-0-pro-v1:0"],
-    "addition_reason": "New model expansion - Gemini 3.0 Pro added for comprehensive coverage",
+    "config_version": "2.2",
+    "last_updated": "2025-11-25",
+    "total_models": 26,
+    "added_models": ["anthropic.claude-opus-4-5-20250929-v1:0", "google.gemini-3-0-pro-v1:0"],
+    "addition_reason": "Claude Opus 4.5 added as flagship model for next benchmark run; Gemini 3.0 Pro for comprehensive coverage",
     "removed_models": ["anthropic.claude-3-opus-20240229-v1:0"],
     "removal_reason": "Poor performance (2.0/10) with high cost ($2.25/week)"
   }
